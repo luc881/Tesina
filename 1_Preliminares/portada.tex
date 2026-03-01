@@ -1,0 +1,68 @@
+\begin{titlepage}
+
+
+\AddToShipoutPictureBG*{%
+  \begin{tikzpicture}[remember picture,overlay]
+    % Imagen superior izquierda
+    \node[anchor=north west] (imgTop)
+      at ([xshift=2.5cm,yshift=-2.5cm]current page.north west) 
+      {\includegraphics[width=3cm]{0_imagenes/IPNLogo.png}};
+
+    % Imagen inferior izquierda
+    \node[anchor=south west] (imgBottom)
+      at ([xshift=2.5cm,yshift=2.5cm]current page.south west) 
+      {\includegraphics[width=4cm]{0_imagenes/EsimeLogo.png}};
+
+    % Línea vertical alineada al borde izquierdo de las imágenes
+    \draw[line width=1.5pt] 
+      ([yshift=-3cm]imgTop.west) -- ([yshift=3cm]imgBottom.west);
+    
+    % Línea fina paralela
+    \draw[line width=0.4pt] 
+      ([xshift=0.15cm,yshift=-3cm]imgTop.west) -- ([xshift=0.15cm,yshift=3cm]imgBottom.west);
+
+  \end{tikzpicture}
+}
+
+
+\begin{adjustwidth}{3cm}{0cm} 
+    \centering
+    \begin{spacing}{1.0}
+    {\Large \bfseries \MakeUppercase{Instituto Politécnico Nacional}\par}
+    \begin{tikzpicture}
+    \draw[line width=1.5pt] (0,0) -- (\linewidth,0);
+    \draw[line width=0.4pt] (0,-0.1) -- (\linewidth,-0.1);
+    \end{tikzpicture}\par
+    {\normalsize \bfseries \MakeUppercase{Escuela Superior de Ingeniería Mecánica y Eléctrica}\par}
+    \vspace{0.3cm}
+    {\normalsize \bfseries \MakeUppercase{Unidad Culhuacán}\par}
+    {\normalsize \bfseries \MakeUppercase{Ingeniería en Comunicaciones y Electrónica}\par}
+    {\normalsize \bfseries \MakeUppercase{Academia de Titulación de I.C.E.}\par}
+    \vspace{0.5cm}
+    {\Large \bfseries Diseño e implementación de una plataforma cloud de gestión de inventario y ventas con monitoreo ambiental orientada a Farmacia Selene.\par}
+    \vspace{0.5cm}
+    {\normalsize \bfseries Número de registro: \par}
+    \vspace{0.5cm}
+    {\normalsize \bfseries \MakeUppercase{Tesina}\par}
+    \vspace{0.1cm}
+    {\normalsize \bfseries \MakeUppercase{Que para obtener el título de}\par}
+    {\normalsize \bfseries \MakeUppercase{Ingeniero en Comunicaciones y Electrónica}\par}
+    {\normalsize \bfseries \MakeUppercase{Por Opción Curricular}\par}
+    \vspace{0.5cm}
+    {\normalsize \bfseries \MakeUppercase{Presentan:}\par}
+    \vspace{0.1cm}
+    {\normalsize \bfseries C. Jorge Yahir Flores Sánchez\par}
+    {\normalsize \bfseries C. Luciano Juárez Sánchez\par}
+    {\normalsize \bfseries C. Alan Yahir Mosco Ramírez\par}
+    \vspace{0.5cm}
+    {\normalsize \bfseries \MakeUppercase{Asesores:} \par}
+    \vspace{0.1cm}
+    {\normalsize \bfseries Dr. Alfredo De la Barrera Gonzales \par}
+    \vspace{0.3cm}
+    {\normalsize \bfseries Dra. Laura Hernández Herrera \par}
+    \vspace{0.3cm} 
+    \vfill
+    {\normalsize \bfseries \raggedleft CDMX, 6 de Febrero de 2026\par}
+    \end{spacing}
+\end{adjustwidth}
+\end{titlepage}

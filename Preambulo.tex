@@ -1,0 +1,229 @@
+% ======================================================================================================================
+%   PAQUETES BÁSICOS
+% ======================================================================================================================
+\usepackage{polyglossia}       % Soporte multilenguaje (XeLaTeX/LuaLaTeX)
+\setmainlanguage{spanish}      % Idioma principal
+\usepackage{graphicx}          % Inserción de imágenes
+\usepackage{amsmath, amssymb, amsfonts} % Símbolos matemáticos
+\usepackage{float}             % Posicionamiento exacto de figuras/tablas
+\usepackage{tikz}              % Gráficos vectoriales
+\usepackage{eso-pic}           % Elementos en el fondo
+\usepackage{changepage}        % Ajustar márgenes locales
+\usepackage{enumitem}          % Listas personalizadas
+% \usepackage{lipsum}          % Texto de prueba (eliminar en versión final)
+
+% ======================================================================================================================
+%   TIPOGRAFÍA Y FORMATO DE TEXTO
+% ======================================================================================================================
+\usepackage{fontspec}          % Fuentes del sistema (XeLaTeX/LuaLaTeX)
+\setmainfont{Arial }  % Fuente principal
+
+\usepackage{setspace}          % Interlineado
+\setstretch{1.5}               % Interlineado 1.5
+
+\setlength{\parindent}{0pt}    % Sin sangría en párrafos
+\setlength{\parskip}{6pt}      % Espacio entre párrafos (opcional, se ve más limpio)
+
+% ======================================================================================================================
+%   MÁRGENES Y GEOMETRÍA
+% ======================================================================================================================
+\usepackage[
+    left=3cm,
+    right=2.54cm,
+    top=2.54cm,
+    bottom=2.54cm,
+    footskip=1.5cm,
+    showframe=false
+]{geometry}
+
+% ======================================================================================================================
+%   ESTILOS DE CAPÍTULOS Y SECCIONES
+% ======================================================================================================================
+\usepackage{titlesec}
+
+% --- Capítulos ---
+\titleformat{\chapter}
+{\bfseries\fontsize{14pt}{16pt}\selectfont}
+{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{0pt}{0pt}
+
+% --- Secciones ---
+\titleformat{\section}
+{\bfseries\fontsize{12pt}{14pt}\selectfont}
+{\thesection}{1em}{}
+
+% --- Subsecciones ---
+\titleformat{\subsection}
+{\bfseries\fontsize{12pt}{14pt}\selectfont}
+{\thesubsection}{1em}{}
+
+% ======================================================================================================================
+%   ENCABEZADOS Y PIES DE PÁGINA
+% ======================================================================================================================
+\usepackage{fancyhdr}
+\fancypagestyle{plain}{%
+    \fancyhf{} % Limpia encabezados y pies
+    \renewcommand{\headrulewidth}{0pt} % Sin línea superior
+    \renewcommand{\footrulewidth}{0pt} % Sin línea inferior
+    \cfoot{\thepage} % Número de página centrado
+}
+\pagestyle{plain} % Usar plain en todo el documento
+
+\fancypagestyle{noheader}{%
+    \fancyhf{} % Limpia encabezados y pies
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+    % Sin \cfoot{\thepage} ← esto quita el número
+}
+
+% ======================================================================================================================
+%   HIPERVÍNCULOS
+% ======================================================================================================================
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+    pdftitle={Tesina},
+    pdfauthor={Tu Nombre},
+}
+
+% ======================================================================================================================
+%   TABLA DE CONTENIDOS (con puntos)
+% ======================================================================================================================
+\usepackage{tocloft}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+
+
+\addto\captionsspanish{ %Cambia el titulo del indice de cuadros
+    \renewcommand{\listtablename}{Índice de tablas}
+}
+
+% ======================================================================================================================
+%   NUEVAS MACROS
+% ======================================================================================================================
+
+% Capítulos sin número pero visibles en el índice
+\newcommand{\chapterstar}[1]{%
+  \chapter*{#1}%
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{}{#1}%
+}
+
+% Página independiente para título de capítulo (sin número de página ni en el índice)
+\newcommand{\chapterpage}[2]{%
+  \clearpage
+  \thispagestyle{empty} % Sin encabezado ni número
+  \null\vfill
+  \begin{center}
+    {\Huge \textbf{Capítulo #1}} \\[3ex]
+    {\LARGE #2}
+  \end{center}
+  \vfill\null
+  \clearpage
+  \markboth{}{#2} % Marca para encabezados
+}
+
+\newcommand{\chapterpageanex}[1]{%
+  \clearpage
+  \thispagestyle{empty} % Sin encabezado ni número
+  \null\vfill
+  \begin{center}
+    {\Huge \textbf{#1}}
+  \end{center}
+  \vfill\null
+  \clearpage
+  \markboth{}{#1} % Marca para encabezados
+}
+
+
+\newcommand{\frontmatterwithnonumber}{
+    \pagestyle{empty}
+    \setcounter{page}{0}
+    \pagenumbering{gobble}
+}
+
+\newcommand{\mainmatterwithnumber}{
+    \clearpage
+    \pagestyle{plain}
+    \setcounter{page}{1}
+    \pagenumbering{arabic}
+}
+
+% Comando para restablecer completamente la numeración
+\newcommand{\startmainmatter}{
+    \clearpage
+    \pagenumbering{arabic}
+    \setcounter{page}{1}
+    \pagestyle{plain}
+    \addtocontents{toc}{\protect\cftpagenumberson{chapter}}
+    \addtocontents{toc}{\protect\cftpagenumberson{section}}
+    \addtocontents{toc}{\protect\cftpagenumberson{subsection}}
+}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+
+
+% Comando para imagenes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{chngcntr} % Para numerar figuras por capítulo
+
+% Figuras numeradas como Capítulo.Figura
+\counterwithin{figure}{chapter}
+
+% Texto "Fig." en lugar de "Figure"
+\captionsetup[figure]{name=Fig.}
+
+% Espacio entre marco e imagen
+\setlength{\fboxsep}{6pt} % Puedes cambiar el valor
+\setlength{\fboxrule}{0.5pt} % Grosor del marco
+
+\usepackage{hyperref}
+\usepackage{url}
+
+% Tablas 
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{xparse}  
+
+
+\usepackage{xfp}   
+\usepackage{pgf}    
+
+\newcommand{\TotalGeneral}{0}
+% Unidades en tablas
+\usepackage{siunitx}  
+
+% Configuración de siunitx para formato monetario
+\sisetup{
+    mode = text, 
+    group-separator = {,},       % Separador de miles
+    group-minimum-digits = 4,    % Agrupa a partir de 4 dígitos
+    output-decimal-marker = {.}, % Marcador decimal
+    round-mode = places,         % Redondea a un número fijo de decimales
+    round-precision = 2,         % Usar 2 decimales
+    round-integer-to-decimal = true, % Añade .00 a enteros (e.g., 80 -> 80.00)
+}
+
+\NewDocumentCommand{\fila}{m m m o}{%
+    % #1: nombre del componente
+    % #2: precio unitario (numérico)
+    % #3: cantidad numérica (para el cálculo)
+    % #4: (opcional) texto a mostrar en la columna cantidad
+    \xdef\TotalGeneral{\fpeval{\TotalGeneral + (#2 * #3)}}%
+    #1 & 
+    \num{#2} & 
+    \IfValueTF{#4}{#4}{\num{#3}} &   % Si hay opcional, muestra el texto; si no, muestra el número formateado
+    \num{\fpeval{#2 * #3}} \\
+    \hline
+}
+
