@@ -1,0 +1,22 @@
+\chapterstar{Objetivo General}
+
+Diseñar e implementar un sistema de gestión de inventario que, con una base de datos en PostgreSQL, una API desarrollada en FastAPI y una aplicación web desarrollada en React, realice el registro, control de existencias y ventas utilizando un lector de códigos de barras, y realice el monitoreo de las variaciones de temperatura y humedad con un microcontrolador ESP32 con sensor AHT10, para la Farmacia Selene.\\
+
+% Subsección visible en el índice pero sin salto de página
+\addcontentsline{toc}{chapter}{Objetivos Específicos}
+{\bfseries\fontsize{14pt}{16pt}\selectfont Objetivos Específicos}
+
+\begin{enumerate}[topsep=2pt, itemsep=4pt, parsep=0pt]
+\item Desarrollar una base de datos en PostgreSQL, para almacenar de forma estructurada la información de productos, niveles de inventario, usuarios, registros de ventas y mediciones obtenidas de los sensores.
+
+\item Desarrollar una API en Python utilizando FastAPI y SQLAlchemy para gestionar el registro de inventario, salidas de inventario, autenticación de usuarios y consulta de registros del sensor para publicarla en la plataforma Railway para su integración con la aplicación desarrollada en React.
+
+\item Desarrollar una aplicación en JavaScript utilizando React para la gestión de inventario, mostrando tableros gráficos, reportes y alertas generadas a partir de los datos obtenidos del sensor para publicarla en la plataforma Vercel para su acceso público.
+
+\item Desarrollar un programa en C++ para que el microcontrolador ESP32 adquiera los datos de temperatura y humedad mediante el sensor AHT10 y envíen esta información a la API a través de solicitudes HTTP.  
+
+\item Diseñar e implementar un gabinete de plástico impreso en 3D con medidas de 15x15x10 cm para alojar el microcontrolador ESP32, el sensor AHT10 y la fuente de alimentación, para su instalación en el área de medición de temperatura y humedad, integrando el lector de códigos de barras en la aplicación de React para optimizar el registro y actualización de existencias en Farmacia Selene.
+
+\end{enumerate}
+
+\thispagestyle{empty}

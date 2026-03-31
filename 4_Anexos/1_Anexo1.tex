@@ -1,0 +1,387 @@
+\chapterpageanex{Anexos}
+\chapterstar{Anexo 1: Estudio de Viabilidad y Factibilidad}
+
+% Redefinir numeración de secciones para el anexo
+\renewcommand{\thesection}{A1.\arabic{section}}
+\setcounter{section}{0}
+
+% Cambiar nombre de "Cuadro" a "Tabla"
+\renewcommand{\tablename}{Tabla}
+% Reiniciar contador de tablas
+\setcounter{table}{0}
+% Formato: A.1, A.2, A.3...
+\renewcommand{\thetable}{A.\arabic{table}}
+
+En el siguiente apartado se presentan las tablas que detallan los recursos esenciales que conforman el estudio de viabilidad y factibilidad del proyecto tecnológico, incluyendo los recursos materiales, tecnológicos, humanos y financieros necesarios para el desarrollo e implementación del sistema de gestión de inventario para la Farmacia Selene, con el propósito de mostrar de manera organizada los elementos requeridos para su elaboración.
+
+% =============================================
+% TABLA 1: RECURSOS HUMANOS
+% =============================================
+\section{Recursos Humanos}
+\begin{longtable}{|p{3.8cm}|p{4.5cm}|p{5.2cm}|}
+
+\caption{Recursos Humanos} \label{tab:recursos_humanos} \\
+
+\hline
+\rowcolor{gray!20}
+\textbf{Puesto} & \textbf{Perfil} & \textbf{Función} \\
+\hline
+\endfirsthead
+\hline
+\rowcolor{gray!20}
+\textbf{Puesto} & \textbf{Perfil} & \textbf{Función} \\
+\hline
+\endhead
+\hline
+\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+Desarrollador Backend &
+Conocimientos en programación con Python, desarrollo de APIs REST con FastAPI y manejo de bases de datos relacionales &
+Implementar lógica de negocio, estructura de BD y comunicación con frontend e IoT. \\
+\hline
+
+Desarrollador Frontend &
+Conocimientos en HTML, CSS, JavaScript y React, así como en el uso de bibliotecas de componentes como Material-UI. &
+Desarrollar la interfaz web del sistema: vistas, formularios, reportes y alertas. \\
+\hline
+
+Desarrollador de Sistemas Embebidos &
+Conocimientos en programación en C++, manejo de microcontroladores y protocolos de comunicación como I²C y HTTP. &
+Programar el ESP32 para lectura del sensor AHT10 y envío de datos al backend. \\
+\hline
+
+Personal de Farmacia &
+Conocimiento operativo del inventario, ventas y manejo de medicamentos. &
+Registrar ventas, consultar existencias y atender alertas del sistema. \\
+\hline
+
+\end{longtable}
+
+
+
+
+% =============================================
+% TABLA 2: RECURSOS MATERIALES
+% =============================================
+\section{Recursos Materiales}
+
+\begin{longtable}{|p{3.5cm}|p{2.5cm}|p{8cm}|}
+
+\caption{Recursos Materiales} \label{tab:recursos_materiales} \\
+
+\hline
+\rowcolor{gray!20}
+\textbf{Componente} & \textbf{Cantidad} & \textbf{Especificaciones} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Componente} & \textbf{Cantidad} & \textbf{Especificaciones} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Microcontrolador ESP32-C5 & 1 &
+Microcontrolador con conectividad Wi-Fi 6 (802.11ax) y Bluetooth Low Energy (BLE), utilizado para la lectura de sensores y comunicación con el servidor. \\
+\hline
+
+Sensor AHT10 & 1 &
+Sensor digital de temperatura y humedad relativa. Precisión de ±0.3~°C en temperatura y ±2\% en humedad. Se conecta al microcontrolador mediante un protocolo de comunicación digital de corto alcance (I²C). \\
+\hline
+
+Lector de códigos de barras & 1 &
+Dispositivo de entrada con conexión USB para la captura automática de los códigos de los productos farmacéuticos. \\
+\hline
+
+Gabinete & 1 &
+Caja de protección utilizada para alojar de forma segura el microcontrolador, el sensor y la fuente de alimentación durante su instalación en la farmacia. \\
+\hline
+
+Cables Dupont & 1 juego &
+Cables de conexión utilizados para unir físicamente el microcontrolador ESP32 con el sensor AHT10. \\
+\hline
+
+Fuente de alimentación USB & 1 &
+Adaptador de corriente de 5~V para la alimentación eléctrica del microcontrolador ESP32. \\
+\hline
+
+Cable USB & 1 &
+Cable utilizado para la programación inicial y alimentación del microcontrolador desde una computadora. \\
+\hline
+
+Computadora de desarrollo & 1 &
+Equipo de cómputo destinado a ejecutar las herramientas de programación, administración de base de datos y navegador web durante el desarrollo del sistema. \\
+\hline
+
+Router / Red Wi-Fi & 1 &
+Infraestructura de red local necesaria para la comunicación inalámbrica entre el microcontrolador, el servidor y la interfaz web. \\
+\hline
+
+\end{longtable}
+
+\newpage
+
+
+
+
+
+% =============================================
+% TABLA 3: RECURSOS TECNOLÓGICOS
+% =============================================
+\section{Recursos Tecnológicos}
+
+\begin{longtable}{|p{3.5cm}|p{8cm}|p{2.5cm}|}
+
+\caption{Recursos Tecnológicos} \label{tab:recursos_tecnologicos} \\
+
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso Tecnológico} & \textbf{Descripción} & \textbf{Tipo} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Recurso Tecnológico} & \textbf{Descripción} & \textbf{Tipo} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Python &
+Lenguaje de programación utilizado para el desarrollo del servidor y la lógica de negocio del sistema. &
+Software \\
+\hline
+
+C++ &
+Lenguaje de programación utilizado para programar el microcontrolador ESP32, gestionando la lectura de sensores y el envío de datos al servidor. &
+Software \\
+\hline
+
+FastAPI &
+Herramienta para la construcción del servidor web que gestiona la comunicación entre la interfaz de usuario, los dispositivos físicos y la base de datos. &
+Software \\
+\hline
+
+PostgreSQL &
+Sistema de base de datos relacional utilizado para almacenar la información de usuarios, productos, ventas y registros ambientales del sistema. &
+Software \\
+\hline
+
+SQLAlchemy &
+Herramienta que permite al código Python interactuar con la base de datos sin necesidad de escribir instrucciones SQL complejas directamente. &
+Software \\
+\hline
+
+React &
+Biblioteca de JavaScript utilizada para construir la interfaz visual del sistema accesible desde el navegador web. &
+Software \\
+\hline
+
+Material-UI (MUI) &
+Biblioteca de componentes visuales prediseñados que garantizan consistencia y adaptabilidad en la interfaz web del sistema. &
+Software \\
+\hline
+
+Arduino IDE / ESP-IDF &
+Entorno de programación utilizado para escribir, compilar y cargar el código en el microcontrolador ESP32. &
+Software \\
+\hline
+
+Vercel &
+Plataforma en la nube utilizada para publicar y mantener disponible la interfaz web del sistema. &
+Servicio en la nube \\
+\hline
+
+Railway &
+Plataforma en la nube utilizada para alojar y mantener en operación el servidor y la base de datos del sistema. &
+Servicio en la nube \\
+\hline
+
+GitHub &
+Plataforma de control de versiones utilizada para el almacenamiento, respaldo y gestión del código fuente del proyecto. &
+Servicio en la nube \\
+\hline
+
+Alembic &
+Herramienta de gestión de migraciones de base de datos, utilizada para aplicar y controlar los cambios en la estructura del sistema de almacenamiento de forma ordenada y segura. &
+Software \\
+\hline
+
+Visual Studio Code &
+Entorno de desarrollo utilizado principalmente para la programación del frontend con React y la gestión general de archivos del proyecto. &
+Software \\
+\hline
+
+PyCharm &
+Entorno de desarrollo integrado utilizado para la programación, depuración y estructuración del servidor desarrollado con Python y FastAPI. &
+Software \\
+\hline
+
+DataGrip &
+Herramienta de administración visual de bases de datos utilizada para consultar, validar y gestionar la información almacenada en PostgreSQL. &
+Software \\
+\hline
+
+JSON (JavaScript Object Notation) &
+Formato ligero de intercambio de datos utilizado para transmitir información estructurada entre el frontend, el backend y otros componentes del sistema mediante la API. &
+Estándar de datos \\
+\hline
+
+JWT (JSON Web Token) &
+Mecanismo de autenticación utilizado para verificar la identidad de los usuarios y controlar el acceso seguro a los endpoints de la API mediante tokens firmados digitalmente. &
+Protocolo de seguridad \\
+\hline
+
+\end{longtable}
+\newpage
+
+
+
+
+
+
+
+% =============================================
+% TABLA 4: RECURSOS FINANCIEROS 
+% =============================================
+\section{Recursos Financieros}
+
+
+% ===============================
+% COSTOS HARDWARE
+% ===============================
+\pgfmathsetmacro{\ESPPrecio}{220}
+\pgfmathsetmacro{\SensorPrecio}{150}
+\pgfmathsetmacro{\ScannerPrecio}{500}
+\pgfmathsetmacro{\CablesPrecio}{50}
+\pgfmathsetmacro{\FuentePrecio}{120}
+\pgfmathsetmacro{\USBPrecio}{50}
+\pgfmathsetmacro{\GabinetePrecio}{120}
+
+\pgfmathsetmacro{\HardwareTotal}{%
+  \ESPPrecio + \SensorPrecio + \ScannerPrecio +
+  \CablesPrecio + \FuentePrecio + \USBPrecio + \GabinetePrecio
+}
+
+% ===============================
+% COSTOS CLOUD
+% ===============================
+\pgfmathsetmacro{\VercelMensual}{360}
+\pgfmathsetmacro{\RailwayMensual}{360}
+\pgfmathsetmacro{\VercelAnual}{\VercelMensual * 12}
+\pgfmathsetmacro{\RailwayAnual}{\RailwayMensual * 12}
+\pgfmathsetmacro{\MensualTotal}{\VercelMensual + \RailwayMensual}
+\pgfmathsetmacro{\AnualTotal}{\MensualTotal * 12}
+
+\begin{center}
+\begin{longtable}{
+  | p{3cm}      % Componente
+  | p{2cm}      % Precio Unitario
+  | p{1.5cm}    % Cantidad
+  | p{2cm}      % Total Inicial
+  | p{2cm}      % Costo Mensual
+  | p{2cm} |    % Costo Anual
+}
+
+\caption{Recursos Financieros} \label{tab:rec_financieros} \\
+\hline
+\rowcolor{gray!20}
+\textbf{Componente} &
+\makecell{\textbf{Precio}\\\textbf{Unitario}\\\textbf{(MXN)}} &
+\makecell{\textbf{Cant.}} &
+\makecell{\textbf{Total}\\\textbf{Inicial}\\\textbf{(MXN)}} &
+\makecell{\textbf{Costo}\\\textbf{Mensual}\\\textbf{(MXN)}} &
+\makecell{\textbf{Costo}\\\textbf{Anual}\\\textbf{(MXN)}} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Componente} &
+\makecell{\textbf{Precio}\\\textbf{Unitario}\\\textbf{(MXN)}} &
+\makecell{\textbf{Cant.}} &
+\makecell{\textbf{Total}\\\textbf{Inicial}\\\textbf{(MXN)}} &
+\makecell{\textbf{Costo}\\\textbf{Mensual}\\\textbf{(MXN)}} &
+\makecell{\textbf{Costo}\\\textbf{Anual}\\\textbf{(MXN)}} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{6}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+% ===============================
+% HARDWARE
+% ===============================
+ESP32-C5 Microcontrolador & \num{\ESPPrecio} & 1 & \num{\ESPPrecio} & 0 & 0 \\
+\hline
+Sensor AHT10 & \num{\SensorPrecio} & 1 & \num{\SensorPrecio} & 0 & 0 \\
+\hline
+Lector de códigos de barras & \num{\ScannerPrecio} & 1 & \num{\ScannerPrecio} & 0 & 0 \\
+\hline
+Cables Dupont & \num{\CablesPrecio} & 1 & \num{\CablesPrecio} & 0 & 0 \\
+\hline
+Fuente de alimentación USB & \num{\FuentePrecio} & 1 & \num{\FuentePrecio} & 0 & 0 \\
+\hline
+Cable USB & \num{\USBPrecio} & 1 & \num{\USBPrecio} & 0 & 0 \\
+\hline
+Gabinete & \num{\GabinetePrecio} & 1 & \num{\GabinetePrecio} & 0 & 0 \\
+\hline
+
+% ===============================
+% SERVICIOS CLOUD
+% ===============================
+Vercel (Hosting Frontend, Pro) & \num{360} & 1 & 0 & \num{\VercelMensual} & \num{\VercelAnual} \\
+\hline
+Railway (Hosting Backend + Base de Datos) & \num{360} & 1 & 0 & \num{\RailwayMensual} & \num{\RailwayAnual} \\
+\hline
+
+% ===============================
+% TOTALES
+% ===============================
+\multicolumn{3}{|r|}{\textbf{Total inversión inicial}} & \num{\HardwareTotal} & & \\
+\hline
+\multicolumn{4}{|r|}{\textbf{Costo mensual del sistema}} & \num{\MensualTotal} & \\
+\hline
+\multicolumn{5}{|r|}{\textbf{Costo anual del sistema}} & \num{\AnualTotal} \\
+\hline
+
+\end{longtable}
+\end{center}
+\newpage
+
+\section{Impacto Social}
+
+La implementación del sistema de gestión de inventario para la Farmacia Selene responde a la necesidad de sustituir un proceso manual propenso a errores, pérdidas económicas y falta de información actualizada. Su digitalización optimiza la operación interna del negocio y genera beneficios directos para la comunidad.
+
+En primer lugar, mejora la disponibilidad y confiabilidad de los medicamentos mediante un control de inventario centralizado y actualizado, reduciendo el desabasto y la acumulación de productos caducados. Esto garantiza un acceso más oportuno y seguro a los productos farmacéuticos.
+
+En segundo lugar, contribuye a la conservación de la calidad de los medicamentos al integrar sensores de temperatura y humedad que permiten supervisar las condiciones de almacenamiento. Este monitoreo continuo mantiene buena actualización de los productos en buen estado y favorece el cumplimiento de buenas prácticas farmacéuticas.
+
+Asimismo, el sistema fortalece al personal al disminuir tareas manuales repetitivas y permitir una mayor concentración en la atención al cliente, promoviendo además la adopción de herramientas tecnológicas en el entorno laboral.
+
+Finalmente, el proyecto demuestra que soluciones basadas en aplicaciones web, bases de datos en la nube y monitoreo ambiental son viables en pequeños establecimientos, sentando un precedente para la modernización de negocios similares en el ámbito local.
+

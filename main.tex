@@ -1,0 +1,45 @@
+\documentclass[12pt,letterpaper,openany]{book}
+
+\input{Preambulo}
+
+% =======================================================================================================================
+
+\begin{document}
+
+% =======================================================================================================================
+% Preliminares
+% =======================================================================================================================
+    
+    \pagestyle{empty}
+
+    \include{1_Preliminares/portada}
+    \include{1_Preliminares/indices}
+% =======================================================================================================================
+% Cuerpo
+% =======================================================================================================================
+    \include{2_Cuerpo/1_PlanteamientoDelProblema}
+    \include{2_Cuerpo/2_Justificacion}
+    \include{2_Cuerpo/3_Objetivos}
+    \addtocontents{toc}{\protect\cftpagenumberson{chapter}}
+    \include{2_Cuerpo/5_Cap1EstadoDelArte}
+    \include{2_Cuerpo/6_Cap2MarcoTeorico}
+    \include{2_Cuerpo/6_DiagramaBloques}
+    
+    
+% =======================================================================================================================
+% Referencias
+% =======================================================================================================================
+    \include{3_Referencias/1_Bibliografia}
+    % \include{3_Referencias/2_Cibergrafia}
+    % \include{3_Referencias/3_Hemerografia}
+    % \include{3_Referencias/4_Anexos}
+    % \include{3_Referencias/5_GlosarioDeTerminos}
+    % \include{3_Referencias/6_Acronimos}
+
+% =======================================================================================================================
+% Anexos
+% =======================================================================================================================
+    \include{4_Anexos/1_Anexo1}
+    \include{4_Anexos/10_Avances}
+
+\end{document}
