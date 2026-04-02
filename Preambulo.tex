@@ -11,6 +11,8 @@
 \usepackage{changepage}        % Ajustar márgenes locales
 \usepackage{enumitem}          % Listas personalizadas
 % \usepackage{lipsum}          % Texto de prueba (eliminar en versión final)
+\usepackage{makecell}
+\usepackage{pgf}
 
 % ======================================================================================================================
 %   TIPOGRAFÍA Y FORMATO DE TEXTO
@@ -51,11 +53,14 @@
 \titleformat{\section}
 {\bfseries\fontsize{12pt}{14pt}\selectfont}
 {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{16pt}{6pt}
 
 % --- Subsecciones ---
 \titleformat{\subsection}
 {\bfseries\fontsize{12pt}{14pt}\selectfont}
 {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{16pt}{6pt}
+
 
 % ======================================================================================================================
 %   ENCABEZADOS Y PIES DE PÁGINA
@@ -138,6 +143,17 @@
   \markboth{}{#1} % Marca para encabezados
 }
 
+\newcommand{\chapterpageavan}[1]{%
+  \clearpage
+  \thispagestyle{empty} % Sin encabezado ni número
+  \null\vfill
+  \begin{center}
+    {\Huge \textbf{#1}}
+  \end{center}
+  \vfill\null
+  \clearpage
+  \markboth{}{#1} % Marca para encabezados
+}
 
 \newcommand{\frontmatterwithnonumber}{
     \pagestyle{empty}
@@ -227,3 +243,27 @@
     \hline
 }
 
+
+
+% imagenes
+% Activar formato de figuras para avances
+\newcommand{\avancesfigureson}{%
+  \renewcommand{\figurename}{Av.}%
+  \setcounter{figure}{0}%
+  \renewcommand{\thefigure}{Av.\arabic{figure}}%
+}
+
+% Restaurar formato estándar de figuras (para capítulos numerados)
+\newcommand{\avancesfiguresoff}{%
+  \renewcommand{\figurename}{Fig.}%
+  \counterwithin{figure}{chapter}%   Restablece la numeración por capítulo
+  \setcounter{figure}{0}%
+}
+
+
+% Separador linea
+\newcommand{\secbreak}{%
+    \vspace{4pt}
+    \noindent\rule{\textwidth}{0.4pt}
+    \vspace{4pt}
+}

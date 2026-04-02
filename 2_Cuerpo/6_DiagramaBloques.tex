@@ -1,51 +1,11 @@
+\chapterstar{Diagrama de bloques}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
-    \fbox{%
-        \begin{tikzpicture}[
-            node distance=2cm and 2.5cm,
-            block/.style={draw, fill=blue!10, text width=3.2cm, minimum height=1.2cm, align=center, rounded corners=5pt},
-            process/.style={draw, fill=orange!10, text width=3.6cm, minimum height=1.4cm, align=center, rounded corners=5pt},
-            output/.style={draw, fill=green!10, text width=3.2cm, minimum height=1.2cm, align=center, rounded corners=5pt},
-            arrow/.style={->, >=stealth, thick},
-            doublearrow/.style={<->, >=stealth, thick},
-            label/.style={font=\footnotesize\bfseries}
-        ]
-
-        %======================
-        % ENTRADAS
-        %======================
-        \node[block] (sensor) {Sensor AHT10\\(Temperatura / Humedad)};
-        \node[block, below=of sensor] (barcode) {Lector de\\Códigos de Barras};
-        \node[block, below=of barcode] (userinput) {Interacción del Usuario\\(Frontend)};
-        \node[label, above=0.4cm of sensor] {ENTRADAS};
-
-        %======================
-        % PROCESOS
-        %======================
-        \node[process, right=of sensor] (esp32) {Microcontrolador\\ESP32};
-        \node[process, below=of esp32] (backend) {Backend\\FastAPI + PostgreSQL};
-        \node[label, above=0.4cm of esp32] {PROCESOS};
-
-        %======================
-        % SALIDAS
-        %======================
-        \node[output, right=of esp32] (interface) {Interfaz Web\\React + MUI};
-        \node[output, right=of backend] (alerts) {Alertas y\\Notificaciones};
-        \node[label, above=0.4cm of interface] {SALIDAS};
-
-        %======================
-        % CONEXIONES
-        %======================
-        \draw[arrow] (sensor.east) -- node[above, font=\scriptsize]{I2C} (esp32.west);
-        \draw[arrow] (barcode.east) -- node[above, font=\scriptsize]{USB / Serial} (esp32.west);
-        \draw[doublearrow] (userinput.east) -- node[above, font=\scriptsize]{HTTP / HTTPS} (backend.west);
-        \draw[doublearrow] (esp32) -- node[right, font=\scriptsize]{HTTP / HTTPS} (backend);
-        \draw[arrow] (backend.east) -- node[above, font=\scriptsize]{API REST} (interface.west);
-        \draw[arrow] (backend.east) -- node[above, font=\scriptsize]{Eventos} (alerts.west);
-
-        \end{tikzpicture}
-    }
-   % \caption{Arquitectura general del sistema}
-    %\label{fig:arquitectura_sistema}
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/DiagramaBloques/DiagramaBloques.png}}
+    \caption{Diagrama de bloques}
+    \label{fig:diag-bloq}
+    
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}

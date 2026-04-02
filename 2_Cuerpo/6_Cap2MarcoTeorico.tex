@@ -37,15 +37,6 @@ Estos dispositivos capturan información del entorno físico y la envían autom�
 
 La integración de estas capas permite que el sistema funcione de manera coordinada. Por ejemplo, al escanear un producto con un lector de códigos de barras (Capa Física), el backend identifica el medicamento correspondiente en la base de datos y envía la información al frontend para que sea mostrada al usuario. De forma similar, si un sensor detecta una variación anormal de temperatura, el backend puede generar una alerta que se visualiza inmediatamente en la interfaz del administrador. Esta arquitectura modular hace que el sistema sea escalable, confiable y adaptable a las necesidades futuras de la Farmacia Selene.
 
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap2MarcoTeorico/EstructuraProyecto.png}}
-    \caption{Estructura del Proyecto}
-    \label{fig:mi_imagen}
-    
-    \vspace{0.2cm}
-    \footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
 
 
 
@@ -56,6 +47,7 @@ La integración de estas capas permite que el sistema funcione de manera coordin
 
 
 
+\secbreak
 \section{Capa Frontend: Tecnologías Web}
 
 La Capa Frontend representa la interfaz gráfica del sistema y constituye el principal medio de interacción entre los usuarios y la plataforma. Su diseño debe garantizar facilidad de uso, rapidez en la respuesta y una presentación clara de la información. 
@@ -116,7 +108,6 @@ Entre las principales ventajas de utilizar Vercel en este proyecto se encuentran
 \end{itemize}
 
 El uso de Vercel facilita que la Farmacia Selene pueda acceder al sistema desde distintos equipos dentro de la sucursal sin requerir infraestructura propia de servidores, reduciendo costos de implementación y mantenimiento.
-\newpage
 
 
 
@@ -132,6 +123,7 @@ El uso de Vercel facilita que la Farmacia Selene pueda acceder al sistema desde 
 
 
 
+\secbreak
 \section{Capa Backend: Servidor, API y Base de Datos}
 
 La Capa Backend es la parte interna del sistema de gestión de inventario y funciona como el centro de control de toda la información. Aunque no es visible para los usuarios, es fundamental para el correcto funcionamiento del sistema, ya que se encarga de procesar los datos, aplicar las reglas del negocio, proteger la información y coordinar la comunicación entre la interfaz de usuario, la base de datos y los dispositivos físicos.
@@ -194,6 +186,23 @@ Gracias a SQLAlchemy, el sistema puede:
 
 Esto contribuye a un desarrollo más ordenado y reduce la probabilidad de errores en el manejo de la información.
 
+\subsection{Alembic: Control de Versiones de la Base de Datos}
+
+Durante el desarrollo del sistema se utilizó \textbf{Alembic}, una herramienta especializada en la gestión de versiones de bases de datos que trabaja en conjunto con SQLAlchemy. Su función principal es permitir la modificación estructurada y controlada del esquema de la base de datos a lo largo del tiempo.
+
+En un proyecto en constante evolución, es común que las tablas requieran cambios, como la adición de nuevas columnas, la creación de relaciones entre entidades o la modificación de restricciones. Realizar estos cambios manualmente puede generar errores y afectar la integridad de la información. Alembic resuelve este problema mediante el uso de \textbf{migraciones}, que son archivos que describen de manera explícita las modificaciones realizadas en la estructura de la base de datos.
+
+Entre las principales ventajas de utilizar Alembic se encuentran:
+
+\begin{itemize}
+    \item \textbf{Control de versiones del esquema:} Permite llevar un historial ordenado de los cambios estructurales en la base de datos.
+    \item \textbf{Actualización controlada:} Facilita aplicar o revertir modificaciones de manera segura.
+    \item \textbf{Integración con SQLAlchemy:} Detecta cambios en los modelos definidos en Python y genera scripts de migración correspondientes.
+    \item \textbf{Reducción de errores:} Disminuye riesgos asociados a cambios manuales en la estructura de las tablas.
+\end{itemize}
+
+El uso de Alembic en este proyecto garantiza que la base de datos pueda evolucionar conforme crecen los requerimientos del sistema, manteniendo consistencia, trazabilidad y buenas prácticas de desarrollo.
+
 \subsection{Railway: Plataforma de Despliegue del Backend}
 
 Para el alojamiento y ejecución del backend en un entorno accesible desde internet se utiliza \textbf{Railway}, una plataforma de infraestructura en la nube que permite desplegar aplicaciones y bases de datos de manera sencilla.
@@ -210,7 +219,6 @@ Entre las principales características de Railway se encuentran:
 \end{itemize}
 
 Gracias a Railway, el backend del sistema permanece activo de manera constante, asegurando que las solicitudes provenientes del frontend y de los dispositivos IoT sean atendidas en tiempo real. Esto permite que el sistema funcione como una plataforma centralizada y accesible, sin necesidad de mantener servidores físicos dentro de la farmacia.
-\newpage
 
 
 
@@ -227,7 +235,7 @@ Gracias a Railway, el backend del sistema permanece activo de manera constante, 
 
 
 
-
+\secbreak
 \section{Capa Física: Dispositivos y Hardware}
 
 La Capa Física corresponde al conjunto de dispositivos electrónicos que operan directamente dentro de la farmacia y que permiten vincular el sistema digital con el entorno real. Su función principal es capturar información física, como la temperatura, la humedad o los códigos de barras de los productos y enviarla al sistema informático para su procesamiento y almacenamiento.
@@ -318,7 +326,6 @@ El lector de códigos de barras es un dispositivo de entrada que permite registr
 Cuando un empleado escanea un producto, el lector obtiene el código correspondiente y lo envía automáticamente al sistema. Este código es utilizado por la aplicación para identificar el medicamento dentro de la base de datos.
 
 Una vez leído el código, la aplicación web solicita al backend la información asociada al producto, como su nombre, precio y cantidad disponible. Esta información se muestra al usuario de forma automática, haciendo el proceso más rápido y eficiente.
-\newpage
 
 
 
@@ -331,7 +338,7 @@ Una vez leído el código, la aplicación web solicita al backend la informació
 
 
 
-
+\secbreak
 \section{Herramientas de Desarrollo}
 
 Además de las tecnologías que conforman directamente la arquitectura del sistema (frontend, backend y capa física), el desarrollo del proyecto requirió el uso de herramientas especializadas que permitieron organizar el código, mantener un control estructurado de los cambios y facilitar el proceso de programación.
@@ -363,6 +370,32 @@ Durante el desarrollo del sistema se utilizaron distintos IDE según el componen
 \end{itemize}
 
 El uso de estos entornos de desarrollo permitió mejorar la organización del proyecto, optimizar la detección temprana de errores y mantener una estructura clara en cada una de las capas del sistema. Esto contribuyó a un proceso de desarrollo más eficiente y ordenado.
+
+\subsection{JSON: Formato de Intercambio de Datos}
+
+JSON (JavaScript Object Notation) es un formato ligero de intercambio de datos ampliamente utilizado en aplicaciones web modernas. Su estructura se basa en pares de clave y valor, lo que permite representar información de manera organizada y fácilmente interpretable tanto por humanos como por sistemas informáticos.
+
+Una de las principales ventajas de JSON es su simplicidad y compatibilidad con múltiples lenguajes de programación, lo que lo convierte en un estándar común para la comunicación entre aplicaciones. En arquitecturas basadas en APIs, como la utilizada en este proyecto, JSON se emplea para enviar y recibir información entre el frontend, el backend y otros sistemas externos.
+
+En el sistema de gestión de inventario desarrollado para la Farmacia Selene, JSON se utiliza como formato principal para transmitir información entre la aplicación web y el servidor backend. Por ejemplo, cuando el frontend solicita la información de un producto, la API responde con una estructura JSON que contiene los datos correspondientes, los cuales son procesados y mostrados en la interfaz del usuario.
+
+El uso de JSON facilita la validación de datos, mejora la interoperabilidad entre sistemas y permite manejar información de forma estructurada dentro de la arquitectura del sistema.
+
+\subsection{JSON Web Token (JWT): Autenticación y Seguridad}
+
+JSON Web Token (JWT) es un estándar abierto utilizado para transmitir información de forma segura entre diferentes partes de un sistema. Este mecanismo se utiliza principalmente para la autenticación de usuarios en aplicaciones web y servicios basados en APIs.
+
+Un token JWT consiste en una cadena de texto firmada digitalmente que contiene información codificada sobre el usuario y su sesión. Cuando un usuario inicia sesión en el sistema, el servidor genera un token que se envía al cliente. Posteriormente, este token se incluye en cada solicitud realizada a la API para verificar la identidad del usuario.
+
+El uso de JWT ofrece diversas ventajas en sistemas distribuidos, entre las que destacan:
+
+\begin{itemize}
+\item Permite autenticar usuarios sin mantener sesiones activas en el servidor.
+\item Reduce la carga del sistema al evitar consultas constantes a la base de datos para validar sesiones.
+\item Facilita la comunicación segura entre aplicaciones web y servicios backend.
+\end{itemize}
+
+En el sistema desarrollado para la Farmacia Selene, JWT se utiliza para controlar el acceso a las diferentes funciones de la API. De esta manera, únicamente los usuarios autenticados pueden consultar información del inventario, registrar ventas o modificar datos dentro del sistema.
 
 
 
