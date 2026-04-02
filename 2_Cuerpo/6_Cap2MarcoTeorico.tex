@@ -289,6 +289,25 @@ El uso del ESP32-C5 permite que la captura de datos ambientales sea automática 
 \end{figure}
 
 
+\subsection{WiFiManager: Gestión Dinámica de Credenciales Wi-Fi}
+
+Durante el despliegue de dispositivos IoT en entornos reales, uno de los desafíos frecuentes es la configuración de la red inalámbrica sin necesidad de recompilar el firmware o acceder físicamente al código fuente. Para resolver esta problemática, el sistema utiliza la librería \textbf{WiFiManager}, desarrollada por tzapu, que permite gestionar las credenciales Wi-Fi del ESP32-C5 de manera dinámica desde cualquier dispositivo con navegador web.
+
+El funcionamiento de WiFiManager se basa en el siguiente mecanismo: si el microcontrolador no encuentra una red Wi-Fi previamente configurada, genera automáticamente un punto de acceso inalámbrico (Access Point) con el nombre \texttt{PharmaTrack-Sensor}. El usuario puede conectarse a dicho punto desde un teléfono o computadora, acceder a un portal de configuración web y seleccionar la red deseada ingresando sus credenciales. Una vez guardada la información, el dispositivo se reconecta automáticamente a la red configurada cada vez que se reinicia.
+
+Adicionalmente, el sistema incorpora un mecanismo de restablecimiento de credenciales mediante el botón BOOT del ESP32-C5 (GPIO~0). Al mantener presionado dicho botón durante más de tres segundos, el sistema borra las credenciales almacenadas y reinicia el portal de configuración, permitiendo cambiar la red de forma sencilla sin necesidad de herramientas adicionales.
+
+Entre las principales ventajas de utilizar WiFiManager en este proyecto se encuentran:
+
+\begin{itemize}
+    \item \textbf{Configuración sin recompilación:} Las credenciales de red se ingresan en tiempo de ejecución, lo que simplifica la instalación del dispositivo en distintos entornos.
+    \item \textbf{Portal web integrado:} Ofrece una interfaz gráfica accesible desde cualquier dispositivo con navegador, sin necesidad de instalar software adicional.
+    \item \textbf{Persistencia de credenciales:} Los datos de la red se almacenan en memoria no volátil del ESP32-C5, por lo que se mantienen disponibles tras cortes de energía o reinicios.
+    \item \textbf{Reconexión automática:} En caso de pérdida de la señal Wi-Fi, el sistema intenta reconectarse de forma autónoma, garantizando la continuidad del monitoreo.
+\end{itemize}
+
+El uso de WiFiManager facilita significativamente el proceso de instalación y mantenimiento del nodo sensor en la farmacia, reduciendo la dependencia de personal técnico especializado para tareas de configuración de red.
+
 \subsection{Sensor de Temperatura y Humedad AHT10}
 
 Para el monitoreo ambiental se utiliza el \textbf{sensor digital de temperatura y humedad AHT10}, el cual permite medir de forma continua las condiciones del entorno donde se almacenan los medicamentos. Este sensor proporciona lecturas confiables y estables, ya que viene calibrado de fábrica y ha sido diseñado específicamente para aplicaciones de control ambiental y sistemas IoT de bajo consumo.
@@ -367,6 +386,7 @@ Durante el desarrollo del sistema se utilizaron distintos IDE según el componen
     \item \textbf{PyCharm:} Utilizado principalmente para el desarrollo del backend en Python y la implementación de la lógica del sistema.
     \item \textbf{Visual Studio Code (VS Code):} Empleado en el desarrollo del frontend con tecnologías web como HTML, CSS, JavaScript y React.
     \item \textbf{DataGrip:} Utilizado para la administración y consulta de la base de datos PostgreSQL, facilitando la visualización y manipulación estructurada de los datos.
+    \item \textbf{Arduino IDE:} Entorno de desarrollo utilizado para programar el microcontrolador ESP32-C5. Permite escribir, compilar y cargar el código directamente en el microcontrolador, e incluye un monitor serie que facilita la depuración del sistema en tiempo real. Además, incorpora un gestor de librerías desde el cual se instalan las dependencias necesarias para el proyecto, como los controladores del sensor AHT10 y la librería WiFiManager.
 \end{itemize}
 
 El uso de estos entornos de desarrollo permitió mejorar la organización del proyecto, optimizar la detección temprana de errores y mantener una estructura clara en cada una de las capas del sistema. Esto contribuyó a un proceso de desarrollo más eficiente y ordenado.
