@@ -316,3 +316,103 @@ La API se desplegó en \textbf{Railway}, una plataforma de infraestructura en la
 Railway se integra directamente con el repositorio de código: cada vez que se publica una nueva versión, el despliegue se actualiza de forma automática. Antes de recibir tráfico, la plataforma ejecuta las migraciones de base de datos pendientes, garantizando que el esquema y el código sean siempre consistentes entre sí.
 
 La información sensible —credenciales de la base de datos, clave de seguridad y parámetros de configuración del entorno— se define como variables en la plataforma, separadas del código fuente, siguiendo la práctica estándar de no incluir datos sensibles en el repositorio.
+
+
+
+% =============================================
+% OE 3: FRONTEND REACT
+% =============================================
+
+\clearpage
+\section{Desarrollo de la interfaz web con React}
+
+Para cumplir con el tercer objetivo específico se diseñó e implementó la interfaz de usuario como una \textbf{aplicación web de página única} (\textit{Single Page Application}, SPA): una vez cargada en el navegador, las transiciones entre vistas ocurren sin recargar completamente la página, lo que mejora la fluidez de la experiencia para el usuario. La interfaz se comunica con la API desarrollada en el OE2 para consultar y registrar información. El resultado es una aplicación con \textbf{dieciséis módulos de navegación} cubiertos por una biblioteca de más de cuarenta componentes de interfaz reutilizables, desplegada en la plataforma Vercel.
+
+\subsection{Selección de React y Vite}
+
+Se eligió \textbf{React} como biblioteca base para la construcción de la interfaz por dos razones principales. La primera es su modelo basado en \textbf{componentes reutilizables}: cada elemento visual —una tabla, un formulario, un botón de acción— se define una vez y puede utilizarse en cualquier módulo sin reescribir código. Esto fue determinante dado que la aplicación comparte patrones visuales casi idénticos entre módulos: la estructura de lista con filtros, el formulario de creación y el diálogo de confirmación de eliminación se repiten en inventario, ventas, catálogo y usuarios. La segunda razón es la amplitud de su ecosistema: bibliotecas para gestión de formularios, caché de datos, animaciones y exportación de documentos existen, están mantenidas activamente y se integran entre sí, evitando desarrollar estas funcionalidades desde cero.
+
+Junto con React se utilizó \textbf{Vite} como herramienta de construcción y servidor de desarrollo. Vite moderniza el proceso al servir los módulos directamente al navegador sin reempaquetar todo el proyecto en cada cambio, reduciendo el tiempo entre guardar una modificación y verla reflejada en pantalla. Esto aceleró el ciclo de desarrollo durante la etapa de diseño de la interfaz.
+
+\subsection{Estructura de la aplicación}
+
+La aplicación se organizó en tres niveles de granularidad. Las \textbf{páginas} son los puntos de entrada de cada ruta; las \textbf{secciones} contienen la lógica y la disposición visual específica de cada módulo de negocio; y los \textbf{componentes} son los bloques visuales reutilizables que las secciones ensamblan. El enrutamiento entre páginas se gestiona con \textbf{React Router}, que mapea cada URL a su vista correspondiente sin recargar el servidor. La navegación se realiza desde una barra lateral persistente que agrupa los módulos por área funcional.
+
+El siguiente diagrama resume el flujo general de interacción del usuario con la aplicación, desde el acceso hasta la confirmación de una operación:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+\node[box, fill=gray!15]  (login)   {\textbf{1.} Pantalla de inicio de sesión};
+\node[box, fill=blue!8,   below=of login]   (jwt)    {\textbf{2.} Verificación de credenciales con la API};
+\node[dec,                below=of jwt]     (valid)  {¿Válidas?};
+\node[err,                right=of valid]   (err)    {Mensaje de\\error al usuario};
+\node[box, fill=blue!12,  below=of valid]   (dash)   {\textbf{3.} Panel principal: ventas del día, alertas de stock y sensor};
+\node[box, fill=gray!10,  below=of dash]    (nav)    {\textbf{4.} Selección de módulo desde la barra lateral};
+\node[box, fill=blue!8,   below=of nav]     (list)   {\textbf{5.} Vista de lista con búsqueda, filtros y paginación};
+\node[box, fill=gray!10,  below=of list]    (action) {\textbf{6.} Seleccionar operación: crear, editar o eliminar};
+\node[box, fill=blue!8,   below=of action]  (form)   {\textbf{7.} Formulario con validación de datos en el cliente};
+\node[dec,                below=of form]    (formv)  {¿Datos\\válidos?};
+\node[err,                right=of formv]   (formerr){Indicadores de\\error por campo};
+\node[box, fill=green!10, below=of formv]   (api)    {\textbf{8.} Envío a la API y respuesta del servidor};
+\node[box, fill=green!8,  below=of api]     (update) {\textbf{9.} Notificación de éxito y actualización automática de la vista};
+\draw[arr] (login)  -- (jwt);
+\draw[arr] (jwt)    -- (valid);
+\draw[arr] (valid)  -- node[left,  font=\footnotesize]{Sí} (dash);
+\draw[arr] (valid)  -- node[above, font=\footnotesize]{No} (err);
+\draw[arr] (dash)   -- (nav);
+\draw[arr] (nav)    -- (list);
+\draw[arr] (list)   -- (action);
+\draw[arr] (action) -- (form);
+\draw[arr] (form)   -- (formv);
+\draw[arr] (formv)  -- node[left,  font=\footnotesize]{Sí} (api);
+\draw[arr] (formv)  -- node[above, font=\footnotesize]{No} (formerr);
+\draw[arr] (api)    -- (update);
+\end{tikzpicture}
+\caption{Flujo general de interacción del usuario con la aplicación web}
+\label{fig:cap3-frontend-flujo}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Componentes visuales con Material-UI}
+
+Para el diseño visual se eligió \textbf{Material-UI} (MUI), una biblioteca que proporciona un conjunto de componentes construidos sobre las guías de diseño Material Design de Google. La razón principal fue evitar diseñar desde cero elementos como tablas paginadas, formularios, diálogos de confirmación y selectores de fecha, que de otro modo habrían requerido semanas de desarrollo adicional. MUI ofrece estos componentes con comportamiento accesible, adaptación a distintos tamaños de pantalla y un sistema de temas que permite ajustar colores y tipografía de forma centralizada para toda la aplicación.
+
+Para las vistas que muestran listados de registros —productos, lotes, ventas, usuarios— se utilizó el componente de tabla avanzada de MUI, que soporta ordenamiento, filtrado por columna y paginación sin configuración adicional. Dado el volumen moderado de registros que maneja una farmacia de pequeña escala, ordenar y filtrar los datos directamente en la vista es suficiente y evita peticiones adicionales al servidor para cada cambio de orden o filtro.
+
+\subsection{Gestión de datos y estado}
+
+La gestión del estado se dividió en dos responsabilidades distintas. El \textbf{estado de sesión} —la información del usuario autenticado, su rol y sus permisos— se almacena en un contexto global accesible desde cualquier componente. Este estado es necesario para decidir qué secciones del menú mostrar y qué operaciones están disponibles según el rol del usuario activo.
+
+El \textbf{estado de los datos del servidor} —listas de productos, ventas, lotes y demás registros— se gestiona con una biblioteca de caché del lado del cliente. Esta biblioteca conserva en memoria los datos ya consultados; al navegar entre módulos, la información previamente cargada se muestra de inmediato mientras se verifica en segundo plano si hay actualizaciones. Cuando se completa una operación —crear, editar o eliminar un registro—, la vista se refresca automáticamente sin que el usuario tenga que recargar la página. Esta separación entre estado de sesión y estado de datos evitó la necesidad de una solución de gestión de estado global más compleja, cuya configuración no se justifica para una aplicación de esta escala.
+
+\subsection{Formularios y validación}
+
+Todos los formularios de creación y edición se implementaron con \textbf{React Hook Form}, una biblioteca que gestiona el estado del formulario sin causar un re-renderizado completo del componente en cada pulsación de tecla. El beneficio principal es el rendimiento: en formularios con muchos campos —como el registro de ventas con múltiples productos o el alta de un medicamento con ingredientes— la interfaz responde de forma fluida incluso en equipos con recursos limitados.
+
+La validación de cada campo se define mediante esquemas que especifican el tipo de dato esperado, los rangos permitidos y los mensajes de error correspondientes. Esta validación se ejecuta \textit{antes} de enviar la petición a la API, evitando peticiones innecesarias cuando el usuario omite un campo obligatorio o introduce un valor fuera de rango. Los esquemas de validación del cliente se diseñaron para reflejar las mismas restricciones que los esquemas Pydantic definidos en la API (OE2), de modo que las reglas sean consistentes en ambas capas.
+
+Para mantener la consistencia visual y evitar duplicar código, se construyó una biblioteca interna de \textbf{componentes de formulario reutilizables}: campos de texto, selectores, autocompletados con búsqueda, selectores de fecha y casillas de verificación. Cada componente integra la lógica de validación y el estilo de MUI, y puede utilizarse en cualquier formulario de la aplicación conectándolo al esquema de validación correspondiente.
+
+\subsection{Autenticación en el cliente}
+
+Al iniciar sesión, la aplicación recibe los tokens generados por la API (OE2) y los almacena en el navegador: el token de acceso en el almacenamiento de sesión —que se elimina automáticamente cuando el usuario cierra la pestaña o el navegador—, y el token de renovación en el almacenamiento persistente, únicamente cuando el usuario activa la opción de recordar la sesión.
+
+El token de acceso acompaña cada petición a la API. Cuando expira, la aplicación utiliza el token de renovación para obtener uno nuevo de forma transparente, sin interrumpir la sesión. Este mecanismo se implementó en la capa de comunicación HTTP de forma centralizada, de modo que todos los módulos se benefician de él sin código adicional en cada vista.
+
+Las rutas de la aplicación están protegidas mediante \textbf{guardias de acceso}: si el usuario no tiene sesión activa, cualquier intento de acceder a una página del sistema lo redirige a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, modificación de roles— el guardia verifica además que los permisos del token incluyan los requeridos, consistente con el módulo RBAC definido en el OE1.
+
+\subsection{Despliegue en Vercel}
+
+La aplicación web se desplegó en \textbf{Vercel}, una plataforma especializada en el alojamiento de aplicaciones JavaScript modernas. Al igual que con Railway para la API, se eligió Vercel sobre alternativas como AWS por la misma razón de escala: ofrece los componentes necesarios —red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización— sin la complejidad de configuración que implica una infraestructura de mayor tamaño.
+
+Un aspecto particular del despliegue de una SPA es el enrutamiento: dado que React Router gestiona las rutas completamente en el cliente, el servidor de Vercel debe redirigir cualquier URL al punto de entrada de la aplicación para que sea React quien determine qué vista mostrar. Sin esta configuración, acceder directamente a una URL como \texttt{/dashboard/product} devolvería un error del servidor. La redirección se definió en el archivo de configuración de Vercel y garantiza que el usuario pueda acceder a cualquier ruta o recargar la página sin errores.
+
+Las variables de configuración —principalmente la URL de la API— se definen en la plataforma de forma separada al código fuente, siguiendo el mismo criterio de seguridad aplicado en el despliegue de la API.
