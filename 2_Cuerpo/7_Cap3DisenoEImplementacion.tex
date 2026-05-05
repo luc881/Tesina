@@ -239,6 +239,7 @@ La autenticación se implementó con \textbf{JWT} (\textit{JSON Web Token}), un 
 
 Al iniciar sesión, la API verifica la contraseña con \texttt{bcrypt} y emite dos tokens: un \textbf{access token} con vigencia de 30 minutos que incluye el identificador del usuario, su rol y sus permisos; y un \textbf{refresh token} opaco de 7 días almacenado en la base de datos. El access token viaja en el encabezado \texttt{Authorization: Bearer} de cada petición y el servidor lo valida sin consultar la base de datos, ya que toda la información necesaria está firmada dentro del propio token. Cuando el access token expira, el cliente usa el refresh token para obtener uno nuevo sin que el usuario tenga que iniciar sesión de nuevo.
 
+
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
