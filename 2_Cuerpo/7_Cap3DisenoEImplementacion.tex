@@ -416,3 +416,104 @@ La aplicación web se desplegó en \textbf{Vercel}, una plataforma especializada
 Un aspecto particular del despliegue de una SPA es el enrutamiento: dado que React Router gestiona las rutas completamente en el cliente, el servidor de Vercel debe redirigir cualquier URL al punto de entrada de la aplicación para que sea React quien determine qué vista mostrar. Sin esta configuración, acceder directamente a una URL como \texttt{/dashboard/product} devolvería un error del servidor. La redirección se definió en el archivo de configuración de Vercel y garantiza que el usuario pueda acceder a cualquier ruta o recargar la página sin errores.
 
 Las variables de configuración —principalmente la URL de la API— se definen en la plataforma de forma separada al código fuente, siguiendo el mismo criterio de seguridad aplicado en el despliegue de la API.
+
+
+
+% =============================================
+% OE 4: NODO SENSOR ESP32
+% =============================================
+
+\clearpage
+\section{Desarrollo del nodo sensor con ESP32}
+
+Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico de monitoreo ambiental que mide temperatura y humedad relativa dentro del área de almacenamiento de la farmacia y envía esas lecturas a la API desarrollada en el OE2. El nodo está construido sobre un microcontrolador \textbf{ESP32-C5} con un sensor \textbf{AHT10}, y su firmware fue programado en C++ utilizando el entorno de desarrollo Arduino.
+
+\subsection{Selección del hardware}
+
+\subsubsection*{Microcontrolador ESP32-C5}
+
+Se eligió el \textbf{ESP32-C5} como microcontrolador principal por tres razones. La primera es que integra conectividad \textbf{WiFi 802.11} de forma nativa, sin necesidad de un módulo adicional, lo que simplifica el diseño físico del nodo y reduce su costo. La segunda es que soporta el protocolo de comunicación \textbf{I\textsuperscript{2}C}, necesario para leer el sensor de temperatura y humedad. La tercera es su compatibilidad con el entorno Arduino, que proporciona un ecosistema de bibliotecas maduro para tareas de red, manejo de JSON y gestión de credenciales, reduciendo significativamente el tiempo de desarrollo.
+
+Se descartaron alternativas como un Arduino Uno porque carece de conectividad WiFi integrada, lo que habría requerido un módulo externo y aumentado la complejidad del circuito. Una Raspberry Pi habría sido sobredimensionada para una tarea de lectura y envío periódico de dos valores numéricos, con un consumo de energía y costo mayores sin un beneficio funcional correspondiente.
+
+\subsubsection*{Sensor AHT10}
+
+El \textbf{AHT10} es un sensor que mide simultáneamente temperatura y humedad relativa en un único componente. Se eligió sobre alternativas como los sensores DHT11 o DHT22 por dos motivos. El primero es su protocolo de comunicación: el AHT10 utiliza I\textsuperscript{2}C, un bus estándar de dos hilos (datos y reloj) que es intrínsecamente más robusto ante interferencias que el protocolo de un solo hilo de los sensores DHT. El segundo es su precisión: el AHT10 ofrece una resolución de 0.01 °C en temperatura y 0.024\% en humedad, adecuada para detectar variaciones ambientales relevantes para el almacenamiento farmacéutico, donde rangos como 15–25 °C y 30–65\% de humedad relativa son críticos para la conservación de medicamentos.
+
+\subsection{Arquitectura del firmware}
+
+El firmware sigue el modelo de ejecución de Arduino, que divide el programa en dos funciones con responsabilidades distintas: \textbf{configuración inicial} (\textit{setup}), que se ejecuta una sola vez al encender el dispositivo e inicializa el hardware y la conexión de red; y \textbf{ciclo operativo} (\textit{loop}), que se ejecuta de forma continua y realiza las lecturas periódicas del sensor y el envío de datos.
+
+El diagrama siguiente muestra el flujo completo de ejecución del firmware, desde el encendido hasta el ciclo de operación continua:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    warn/.style={rectangle, draw, rounded corners=3pt, fill=orange!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+\node[box, fill=gray!15]  (ini)   {\textbf{1.} Encendido del nodo sensor};
+\node[box, fill=blue!8,   below=of ini]   (hw)    {\textbf{2.} Inicializar bus I\textsuperscript{2}C y detectar sensor AHT10};
+\node[dec,                below=of hw]    (sdet)  {¿Sensor\\detectado?};
+\node[err,                right=of sdet]  (errs)  {Error de hardware\\(espera indefinida)};
+\node[box, fill=blue!8,   below=of sdet]  (wifi)  {\textbf{3.} Conectar a WiFi mediante portal de provisión};
+\node[dec,                below=of wifi]  (wcon)  {¿Conectado?};
+\node[err,                right=of wcon]  (errw)  {Reiniciar\\dispositivo};
+\node[box, fill=gray!10,  below=of wcon]  (chk)   {\textbf{4.} Verificar que la conexión WiFi esté activa};
+\node[dec,                below=of chk]   (wact)  {¿WiFi\\activo?};
+\node[warn,               right=of wact]  (rec)   {Reconectar\\y esperar};
+\node[box, fill=blue!10,  below=of wact]  (read)  {\textbf{5.} Leer temperatura y humedad cada 30 segundos};
+\node[dec,                below=of read]  (val)   {¿Valores en\\rango válido?};
+\node[warn,               right=of val]   (disc)  {Descartar\\lectura};
+\node[box, fill=green!10, below=of val]   (post)  {\textbf{6.} Enviar datos a la API: POST HTTPS};
+\node[box, fill=green!8,  below=of post]  (res)   {\textbf{7.} Registrar resultado → repetir desde paso 4};
+\draw[arr] (ini)  -- (hw);
+\draw[arr] (hw)   -- (sdet);
+\draw[arr] (sdet) -- node[left,  font=\footnotesize]{Sí} (wifi);
+\draw[arr] (sdet) -- node[above, font=\footnotesize]{No} (errs);
+\draw[arr] (wifi) -- (wcon);
+\draw[arr] (wcon) -- node[left,  font=\footnotesize]{Sí} (chk);
+\draw[arr] (wcon) -- node[above, font=\footnotesize]{No} (errw);
+\draw[arr] (chk)  -- (wact);
+\draw[arr] (wact) -- node[left,  font=\footnotesize]{Sí} (read);
+\draw[arr] (wact) -- node[above, font=\footnotesize]{No} (rec);
+\draw[arr] (read) -- (val);
+\draw[arr] (val)  -- node[left,  font=\footnotesize]{Sí} (post);
+\draw[arr] (val)  -- node[above, font=\footnotesize]{No} (disc);
+\draw[arr] (post) -- (res);
+\end{tikzpicture}
+\caption{Flujo de ejecución del firmware del nodo sensor}
+\label{fig:cap3-sensor-flujo}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Una característica de diseño relevante es que el ciclo operativo utiliza \textbf{temporización no bloqueante}: en lugar de detener la ejecución del programa durante los 30 segundos de espera, el firmware compara continuamente el tiempo transcurrido con el intervalo deseado. Esto permite que en cada ciclo se verifique el estado de la conexión WiFi y se atienda el botón de restablecimiento, sin que el programa quede congelado esperando la siguiente lectura.
+
+\subsection{Provisión de red con WiFiManager}
+
+Un requisito de diseño fue que el nodo no tuviera credenciales WiFi escritas directamente en el firmware, ya que eso obligaría a recompilar y recargar el programa cada vez que se cambie la red o el dispositivo se instale en una ubicación distinta. Para resolver esto se utilizó la biblioteca \textbf{WiFiManager}, que implementa un mecanismo de provisión mediante portal cautivo:
+
+En el primer arranque, el ESP32 no encuentra credenciales guardadas y crea una red WiFi temporal de nombre \texttt{PharmaTrack-Sensor}. El técnico de instalación se conecta a esa red desde un teléfono o computadora, accede a una página de configuración que aparece automáticamente en el navegador, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales en su memoria interna y se conecta. En arranques posteriores, utiliza las credenciales guardadas de forma automática sin intervención del usuario.
+
+Si en algún momento se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio del ESP32 durante tres segundos borra las credenciales guardadas y el dispositivo vuelve al modo de provisión.
+
+\subsection{Lectura del sensor y validación}
+
+El sensor AHT10 se comunica con el ESP32 mediante el protocolo \textbf{I\textsuperscript{2}C}, que requiere únicamente dos líneas: una para los datos y otra para la señal de reloj. Esta comunicación es gestionada por una biblioteca de Adafruit que abstrae los detalles del protocolo y expone una interfaz de lectura directa.
+
+La lectura se realiza cada \textbf{30 segundos}. Este intervalo representa un balance entre la granularidad de los datos almacenados y la carga generada sobre la red y el servidor: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén, pero consumirían más ancho de banda y generarían más registros en la base de datos. Las lecturas menos frecuentes, por otro lado, podrían no detectar variaciones térmicas abruptas con suficiente oportunidad.
+
+Antes de enviar cada lectura a la API, el firmware verifica que los valores estén dentro de rangos físicamente plausibles: temperatura entre −10 °C y 85 °C, y humedad entre 0\% y 100\%. Si una lectura cae fuera de esos rangos —lo que indicaría un fallo en el sensor o interferencia eléctrica— se descarta sin enviar, evitando que datos erróneos se almacenen en la base de datos. Los valores válidos se redondean a un decimal antes del envío.
+
+\subsection{Envío de datos a la API}
+
+Cada lectura válida se envía al endpoint \texttt{/api/v1/sensor-readings/} de la API mediante una petición \textbf{POST HTTPS}. El uso de HTTPS garantiza que los datos viajan cifrados entre el nodo y el servidor, lo cual es relevante dado que la comunicación atraviesa la red WiFi del establecimiento y redes públicas de Internet hasta el servidor en Railway.
+
+El cuerpo de la petición es un objeto JSON con tres campos: la temperatura, la humedad y un identificador del dispositivo. El identificador permite que la API registre qué nodo envió cada lectura, relevante si en el futuro se despliegan múltiples nodos en distintas áreas o sucursales.
+
+El firmware evalúa el código de respuesta HTTP devuelto por el servidor. Si la API confirma que el registro fue creado exitosamente, el ciclo continúa normalmente. Si la API responde con un error —por un problema temporal del servidor, por ejemplo— el firmware registra el error en el puerto serial para diagnóstico y espera hasta el siguiente ciclo de 30 segundos sin intentar reenviar. Esta decisión de no reintentar el envío fue deliberada: en un sistema de monitoreo ambiental, una lectura perdida ocasionalmente es menos problemática que una lógica de reintento que podría generar peticiones en ráfaga y sobrecargar el servidor.
