@@ -1,3 +1,306 @@
-\chapterpage{1}{Diseño e Implementación}
-\chapter{Diseño e Implementación}
-\lipsum[15]
+% =============================================
+% CAPÍTULO 3: DISEÑO E IMPLEMENTACIÓN
+% =============================================
+
+\chapterpage{3}{Diseño e Implementación}
+\clearpage
+\refstepcounter{chapter}
+\addcontentsline{toc}{chapter}{Cap. 3 Diseño e Implementación}
+
+En este capítulo se describe el proceso de diseño e implementación del sistema de gestión de inventario y ventas con monitoreo ambiental para la Farmacia Selene. Se presentan las decisiones tomadas en cada etapa del desarrollo, desde la estructuración de la base de datos y la construcción de la API hasta la implementación de la interfaz web y el nodo de sensores, así como el proceso de integración y despliegue del sistema completo.
+
+
+
+
+% =============================================
+% SECCIÓN 1: ARQUITECTURA GENERAL
+% =============================================
+
+\section{Arquitectura general del sistema}
+
+El sistema fue diseñado siguiendo una arquitectura de tres capas que separa responsabilidades de manera clara y facilita el mantenimiento y la escalabilidad del proyecto. Esta separación permite que cada capa evolucione de manera independiente sin afectar el funcionamiento de las demás.
+
+La \textbf{Capa Frontend} constituye la interfaz de usuario accesible desde el navegador web. Es la parte visible del sistema, desde la cual los empleados y administradores de la farmacia consultan el inventario, registran ventas y visualizan alertas ambientales. Esta capa fue desarrollada con React y Material-UI, y está desplegada en la plataforma Vercel.
+
+La \textbf{Capa Backend} actúa como núcleo del sistema. Contiene la lógica de negocio, gestiona la autenticación de usuarios y expone una API REST desarrollada con FastAPI que permite la comunicación con el frontend y con los dispositivos físicos. El servidor se encuentra alojado en Railway junto con la base de datos PostgreSQL.
+
+La \textbf{Capa Física} está compuesta por el microcontrolador ESP32-C5 y el sensor de temperatura y humedad AHT10. Este nodo captura variables ambientales del área de almacenamiento de medicamentos y las envía periódicamente al backend mediante solicitudes HTTP sobre la red Wi-Fi de la farmacia.
+
+La comunicación entre capas se realiza mediante el formato JSON a través de la API REST. La Figura~\ref{fig:cap3-estructura} ilustra la organización general del sistema y la relación entre sus componentes.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap2MarcoTeorico/EstructuraProyecto.png}}
+    \caption{Arquitectura general del sistema}
+    \label{fig:cap3-estructura}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 2: DISEÑO DE LA BASE DE DATOS
+% =============================================
+
+\section{Diseño de la base de datos}
+
+La base de datos fue diseñada en PostgreSQL siguiendo un modelo relacional organizado en cuatro módulos funcionales. Esta organización modular permite separar las responsabilidades de cada conjunto de tablas, mantener la integridad referencial de los datos y facilitar posibles ampliaciones futuras del sistema.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Avances1/BDCompleta.png}}
+    \caption{Esquema completo de la base de datos}
+    \label{fig:cap3-bd-completa}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+A continuación se describen los cuatro módulos que conforman la base de datos del sistema:
+
+\subsection{Módulo de Usuarios y Acceso}
+
+Este módulo gestiona las cuentas del sistema y los mecanismos de autenticación de empleados y administradores. Su función es controlar quién puede acceder al sistema y con qué nivel de permisos. Las tablas que lo conforman almacenan información como el nombre de usuario, la contraseña encriptada y el rol asignado, el cual determina las acciones que cada usuario puede realizar dentro de la plataforma.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.6\textwidth]{0_imagenes/Avances1/BDUsuarios.png}}
+    \caption{Módulo de usuarios y acceso}
+    \label{fig:cap3-bd-usuarios}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Módulo de Catálogo de Productos}
+
+Este módulo almacena la información de los medicamentos y productos disponibles en la farmacia, incluyendo nombre, presentación, código de barras y precio. Su contenido fue poblado inicialmente a partir del catálogo de más de 1500 productos proporcionado por el propietario de la Farmacia Selene.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.6\textwidth]{0_imagenes/Avances1/BDProductos.png}}
+    \caption{Módulo de catálogo de productos}
+    \label{fig:cap3-bd-productos}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Módulo de Inventario y Compras}
+
+Este módulo registra las cantidades disponibles de cada producto y los movimientos asociados al abastecimiento. Permite llevar un control actualizado de las existencias y detectar cuándo es necesario reponer un producto, evitando tanto el desabasto como la acumulación excesiva de medicamentos.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.6\textwidth]{0_imagenes/Avances1/BDInventarios.png}}
+    \caption{Módulo de inventario y compras}
+    \label{fig:cap3-bd-inventarios}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Módulo de Ventas y Pagos}
+
+Este módulo almacena los registros de ventas realizadas y las transacciones correspondientes. Cada venta queda asociada al empleado que la realizó, a los productos vendidos y a la cantidad cobrada, lo que permite generar reportes históricos y analizar el comportamiento del negocio a lo largo del tiempo.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.6\textwidth]{0_imagenes/Avances1/BDVentas.png}}
+    \caption{Módulo de ventas y pagos}
+    \label{fig:cap3-bd-ventas}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La evolución estructural de la base de datos fue gestionada con \textbf{Alembic}, herramienta que permite versionar y aplicar cambios al esquema de manera controlada. Esto resultó especialmente útil durante las etapas de desarrollo en las que fue necesario ajustar columnas y relaciones sin perder la información ya almacenada.
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 3: API REST
+% =============================================
+
+\section{Diseño e implementación de la API REST}
+
+La API REST constituye el punto de comunicación central del sistema. Fue desarrollada con \textbf{FastAPI} y se encarga de recibir solicitudes del frontend y del nodo sensor, procesarlas conforme a las reglas del negocio y devolver respuestas en formato JSON. La API se encuentra desplegada en Railway y es accesible de forma pública mediante un dominio asignado por la plataforma.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Avances1/APIDominio.png}}
+    \caption{Dominio público de la API del sistema}
+    \label{fig:cap3-api-dominio}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Organización de los endpoints}
+
+La API cuenta con aproximadamente \textbf{48 endpoints} organizados en módulos que agrupan las operaciones según su área funcional:
+
+\begin{itemize}
+    \item \textbf{Autenticación:} inicio de sesión y generación de tokens JWT.
+    \item \textbf{Usuarios:} creación, consulta, modificación y eliminación de cuentas.
+    \item \textbf{Productos:} gestión del catálogo de medicamentos.
+    \item \textbf{Inventario:} consulta y actualización de existencias.
+    \item \textbf{Ventas:} registro y consulta de transacciones.
+    \item \textbf{Sensores:} recepción y consulta de mediciones ambientales.
+\end{itemize}
+
+\subsection{Autenticación con JWT}
+
+Para controlar el acceso a la API se implementó un sistema de autenticación basado en \textbf{JSON Web Tokens (JWT)}. Cuando un usuario inicia sesión con credenciales válidas, el servidor genera un token firmado digitalmente que debe incluirse en el encabezado de cada solicitud posterior. Únicamente las solicitudes que presenten un token válido y vigente son procesadas por los endpoints protegidos.
+
+Este mecanismo garantiza que solo los usuarios autenticados puedan consultar o modificar la información del sistema, independientemente de la red desde la que realicen la solicitud.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Avances1/APIComparativo.png}}
+    \caption{Comparativo de endpoints y módulos de la API}
+    \label{fig:cap3-api-comparativo}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+FastAPI genera automáticamente documentación interactiva de la API en formato OpenAPI, lo que facilitó las pruebas durante el desarrollo y permite verificar el comportamiento de cada endpoint sin necesidad de herramientas externas.
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 4: FRONTEND
+% =============================================
+
+\section{Implementación del Frontend}
+
+La interfaz web fue desarrollada con \textbf{React} y la biblioteca de componentes \textbf{Material-UI (MUI)}. La aplicación está organizada en componentes reutilizables que encapsulan cada sección funcional del sistema, como el módulo de productos, el módulo de ventas y el panel de alertas ambientales.
+
+La comunicación con el backend se realiza de forma asíncrona: cada acción del usuario genera una solicitud HTTP hacia la API, la cual responde con los datos en formato JSON que son procesados e integrados en la interfaz sin necesidad de recargar la página completa.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Avances1/FRONTENDJSON.png}}
+    \caption{Respuesta de la API en formato JSON consumida por el frontend}
+    \label{fig:cap3-frontend-json}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La Figura~\ref{fig:cap3-frontend-json} muestra cómo el frontend recibe la respuesta JSON de la API, mientras que la Figura~\ref{fig:cap3-frontend-ui} presenta la información ya procesada y visualizada en la interfaz de usuario mediante tablas y componentes de MUI.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.8\textwidth]{0_imagenes/Avances1/FRONTENDUI.png}}
+    \caption{Interfaz de usuario con datos del inventario}
+    \label{fig:cap3-frontend-ui}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La aplicación fue desplegada en \textbf{Vercel}, lo que permite que sea accesible desde cualquier dispositivo con conexión a internet dentro o fuera de la farmacia. Vercel integra automáticamente los cambios del repositorio, de modo que cada actualización del código se refleja en la versión en producción sin intervención manual.
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 5: NODO SENSOR
+% =============================================
+
+\section{Implementación del nodo de monitoreo ambiental}
+
+El nodo de monitoreo ambiental está compuesto por el microcontrolador \textbf{ESP32-C5} y el sensor \textbf{AHT10}, programados en C++ mediante el Arduino IDE. Su función es medir periódicamente la temperatura y la humedad del área de almacenamiento de medicamentos y enviar los datos al backend mediante solicitudes HTTP.
+
+\subsection{Flujo de operación del nodo}
+
+El firmware del ESP32-C5 sigue el siguiente ciclo de operación:
+
+\begin{enumerate}
+    \item Al encender el dispositivo, se intenta establecer conexión con la red Wi-Fi cuyas credenciales están almacenadas en la memoria no volátil del microcontrolador.
+    \item Si no se encuentran credenciales guardadas o la conexión falla, se activa el portal de configuración de \textbf{WiFiManager}, que genera un punto de acceso temporal llamado \texttt{PharmaTrack-Sensor} para que el usuario ingrese las credenciales desde un navegador.
+    \item Una vez conectado a la red, el microcontrolador lee los valores de temperatura y humedad del sensor AHT10 mediante la interfaz I²C.
+    \item Los datos son empaquetados en formato JSON y enviados al endpoint de sensores de la API mediante una solicitud HTTP POST.
+    \item El proceso de lectura y envío se repite periódicamente en intervalos definidos en el firmware.
+\end{enumerate}
+
+\subsection{Mecanismo de restablecimiento de credenciales}
+
+Para facilitar el mantenimiento del dispositivo, se implementó un mecanismo de restablecimiento mediante el botón BOOT del ESP32-C5 (GPIO~0). Al mantenerlo presionado durante más de tres segundos, el sistema borra las credenciales Wi-Fi almacenadas y reinicia el portal de configuración, permitiendo configurar una nueva red sin necesidad de recompilar ni reprogramar el microcontrolador.
+
+Este diseño reduce la dependencia de personal técnico especializado para tareas de reconfiguración, lo que es especialmente relevante en el entorno operativo de una pequeña farmacia.
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 6: MIGRACIÓN Y CARGA INICIAL DE DATOS
+% =============================================
+
+\section{Migración y carga inicial de datos}
+
+Para poblar la base de datos con el catálogo de productos de la Farmacia Selene se utilizó un archivo de Excel proporcionado por el propietario del negocio, el cual contenía aproximadamente \textbf{1500 registros} con información de medicamentos, presentaciones y precios.
+
+Antes de importar los datos fue necesario realizar un proceso de limpieza y estandarización, ya que el archivo presentaba inconsistencias comunes en registros administrados manualmente:
+
+\begin{itemize}
+    \item Registros duplicados de productos.
+    \item Diferencias de formato en nombres y descripciones.
+    \item Campos incompletos o mal organizados.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Avances1/DatosExcel.png}}
+    \caption{Catálogo de productos original en formato Excel}
+    \label{fig:cap3-datos-excel}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Una vez limpios, los datos fueron transformados al formato JSON para su importación a la base de datos mediante los endpoints de la API. La Figura~\ref{fig:cap3-datos-json} muestra la estructura del archivo JSON generado a partir del catálogo original.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.55\textwidth]{0_imagenes/Avances1/DatosJSON.png}}
+    \caption{Estructura de datos convertida al formato JSON}
+    \label{fig:cap3-datos-json}
+
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Este proceso de migración permitió que el sistema iniciara con información real y actualizada de la farmacia, eliminando la necesidad de captura manual y reduciendo el tiempo de puesta en marcha del sistema.
+
+
+
+
+\secbreak
+% =============================================
+% SECCIÓN 7: DESPLIEGUE E INTEGRACIÓN
+% =============================================
+
+\section{Despliegue e integración del sistema}
+
+El despliegue del sistema se realizó en dos plataformas de nube independientes que trabajan de manera coordinada para mantener todos los componentes del sistema disponibles de forma continua.
+
+El \textbf{backend y la base de datos} fueron desplegados en \textbf{Railway}. La plataforma gestiona automáticamente la ejecución del servidor FastAPI y la instancia de PostgreSQL, ofreciendo herramientas de monitoreo para verificar el estado del servicio y detectar posibles errores en tiempo real.
+
+La \textbf{interfaz web} fue desplegada en \textbf{Vercel}, que conecta directamente con el repositorio del proyecto. Cada actualización del código del frontend genera automáticamente una nueva versión publicada, lo que facilita el ciclo de desarrollo y garantiza que los usuarios siempre accedan a la versión más reciente del sistema.
+
+El \textbf{nodo sensor} opera de forma autónoma dentro de la red local de la farmacia, enviando datos de forma periódica a la API alojada en Railway sin requerir intervención manual.
+
+La integración entre estas tres capas queda definida por los contratos de la API REST: el frontend y el nodo sensor conocen únicamente las rutas, los formatos de solicitud y las respuestas esperadas, de modo que cada componente puede actualizarse o reemplazarse de manera independiente sin afectar el funcionamiento del sistema completo.
