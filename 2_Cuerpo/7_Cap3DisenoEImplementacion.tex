@@ -164,3 +164,166 @@ El esquema no fue diseñado de forma estática desde el inicio, sino que evoluci
 Se generaron \textbf{13 migraciones} a lo largo del desarrollo. Dos de ellas ilustran el proceso iterativo: la primera fue la conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}, necesaria tras detectar discrepancias en totales causadas por la aritmética de punto flotante; la segunda fue la adición de \texttt{deleted\_at} a las tablas cuya eliminación física rompería el historial de ventas. Ambos cambios se aplicaron sin pérdida de información ni rediseño del esquema.
 
 El uso de Alembic garantizó además que el entorno de desarrollo local y el entorno de producción desplegado en Railway mantuvieran siempre la misma versión del esquema, eliminando inconsistencias entre ambos entornos.
+
+
+
+
+% =============================================
+% OE 2: API REST
+% =============================================
+
+\clearpage
+\section{Desarrollo de la API REST con FastAPI}
+
+Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python utilizando el \textit{framework} FastAPI. Una API REST es una interfaz de comunicación que permite a los clientes —la aplicación web y el nodo sensor— enviar peticiones HTTP y recibir datos estructurados en formato JSON. La API resultante expone \textbf{23 módulos de rutas} organizados bajo el prefijo \texttt{/api/v1} y gestiona las operaciones de inventario, ventas, usuarios, compras y lecturas del sensor.
+
+\subsection{Selección de FastAPI}
+
+Se eligió FastAPI en lugar de alternativas como Flask o Django REST Framework por tres razones técnicas concretas.
+
+La primera es la \textbf{validación automática de datos de entrada} a través de Pydantic. Cada petición es verificada contra los tipos y restricciones definidos en los esquemas antes de que el código del \textit{endpoint} se ejecute; si un campo obligatorio falta o un valor está fuera de rango, FastAPI devuelve un error descriptivo sin necesidad de código de validación manual.
+
+La segunda es el soporte nativo para \textbf{programación asíncrona} (\texttt{async/await}), que permite al servidor atender múltiples peticiones concurrentes sin bloquear el hilo de ejecución durante las operaciones de entrada/salida —como las consultas a PostgreSQL— mejorando la capacidad de respuesta bajo carga simultánea.
+
+La tercera es la \textbf{generación automática de documentación interactiva} en \texttt{/docs} (estándar OpenAPI), que describe cada \textit{endpoint}, sus parámetros y sus posibles respuestas directamente a partir del código. Esto eliminó la necesidad de mantener documentación separada durante el desarrollo.
+
+\subsection{Arquitectura en capas}
+
+La API se estructuró en capas con responsabilidades distintas: cada petición HTTP desciende por la pila hasta la base de datos y la respuesta asciende por el mismo camino. Esta separación garantiza que los cambios en una capa —por ejemplo, modificar la lógica de negocio o sustituir el motor de base de datos— no requieran modificar las demás.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=4pt, minimum width=9.5cm, minimum height=0.82cm, align=center, font=\small},
+    arr/.style={Stealth-Stealth, thick, gray!70}
+]
+\node[box, fill=gray!15]   (client)  {Cliente HTTP \quad (navegador / nodo sensor)};
+\node[box, fill=blue!10,   below=of client]  (router)  {Router \quad \texttt{/api/v1/\{recurso\}}};
+\node[box, fill=blue!18,   below=of router]  (auth)    {Middleware — validación JWT y permisos RBAC};
+\node[box, fill=green!10,  below=of auth]    (logic)   {Lógica de negocio — validaciones de dominio y cálculos};
+\node[box, fill=orange!10, below=of logic]   (orm)     {SQLAlchemy ORM — mapeo objetos $\leftrightarrow$ tablas};
+\node[box, fill=red!10,    below=of orm]     (db)      {PostgreSQL};
+\foreach \a/\b in {client/router, router/auth, auth/logic, logic/orm, orm/db}
+    \draw[arr] (\a) -- (\b);
+\end{tikzpicture}
+\caption{Arquitectura en capas de la API REST}
+\label{fig:cap3-api-capas}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Cada capa tiene una responsabilidad específica: el \textbf{router} mapea la URL y el método HTTP al \textit{endpoint} correspondiente; el \textbf{middleware} valida el token y verifica que el usuario tenga el permiso requerido antes de continuar; la \textbf{lógica de negocio} ejecuta las reglas del dominio (por ejemplo, verificar stock disponible antes de registrar una venta); el \textbf{ORM} traduce las operaciones sobre objetos Python a consultas SQL; y \textbf{PostgreSQL} persiste y recupera los datos.
+
+\subsection{Modelos ORM con SQLAlchemy}
+
+SQLAlchemy es una biblioteca que implementa el patrón \textbf{ORM} (\textit{Object-Relational Mapping}): permite definir las tablas de la base de datos como clases Python y operar sobre ellas mediante objetos en lugar de escribir SQL directamente. Cada tabla del esquema descrito en el OE1 tiene una clase ORM correspondiente, organizada por módulo en el directorio \texttt{src/pharmatrack/models/}.
+
+Se utilizó la sintaxis de \textbf{SQLAlchemy 2.0} con anotaciones de tipo \texttt{Mapped[T]}, que permite a las herramientas de análisis estático detectar errores de tipo en las consultas antes de ejecutar el código. Un campo declarado como \texttt{Mapped[Decimal]} garantiza, por ejemplo, que solo se asignen valores decimales a esa columna.
+
+Dos características de SQLAlchemy se emplearon para resolver problemas concretos de rendimiento y concurrencia. La primera es la carga anticipada con \texttt{selectinload()}: sin ella, acceder a los permisos de un usuario genera una consulta SQL por cada permiso individual —problema conocido como \textit{N+1 queries}—; con \texttt{selectinload()}, SQLAlchemy trae todos los permisos en una segunda consulta única, independientemente de cuántos tenga el rol. La segunda es el bloqueo a nivel de fila con \texttt{with\_for\_update()}: al descontar unidades de un lote durante una venta, se bloquea el registro del lote para que una segunda transacción concurrente no lea la cantidad antes de que la primera la actualice, previniendo condiciones de carrera en el inventario.
+
+\subsection{Esquemas de validación con Pydantic}
+
+Cada módulo define dos tipos de modelos distintos: el \textbf{modelo ORM} para la base de datos y el \textbf{esquema Pydantic} para la API. Esta separación es necesaria porque el modelo ORM representa la estructura completa de la tabla —con llaves foráneas y marcas de tiempo internas—, mientras que el esquema Pydantic define el contrato de la API: qué campos acepta el cliente al crear un recurso, cuáles puede modificar y cuáles recibe en la respuesta.
+
+Para cada recurso se definieron cuatro esquemas: \texttt{*Base} (campos comunes), \texttt{*Create} (validación al crear), \texttt{*Update} (validación al actualizar) y \texttt{*Response} (estructura de la respuesta). Esta jerarquía evita duplicar definiciones y hace explícito qué datos son públicos y cuáles son internos.
+
+Se implementaron \textbf{tipos de dato personalizados} que centralizan reglas de validación usadas en múltiples esquemas: \texttt{MoneyAmount} garantiza que los precios tengan exactamente dos decimales y sean no negativos; \texttt{FutureOrPresentDate} rechaza fechas de caducidad en el pasado; \texttt{ShortNameStr} restringe nombres de producto a caracteres alfanuméricos con soporte de diacríticos del español. Definir estas reglas como tipos reutilizables evita duplicar la validación en cada esquema que las necesite.
+
+\subsection{Autenticación y autorización}
+
+\subsubsection*{JSON Web Token (JWT): Autenticación y Seguridad}
+
+La autenticación se implementó con \textbf{JWT} (\textit{JSON Web Token}), un estándar que permite emitir tokens firmados digitalmente que contienen información del usuario. Se utilizó la biblioteca \texttt{python-jose} con el algoritmo \textbf{HS256} para firmar y verificar los tokens.
+
+Al iniciar sesión, la API verifica la contraseña con \texttt{bcrypt} y emite dos tokens: un \textbf{access token} con vigencia de 30 minutos que incluye el identificador del usuario, su rol y sus permisos; y un \textbf{refresh token} opaco de 7 días almacenado en la base de datos. El access token viaja en el encabezado \texttt{Authorization: Bearer} de cada petición y el servidor lo valida sin consultar la base de datos, ya que toda la información necesaria está firmada dentro del propio token. Cuando el access token expira, el cliente usa el refresh token para obtener uno nuevo sin que el usuario tenga que iniciar sesión de nuevo.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm and 2.2cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=6.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.4cm, minimum height=0.82cm, align=center, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+\node[box, fill=gray!15]  (login)   {\textbf{1.} POST /auth/login con credenciales};
+\node[box, fill=blue!10,  below=of login]    (verify)  {\textbf{2.} API verifica contraseña (bcrypt)};
+\node[dec,                below=of verify]   (valid)   {¿válida?};
+\node[box, fill=green!10, below=of valid]    (tokens)  {\textbf{3.} Emitir access token (30 min)\\y refresh token (7 días)};
+\node[box, fill=blue!10,  below=of tokens]   (request) {\textbf{4.} Petición con Authorization: Bearer};
+\node[dec,                below=of request]  (tokval)  {¿token\\válido?};
+\node[box, fill=green!10, below=of tokval]   (exec)    {\textbf{5.} Ejecutar endpoint → respuesta JSON};
+\node[err, right=of valid]    (err1) {HTTP 401\\Unauthorized};
+\node[err, right=of tokval]   (err2) {HTTP 401\\Token inválido};
+\draw[arr] (login) -- (verify);
+\draw[arr] (verify) -- (valid);
+\draw[arr] (valid) -- node[left, font=\footnotesize]{Sí} (tokens);
+\draw[arr] (valid) -- node[above, font=\footnotesize]{No} (err1);
+\draw[arr] (tokens) -- (request);
+\draw[arr] (request) -- (tokval);
+\draw[arr] (tokval) -- node[left, font=\footnotesize]{Sí} (exec);
+\draw[arr] (tokval) -- node[above, font=\footnotesize]{No} (err2);
+\end{tikzpicture}
+\caption{Flujo de autenticación mediante JWT}
+\label{fig:cap3-jwt-flujo}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsubsection*{Control de acceso basado en permisos}
+
+La autorización se implementó mediante \textbf{inyección de dependencias} de FastAPI. En lugar de verificar permisos dentro del cuerpo de cada \textit{endpoint}, la comprobación se declara en el decorador de la ruta:
+
+\medskip
+\noindent\texttt{\hspace{1cm}@router.get("", dependencies=CAN\_READ\_USERS)}
+\medskip
+
+donde \texttt{CAN\_READ\_USERS = [Depends(require\_permission("users.read"))]}. Esto significa que FastAPI ejecuta la verificación de permiso \textit{antes} de invocar el \textit{endpoint}; si el usuario no tiene el permiso requerido, la petición es rechazada con HTTP 403 sin llegar al código de la función. El enfoque declarativo hace visible qué permiso requiere cada ruta sin necesidad de leer el cuerpo de la función, y conecta directamente con el módulo RBAC de la base de datos descrito en el OE1.
+
+\clearpage
+\subsection{Endpoints por módulo}
+
+Los 23 módulos de rutas se agrupan en seis áreas funcionales. La siguiente tabla resume la estructura y las operaciones principales de cada grupo:
+
+\begin{table}[H]
+\centering
+\caption{Agrupación de endpoints de la API REST por área funcional}
+\label{tab:cap3-endpoints}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}l >{\raggedright}p{3.8cm} X@{}}
+\toprule
+\textbf{Área} & \textbf{Módulos} & \textbf{Operaciones principales} \\
+\midrule
+Autenticación      & \texttt{auth}                                                             & Login, emisión y renovación de tokens, cierre de sesión, restablecimiento de contraseña \\[4pt]
+Usuarios y acceso  & \texttt{users, roles, permissions, branches}                              & CRUD de usuarios, asignación de roles, gestión de permisos y sucursales \\[4pt]
+Catálogo           & \texttt{products, product\_master, categories, brands, ingredients}        & CRUD de medicamentos, jerarquía de categorías, ingredientes activos \\[4pt]
+Inventario         & \texttt{product\_batch, suppliers, purchases, purchase\_details}           & Registro de lotes con fechas de caducidad, órdenes de compra \\[4pt]
+Ventas             & \texttt{sales, sale\_details, sale\_payments, sale\_batch\_usage, refunds} & Registro de ventas con descuento FEFO, pagos divididos, devoluciones \\[4pt]
+Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}                     & Lecturas del sensor, indicadores del negocio, estadísticas \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{table}
+
+Todos los \textit{endpoints} siguen las convenciones REST: \texttt{GET} para lectura, \texttt{POST} para creación, \texttt{PUT}/\texttt{PATCH} para actualización y \texttt{DELETE} para eliminación. Los recursos con \texttt{deleted\_at} —usuarios, sucursales, roles— aplican borrado lógico, como se describió en el OE1.
+
+\subsection{Pruebas con Pytest}
+
+La API se verificó con una suite de pruebas en \textbf{Pytest} compuesta por \textbf{20 archivos de prueba}, uno por cada módulo funcional. El objetivo fue garantizar que cada \textit{endpoint} devuelve los códigos HTTP correctos y que la lógica crítica —en particular el descuento de inventario por lotes y las devoluciones— produce los resultados esperados.
+
+La configuración de las pruebas usa dos \textit{fixtures}: una con alcance de sesión que crea el esquema de base de datos una sola vez al inicio de la suite, y otra por prueba que trunca todas las tablas con \texttt{CASCADE} antes de cada caso. Esto garantiza que cada prueba parte de un estado limpio sin necesidad de recrear el esquema completo, reduciendo el tiempo total de ejecución.
+
+Se priorizaron las pruebas sobre los flujos con mayor riesgo de error: el descuento de lotes con criterio FEFO, la validación de stock antes de registrar una venta, el cálculo de totales con impuesto y descuento, y la reintegración de inventario al procesar una devolución.
+
+\subsection{Despliegue en Railway}
+
+La API se desplegó en \textbf{Railway}, una plataforma de infraestructura en la nube que provisiona tanto el servidor de aplicación como la base de datos PostgreSQL en el mismo proyecto. Se eligió Railway sobre alternativas como un servidor VPS por su integración con repositorios Git: cada \textit{push} a la rama principal desencadena automáticamente un nuevo despliegue sin configuración adicional de integración continua.
+
+El comando de inicio está definido en el archivo \texttt{Procfile}. Ejecuta dos pasos en secuencia: primero \texttt{alembic upgrade head}, que aplica todas las migraciones pendientes antes de que el servidor arranque, garantizando que el esquema de la base de datos esté en la versión más reciente; luego inicia el servidor con \textbf{Uvicorn} —servidor ASGI compatible con FastAPI— con dos procesos trabajadores para atender peticiones concurrentes.
+
+La separación entre el entorno de desarrollo y el de producción se gestiona mediante variables de entorno: la cadena de conexión a PostgreSQL, la clave secreta de JWT y los orígenes permitidos en CORS se configuran directamente en Railway sin modificar el código. En producción, CORS está restringido al dominio de la aplicación web, rechazando peticiones desde otros orígenes.
