@@ -34,7 +34,7 @@ La tercera razón es el soporte para \textbf{índices únicos parciales}, una fu
 
 Las 22 tablas se dividieron en cinco módulos según el área del negocio que gestionan, de modo que cada módulo tenga una responsabilidad clara y las dependencias entre módulos sean explícitas:
 
-\begin{enumerate}
+\begin{enumerate}[nosep, itemsep=3pt]
     \item \textbf{Autenticación y control de acceso:} usuarios, roles y permisos.
     \item \textbf{Catálogo de productos:} información de los medicamentos y sus características.
     \item \textbf{Inventario y compras:} lotes, fechas de caducidad y órdenes de abastecimiento.
@@ -46,14 +46,14 @@ Esta separación hace que las tablas de un módulo puedan crecer o modificarse s
 
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/DiagramaGeneral.png}}
+    \fbox{\includegraphics[width=0.88\textwidth]{0_imagenes/Cap3/DiagramaGeneral.png}}
     \caption{Organización modular de la base de datos y dependencias entre módulos}
     \label{fig:cap3-bd-modulos}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-
+\clearpage
 \subsection{Módulo 1: Autenticación y control de acceso}
 
 Este módulo está formado por cinco tablas: \texttt{users} (usuarios), \texttt{roles}, \texttt{permissions} (permisos), \texttt{role\_has\_permissions} y \texttt{branches} (sucursales).
@@ -70,14 +70,14 @@ Las tablas \texttt{users}, \texttt{roles} y \texttt{branches} incluyen una colum
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaAuth.png}}
+    \fbox{\includegraphics[width=0.72\textwidth]{0_imagenes/Cap3/DiagramaAuth.png}}
     \caption{Diagrama relacional del módulo de autenticación y control de acceso}
     \label{fig:cap3-diagrama-auth}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-
+\clearpage
 \subsection{Módulo 2: Catálogo de productos}
 
 Este módulo administra la información de los medicamentos mediante seis tablas: \texttt{products}, \texttt{product\_master}, \texttt{product\_categories}, \texttt{product\_brands}, \texttt{ingredients} y \texttt{product\_has\_ingredients}.
@@ -94,14 +94,14 @@ La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra 
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaCatalogo.png}}
+    \fbox{\includegraphics[width=0.88\textwidth]{0_imagenes/Cap3/DiagramaCatalogo.png}}
     \caption{Diagrama relacional del módulo de catálogo de productos}
     \label{fig:cap3-diagrama-catalogo}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-
+\clearpage
 \subsection{Módulo 3: Inventario y compras}
 
 Este módulo controla las existencias físicas y el abastecimiento mediante cuatro tablas: \texttt{product\_batches} (lotes), \texttt{suppliers} (proveedores), \texttt{purchases} (órdenes de compra) y \texttt{purchase\_details} (líneas de cada orden).
@@ -116,14 +116,14 @@ Para la columna \texttt{lot\_code} se diseñó un \textbf{índice único parcial
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=0.9\textwidth]{0_imagenes/Cap3/DiagramaInventario.png}}
+    \fbox{\includegraphics[width=0.88\textwidth]{0_imagenes/Cap3/DiagramaInventario.png}}
     \caption{Diagrama relacional del módulo de inventario y compras}
     \label{fig:cap3-diagrama-inventario}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-
+\clearpage
 \subsection{Módulo 4: Registro de ventas}
 
 Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
@@ -142,14 +142,14 @@ La tabla \texttt{sale\_payments} se separó de \texttt{sales} para soportar \tex
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaVentas.png}}
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/DiagramaVentas.png}}
     \caption{Diagrama relacional del módulo de registro de ventas}
     \label{fig:cap3-diagrama-ventas}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-
+\clearpage
 \subsection{Módulo 5: Mediciones del sensor}
 
 Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena cada medición enviada por el nodo electrónico: el valor de temperatura, el valor de humedad, la marca de tiempo en que fue registrada (\texttt{recorded\_at}) y un identificador del dispositivo que la envió (\texttt{device\_id}).
