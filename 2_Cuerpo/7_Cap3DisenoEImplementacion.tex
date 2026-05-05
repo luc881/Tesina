@@ -517,3 +517,86 @@ Cada lectura válida se envía al endpoint \texttt{/api/v1/sensor-readings/} de 
 El cuerpo de la petición es un objeto JSON con tres campos: la temperatura, la humedad y un identificador del dispositivo. El identificador permite que la API registre qué nodo envió cada lectura, relevante si en el futuro se despliegan múltiples nodos en distintas áreas o sucursales.
 
 El firmware evalúa el código de respuesta HTTP devuelto por el servidor. Si la API confirma que el registro fue creado exitosamente, el ciclo continúa normalmente. Si la API responde con un error —por un problema temporal del servidor, por ejemplo— el firmware registra el error en el puerto serial para diagnóstico y espera hasta el siguiente ciclo de 30 segundos sin intentar reenviar. Esta decisión de no reintentar el envío fue deliberada: en un sistema de monitoreo ambiental, una lectura perdida ocasionalmente es menos problemática que una lógica de reintento que podría generar peticiones en ráfaga y sobrecargar el servidor.
+
+\subsection{Visualización local con pantallas OLED}
+
+Para complementar el nodo sensor con retroalimentación visual directa, se incorporaron tres \textbf{pantallas OLED SSD1306} de 128×64 píxeles. La necesidad surgió del escenario de operación: el personal de la farmacia —o el técnico de mantenimiento— puede necesitar verificar si el sensor está activo, conectado y midiendo correctamente sin tener que abrir la aplicación web. Con tres pantallas, cada dato ocupa su propia superficie y resulta legible de un vistazo desde cierta distancia: la primera muestra la temperatura actual, la segunda la humedad relativa y la tercera el estado de la conexión WiFi.
+
+Las pantallas se conectan al mismo bus I\textsuperscript{2}C que el sensor AHT10, aprovechando que el protocolo permite que múltiples dispositivos compartan el mismo par de conductores. Para que el microcontrolador pueda dirigir instrucciones a cada pantalla de forma individual, a cada módulo OLED se le asigna una dirección de bus distinta. La actualización de las pantallas ocurre tras cada ciclo de lectura del sensor, de modo que el valor mostrado corresponde siempre a la última medición realizada.
+
+Esta incorporación mejora la usabilidad del nodo durante la instalación y el mantenimiento sin añadir complejidad al firmware: el mismo valor que se envía a la API se redirige también a las pantallas, reutilizando el dato ya obtenido sin operaciones adicionales.
+
+
+% =============================================
+% OE 5: GABINETE FÍSICO E INTEGRACIÓN
+% =============================================
+
+\clearpage
+\section{Integración física y lector de código de barras}
+
+El quinto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
+
+\subsection{Gabinete impreso en 3D}
+
+Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó un gabinete personalizado que se fabricó mediante \textbf{impresión 3D}. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja de propósito general disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
+
+El diseño se realizó en \textbf{Bambu Studio}, el software de preparación de modelos tridimensionales para impresoras de la línea Bambu Lab. El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares dimensionadas con exactitud para exponer las pantallas OLED al frente. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos, lo que simplifica el acceso al interior para mantenimiento o ajustes.
+
+El resultado es un dispositivo autónomo que puede colocarse sobre una superficie o fijarse en el área de almacenamiento, visible sin necesidad de conexión a ningún monitor externo ni acceso a la aplicación web.
+
+\subsection{Integración del lector de código de barras}
+
+Para agilizar el registro de ventas se incorporó el lector de código de barras modelo \textbf{Netum CS7501}, un dispositivo USB que el sistema operativo reconoce como un teclado estándar. Desde la perspectiva del navegador, el lector no requiere ningún controlador especial: al apuntar el lector a un código de barras con el cursor dentro de un campo de texto, el valor escaneado se ingresa como si hubiera sido tecleado.
+
+La integración no fue puramente de conexión directa. El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo de un lector de código de barras: el usuario habría tenido que hacer clic en el campo correcto, esperar el resultado de búsqueda y repetir el proceso para cada artículo. Para que la herramienta resultara práctica en un escenario de punto de venta, se diseñó e implementó un \textbf{modo lector} específico dentro del módulo de creación de ventas de la aplicación web.
+
+\subsubsection*{Modo lector en el registro de ventas}
+
+El modo lector se activa desde cualquier parte del formulario de venta mediante la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse ni hacer clic. Mientras el modo está activo, el formulario muestra un indicador visual animado con el texto "Escaneando" para confirmar que el lector está listo para recibir el siguiente código.
+
+Al escanear un código, la aplicación lo compara contra el campo de código único de cada producto en el catálogo, el cual se cargó en memoria al abrir el formulario. Si hay coincidencia, el producto se agrega a la lista de artículos de la venta, o se incrementa su cantidad si ya estaba incluido; si no hay coincidencia, el campo muestra un indicador de error para que el operador pueda identificar el producto de otra forma. La confirmación visual se realiza mediante un cambio de color en el borde del campo de entrada: verde en caso de éxito, rojo en caso de fallo.
+
+La búsqueda se realiza sobre los datos ya disponibles en el cliente, sin generar una petición adicional al servidor por cada escaneo. En un punto de venta donde múltiples productos se escanean en secuencia rápida, una consulta de red por código introduciría una latencia perceptible y dependencia de la velocidad de la conexión; al cargar el catálogo una sola vez al abrir el formulario, cada escaneo se resuelve de forma local e inmediata.
+
+El modo se desactiva automáticamente cuando el usuario hace clic fuera del área de escaneo, lo que le permite continuar completando el resto del formulario —sucursal, forma de pago— sin necesidad de una acción adicional para salir del modo.
+
+El diagrama siguiente resume el flujo de interacción del modo lector desde el momento en que el usuario lo activa hasta que completa la selección de artículos:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    ok/.style={rectangle, draw, rounded corners=3pt, fill=green!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+\node[box, fill=gray!15]  (start) {\textbf{1.} Formulario de creación de venta abierto};
+\node[box, fill=blue!8,   below=of start] (f2)    {\textbf{2.} Usuario presiona F2 → modo lector activo};
+\node[box, fill=blue!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras del producto};
+\node[box, fill=gray!10,  below=of scan]  (look)  {\textbf{4.} Buscar código en catálogo cargado en memoria};
+\node[dec,                below=of look]  (found) {¿Producto\\encontrado?};
+\node[ok,                 right=of found] (add)   {Agregar / incrementar\\en la lista de venta};
+\node[err,                left=of found]  (nf)    {Señal visual\\de error};
+\node[box, fill=green!10, below=of found] (flash) {\textbf{5.} Confirmar resultado (borde verde / rojo)};
+\node[dec,                below=of flash] (more)  {¿Más artículos\\por escanear?};
+\node[box, fill=gray!15,  below=of more]  (end)   {\textbf{6.} Clic fuera del área → modo desactivado};
+
+\draw[arr] (start) -- (f2);
+\draw[arr] (f2)    -- (scan);
+\draw[arr] (scan)  -- (look);
+\draw[arr] (look)  -- (found);
+\draw[arr] (found) -- node[above, font=\footnotesize]{Sí} (add);
+\draw[arr] (found) -- node[above, font=\footnotesize]{No} (nf);
+\draw[arr] (add)   |- (flash);
+\draw[arr] (nf)    |- (flash);
+\draw[arr] (flash) -- (more);
+\draw[arr] (more.west) -- ++(-1.6,0) |- node[left, font=\footnotesize, pos=0.25]{Sí} (scan.west);
+\draw[arr] (more)  -- node[left, font=\footnotesize]{No} (end);
+\end{tikzpicture}
+\caption{Flujo del modo lector de código de barras en el registro de ventas}
+\label{fig:cap3-barcode-flujo}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
