@@ -7,7 +7,7 @@
 \refstepcounter{chapter}
 \addcontentsline{toc}{chapter}{Cap. 3 Diseño e Implementación}
 
-En este capítulo se describe el proceso de diseño e implementación del sistema PharmaTrack, desarrollando cada uno de los objetivos específicos del proyecto. Para cada objetivo se presentan las decisiones de diseño tomadas y la justificación técnica que las respalda.
+En este capítulo se describe el proceso de diseño e implementación del sistema, desarrollando cada uno de los objetivos específicos del proyecto en el orden en que fueron planteados. Para cada objetivo se presentan las decisiones técnicas tomadas y la justificación que las respalda.
 
 
 
@@ -18,72 +18,149 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 
 \section{Desarrollo de la base de datos en PostgreSQL}
 
-El primer objetivo específico consistió en diseñar e implementar la base de datos que centraliza la información del sistema: productos, niveles de inventario, usuarios, registros de ventas y mediciones de los sensores. La base de datos resultante está compuesta por \textbf{22 tablas} organizadas en cinco módulos funcionales, cuya evolución fue gestionada mediante \textbf{13 migraciones} con Alembic.
+Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales, y su evolución a lo largo del desarrollo fue gestionada mediante \textbf{13 archivos de migración} versionados con Alembic.
 
 \subsection{Selección de PostgreSQL}
 
-Se eligió PostgreSQL como sistema gestor de base de datos por tres razones técnicas principales. Primero, garantiza el cumplimiento de las propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad), lo cual es indispensable en un sistema que registra transacciones financieras y movimientos de inventario donde una operación interrumpida no debe dejar el estado de la base de datos en un punto inconsistente. Segundo, provee el tipo de dato \texttt{NUMERIC(p,s)}, que almacena valores decimales con precisión exacta; esto es relevante porque los tipos de punto flotante (\texttt{DOUBLE}, \texttt{FLOAT}) acumulan errores de representación binaria que producen inexactitudes al sumar totales monetarios. Tercero, soporta índices únicos parciales, una funcionalidad que se aprovechó específicamente para el control de lotes de productos, como se explica más adelante.
+Se eligió PostgreSQL como sistema gestor de base de datos en lugar de alternativas como MySQL o SQLite por tres razones técnicas concretas.
 
-\subsection{Estructura modular del esquema}
+La primera es el cumplimiento de las propiedades \textbf{ACID} (Atomicidad, Consistencia, Aislamiento y Durabilidad), que garantizan que cada operación sobre la base de datos se completa en su totalidad o no se aplica en absoluto. En un sistema que registra ventas y descuenta inventario simultáneamente, esto es crítico: si el proceso se interrumpe a la mitad —por un corte de energía o un error de red, por ejemplo— la base de datos no puede quedar en un estado donde el inventario ya fue descontado pero la venta no fue registrada.
 
-El esquema fue organizado en cinco módulos con responsabilidades bien delimitadas, de modo que las tablas de cada módulo gestionen una sola área del negocio y las dependencias entre módulos sean explícitas mediante llaves foráneas.
+La segunda razón es la disponibilidad del tipo de dato \textbf{\texttt{NUMERIC(p,s)}}, que almacena valores decimales con precisión exacta. Los tipos de punto flotante (\texttt{FLOAT}, \texttt{DOUBLE}), al representar números internamente en base binaria, no pueden representar con exactitud ciertos valores decimales como \$0.10. Esto genera errores de redondeo que se acumulan al sumar muchas operaciones. Para cantidades monetarias esta imprecisión es inaceptable; \texttt{NUMERIC} elimina el problema al almacenar los dígitos exactos, a cambio de un mayor uso de almacenamiento que es justificable en un sistema con volúmenes de datos moderados.
 
-\subsubsection*{Módulo de autenticación y control de acceso}
+La tercera razón es el soporte para \textbf{índices únicos parciales}, una funcionalidad que permite aplicar una restricción de unicidad solo a los registros que cumplen cierta condición. Su uso específico se describe en el módulo de inventario.
 
-Este módulo gestiona la identidad de los usuarios y sus permisos dentro del sistema. Está formado por cuatro tablas: \texttt{users}, \texttt{roles}, \texttt{permissions} y la tabla pivote \texttt{role\_has\_permissions}. Se implementó el patrón \textbf{RBAC} (\textit{Role-Based Access Control}), en el que cada usuario tiene un rol asignado y cada rol agrupa un conjunto de permisos. Esta separación entre rol y permiso permite modificar los privilegios de un grupo de usuarios cambiando únicamente el rol, sin necesidad de actualizar cada cuenta individualmente.
+\subsection{Organización modular del esquema}
 
-La tabla \texttt{users} incluye la columna \texttt{deleted\_at} para soportar \textbf{borrado lógico} (\textit{soft delete}): en lugar de eliminar físicamente el registro de un usuario, se registra la fecha de baja. Esta decisión se tomó porque el historial de ventas referencia al usuario que las realizó; eliminar físicamente el registro rompería la integridad referencial o requeriría valores nulos en columnas que representan información operativa. El mismo patrón se aplicó a las tablas \texttt{roles}, \texttt{products}, \texttt{branches} y \texttt{sale\_payments}.
+Las 22 tablas se dividieron en cinco módulos según el área del negocio que gestionan, de modo que cada módulo tenga una responsabilidad clara y las dependencias entre módulos sean explícitas:
 
-\subsubsection*{Módulo de catálogo de productos}
+\begin{enumerate}
+    \item \textbf{Autenticación y control de acceso:} usuarios, roles y permisos.
+    \item \textbf{Catálogo de productos:} información de los medicamentos y sus características.
+    \item \textbf{Inventario y compras:} lotes, fechas de caducidad y órdenes de abastecimiento.
+    \item \textbf{Registro de ventas:} transacciones, pagos y devoluciones.
+    \item \textbf{Mediciones del sensor:} lecturas de temperatura y humedad.
+\end{enumerate}
 
-Este módulo almacena la información de los medicamentos y está compuesto por seis tablas: \texttt{products}, \texttt{product\_master}, \texttt{product\_categories}, \texttt{product\_brands}, \texttt{ingredients} y \texttt{product\_has\_ingredients}.
-
-La tabla \texttt{product\_master} representa el \textbf{medicamento genérico}, mientras que \texttt{products} representa sus presentaciones concretas (tabletas, jarabe, inyectable). Esta separación permite agrupar variantes del mismo principio activo bajo una entidad común, facilitando búsquedas y reportes por nombre genérico sin duplicar información.
-
-La tabla \texttt{product\_categories} implementa una \textbf{jerarquía propia} mediante la columna \texttt{parent\_id} que referencia la misma tabla, lo que permite representar categorías anidadas (por ejemplo: \textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) sin requerir una tabla adicional por nivel.
-
-La tabla pivote \texttt{product\_has\_ingredients} registra la relación muchos a muchos entre productos e ingredientes activos, incluyendo la cantidad (\texttt{amount}) y la unidad de medida (\texttt{unit}). Esto hace posible consultar la composición de cualquier producto directamente desde la base de datos.
-
-\subsubsection*{Módulo de inventario y compras}
-
-Este módulo controla las existencias físicas y el abastecimiento mediante tres tablas: \texttt{product\_batches}, \texttt{purchases} y \texttt{purchase\_details}, además de \texttt{suppliers}.
-
-La tabla central es \texttt{product\_batches}, que registra cada \textbf{lote} de producto con su código de lote (\texttt{lot\_code}), fecha de caducidad (\texttt{expiration\_date}) y cantidad disponible (\texttt{quantity}). Esta granularidad es técnicamente necesaria en una farmacia porque los medicamentos tienen fecha de caducidad por lote y las regulaciones farmacéuticas exigen que las salidas respeten el principio \textbf{FEFO} (\textit{First Expired, First Out}): se despacha primero el lote que vence antes.
-
-Para la columna \texttt{lot\_code} se implementó un \textbf{índice único parcial} con la condición \texttt{WHERE lot\_code IS NOT NULL}. Esta decisión resuelve un problema concreto: algunos productos ingresan sin número de lote asignado, por lo que se permiten múltiples entradas con \texttt{lot\_code = NULL} para el mismo producto, pero no se permiten dos lotes con el mismo código no nulo para un mismo producto. Un índice único convencional rechazaría los valores nulos múltiples, lo que haría inviable registrar ingresos sin lote.
-
-Cuando se registra una compra, los datos del pedido quedan en \texttt{purchases} y \texttt{purchase\_details}, y se crea o actualiza el lote correspondiente en \texttt{product\_batches}. Esta distinción entre el documento de compra y el registro de existencias mantiene el historial de abastecimiento independiente del estado actual del inventario.
-
-\subsubsection*{Módulo de ventas}
-
-Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
-
-Se utilizó un diseño de \textbf{cabecera-detalle}: \texttt{sales} almacena los datos generales de la transacción (usuario, sucursal, subtotal, descuento, impuesto, total y estado) y \texttt{sale\_details} registra cada línea de producto vendido. Esta estructura es estándar en sistemas de punto de venta porque permite que una sola venta incluya múltiples productos sin redundar los datos generales de la transacción.
-
-La tabla \texttt{sale\_batch\_usage} establece qué cantidad de qué lote se consumió por cada línea de venta. Esto proporciona \textbf{trazabilidad completa}: dado un número de lote o un producto, es posible consultar en qué ventas específicas fue despachado. Esta información es relevante ante un retiro de mercado o alerta sanitaria sobre un lote defectuoso.
-
-La columna \texttt{status} de \texttt{sales} es un tipo enumerado con los valores \texttt{DRAFT}, \texttt{COMPLETED} y \texttt{CANCELLED}. El estado \texttt{DRAFT} permite acumular los productos de una venta antes de confirmarla, sin afectar el inventario hasta que la transacción sea completada, evitando descuentos prematuros de existencias.
-
-La tabla \texttt{sale\_payments} está separada de \texttt{sales} para soportar \textbf{pagos mixtos}: una misma venta puede liquidarse con efectivo y tarjeta simultáneamente, registrando cada pago como una fila independiente con su método e importe.
-
-\subsubsection*{Módulo de monitoreo ambiental}
-
-La tabla \texttt{sensor\_readings} almacena cada medición enviada por el nodo ESP32-C5, registrando la temperatura, la humedad, la marca de tiempo (\texttt{recorded\_at}) y un identificador de dispositivo (\texttt{device\_id}) en formato cadena de texto. Se optó por no crear una tabla separada de dispositivos dado que el sistema opera con un único nodo sensor; el identificador como cadena permite incorporar nodos adicionales sin modificar el esquema.
+Esta separación hace que las tablas de un módulo puedan crecer o modificarse sin impactar innecesariamente a los demás, y permite localizar con facilidad qué parte del esquema es responsable de cada tipo de dato.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=\textwidth]{0_imagenes/Avances1/BDCompleta.png}}
-    \caption{Esquema completo de la base de datos del sistema}
+    \caption{Vista general del esquema de la base de datos implementada}
     \label{fig:cap3-bd-completa}
-
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
+
+\subsection{Módulo 1: Autenticación y control de acceso}
+
+Este módulo está formado por cinco tablas: \texttt{users} (usuarios), \texttt{roles}, \texttt{permissions} (permisos), \texttt{role\_has\_permissions} y \texttt{branches} (sucursales).
+
+Se implementó el patrón \textbf{RBAC} (\textit{Role-Based Access Control}, control de acceso basado en roles): en lugar de asignar permisos directamente a cada usuario, se definen roles —por ejemplo, \textit{administrador} o \textit{empleado}— y cada rol agrupa un conjunto de permisos. El usuario únicamente recibe un rol asignado. La ventaja de esta estructura es que modificar los privilegios de un grupo entero de usuarios requiere únicamente actualizar el rol, no cada cuenta por separado. Los vínculos entre roles y permisos se almacenan en la tabla \texttt{role\_has\_permissions}, que funciona como tabla de unión para la relación de muchos a muchos entre ambas entidades.
+
+Las tablas \texttt{users}, \texttt{roles} y \texttt{branches} incluyen una columna \texttt{deleted\_at}. Cuando un usuario o sucursal es dado de baja, en lugar de eliminar el registro se anota la fecha en esa columna. Esta estrategia se denomina \textbf{borrado lógico} y fue necesaria porque las ventas registradas referencian al usuario que las realizó: si ese registro se eliminara físicamente, el historial de ventas quedaría con referencias rotas o habría que duplicar la información del usuario dentro de cada venta.
+
+% -------------------------------------------------------
+% DIAGRAMA 1 — Módulo de Autenticación y Control de Acceso
+% Guardar la imagen generada en dbdiagram.io como:
+%   0_imagenes/Cap3/DiagramaAuth.png
+% y descomentar el bloque siguiente:
+% -------------------------------------------------------
+% \begin{figure}[H]
+%     \centering
+%     \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaAuth.png}}
+%     \caption{Diagrama relacional del módulo de autenticación y control de acceso}
+%     \label{fig:cap3-diagrama-auth}
+%     \vspace{0.2cm}
+%     \footnotesize \textbf{Fuente:} Elaboración propia.
+% \end{figure}
+
+
+\subsection{Módulo 2: Catálogo de productos}
+
+Este módulo administra la información de los medicamentos mediante seis tablas: \texttt{products}, \texttt{product\_master}, \texttt{product\_categories}, \texttt{product\_brands}, \texttt{ingredients} y \texttt{product\_has\_ingredients}.
+
+Se separó \texttt{product\_master} (medicamento genérico) de \texttt{products} (presentación específica). Por ejemplo, \textit{Paracetamol} es un único registro en \texttt{product\_master}, y sus presentaciones concretas —\textit{Paracetamol 500~mg 20 tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— son registros distintos en \texttt{products} que apuntan al mismo genérico. Esto evita duplicar el nombre del principio activo en cada presentación y permite generar reportes agrupados por nombre genérico sin procesamiento adicional.
+
+La tabla \texttt{product\_categories} implementa una \textbf{jerarquía autorelacionada}: la columna \texttt{parent\_id} referencia a la misma tabla, lo que permite representar categorías anidadas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) con una única tabla y sin límite fijo de niveles de profundidad.
+
+La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra qué ingredientes activos contiene cada producto, junto con la cantidad y la unidad de medida (mg, g, ml, UI). Almacenar la composición en la base de datos —en lugar de solo en la etiqueta del producto— hace posible consultar o filtrar medicamentos por principio activo directamente desde el sistema.
+
+% -------------------------------------------------------
+% DIAGRAMA 2 — Módulo de Catálogo de Productos
+% Guardar como: 0_imagenes/Cap3/DiagramaCatalogo.png
+% -------------------------------------------------------
+% \begin{figure}[H]
+%     \centering
+%     \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaCatalogo.png}}
+%     \caption{Diagrama relacional del módulo de catálogo de productos}
+%     \label{fig:cap3-diagrama-catalogo}
+%     \vspace{0.2cm}
+%     \footnotesize \textbf{Fuente:} Elaboración propia.
+% \end{figure}
+
+
+\subsection{Módulo 3: Inventario y compras}
+
+Este módulo controla las existencias físicas y el abastecimiento mediante cuatro tablas: \texttt{product\_batches} (lotes), \texttt{suppliers} (proveedores), \texttt{purchases} (órdenes de compra) y \texttt{purchase\_details} (líneas de cada orden).
+
+La tabla central del módulo es \texttt{product\_batches}, que registra cada \textbf{lote} de un producto con su código de lote, fecha de caducidad y cantidad disponible en ese lote. Gestionar el inventario a nivel de lote es técnicamente necesario en una farmacia porque los medicamentos tienen fecha de caducidad por lote, y las regulaciones de buenas prácticas de almacenamiento farmacéutico establecen que deben despacharse primero los lotes que vencen antes, criterio conocido como \textbf{FEFO} (\textit{First Expired, First Out}). Sin este nivel de detalle, el sistema conocería cuántas unidades hay de un producto, pero no podría determinar cuál lote se consumió en cada salida.
+
+Para la columna \texttt{lot\_code} se diseñó un \textbf{índice único parcial} que aplica únicamente cuando el valor no es nulo. Esta restricción resuelve una situación concreta identificada durante el análisis del negocio: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Un índice único convencional rechazaría varias entradas con valor nulo para el mismo producto, impidiendo registrar estos ingresos. El índice parcial permite tantos lotes sin código como sea necesario, pero impide que dos lotes del mismo producto compartan el mismo código no nulo, previniendo registros duplicados por error.
+
+% -------------------------------------------------------
+% DIAGRAMA 3 — Módulo de Inventario y Compras
+% Guardar como: 0_imagenes/Cap3/DiagramaInventario.png
+% -------------------------------------------------------
+% \begin{figure}[H]
+%     \centering
+%     \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaInventario.png}}
+%     \caption{Diagrama relacional del módulo de inventario y compras}
+%     \label{fig:cap3-diagrama-inventario}
+%     \vspace{0.2cm}
+%     \footnotesize \textbf{Fuente:} Elaboración propia.
+% \end{figure}
+
+
+\subsection{Módulo 4: Registro de ventas}
+
+Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
+
+Se utilizó un diseño de \textbf{cabecera-detalle}: \texttt{sales} almacena los datos generales de cada transacción (empleado que la realizó, sucursal, descuento, impuesto y total), y \texttt{sale\_details} registra cada producto incluido en esa venta con su cantidad y precio unitario. Separar el encabezado de las líneas de detalle permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea, y facilita calcular totales agregados con consultas directas a la base de datos.
+
+La tabla \texttt{sale\_batch\_usage} vincula cada línea de venta con el lote específico del que se descontaron las unidades. Esta estructura proporciona \textbf{trazabilidad completa de cada lote}: dado un número de lote, es posible identificar en qué ventas fue despachado. En el contexto farmacéutico, esto resulta necesario ante un retiro de mercado o una alerta sanitaria, ya que permite determinar exactamente qué ventas contienen el lote afectado.
+
+La columna \texttt{status} de \texttt{sales} maneja tres estados mediante un tipo enumerado: \texttt{DRAFT}, \texttt{COMPLETED} y \texttt{CANCELLED}. El estado \texttt{DRAFT} permite acumular los productos de una venta en progreso sin que el inventario sea descontado, operación que ocurre únicamente al transicionar al estado \texttt{COMPLETED}. Esto evita que una venta incompleta o cancelada descuente existencias de forma prematura.
+
+La tabla \texttt{sale\_payments} se separó de \texttt{sales} para soportar \textbf{pagos divididos}: una misma transacción puede liquidarse con dos métodos de pago distintos —parte en efectivo, parte con tarjeta— registrando cada pago como una fila independiente con su método e importe.
+
+% -------------------------------------------------------
+% DIAGRAMA 4 — Módulo de Registro de Ventas
+% Guardar como: 0_imagenes/Cap3/DiagramaVentas.png
+% -------------------------------------------------------
+% \begin{figure}[H]
+%     \centering
+%     \fbox{\includegraphics[width=0.92\textwidth]{0_imagenes/Cap3/DiagramaVentas.png}}
+%     \caption{Diagrama relacional del módulo de registro de ventas}
+%     \label{fig:cap3-diagrama-ventas}
+%     \vspace{0.2cm}
+%     \footnotesize \textbf{Fuente:} Elaboración propia.
+% \end{figure}
+
+
+\subsection{Módulo 5: Mediciones del sensor}
+
+Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena cada medición enviada por el nodo electrónico: el valor de temperatura, el valor de humedad, la marca de tiempo en que fue registrada (\texttt{recorded\_at}) y un identificador del dispositivo que la envió (\texttt{device\_id}).
+
+El identificador de dispositivo se definió como cadena de texto en lugar de una llave foránea hacia una tabla de dispositivos, ya que el sistema opera con un único nodo sensor. Crear una tabla de dispositivos completa representaría complejidad estructural sin un beneficio funcional inmediato; el identificador como cadena permite distinguir futuros nodos adicionales sin necesidad de modificar el esquema.
+
+
 \subsection{Gestión de cambios con Alembic}
 
-El esquema no fue diseñado de forma estática, sino que evolucionó de manera iterativa a lo largo del desarrollo. Para gestionar esta evolución se utilizó \textbf{Alembic}, que permite describir cada cambio estructural como un archivo de migración versionado, aplicar o revertir cambios de forma controlada y mantener consistencia entre los entornos de desarrollo y producción.
+El esquema no fue diseñado de forma estática desde el inicio, sino que evolucionó de manera iterativa conforme el desarrollo avanzó y se identificaron ajustes necesarios. Para gestionar esta evolución se utilizó \textbf{Alembic}, una herramienta que actúa como control de versiones para el esquema de la base de datos: cada cambio estructural —crear una tabla, añadir una columna, modificar un tipo de dato— se describe en un archivo de migración numerado que puede aplicarse o revertirse de forma controlada y reproducible.
 
-Se generaron 13 migraciones que documentan el historial completo del esquema. Entre los cambios más relevantes desde el punto de vista de ingeniería destacan dos. El primero fue la \textbf{conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}}: durante el desarrollo inicial se usó \texttt{DOUBLE} por simplicidad, pero al verificar el comportamiento de las operaciones de suma se detectaron diferencias de centavos en los totales acumulados, problema propio de la aritmética de punto flotante; la migración corrigió el tipo de dato en todas las tablas afectadas sin pérdida de información. El segundo fue la \textbf{adición de \texttt{deleted\_at}} a múltiples tablas en migraciones separadas, a medida que el análisis de los flujos del sistema reveló que la eliminación física de registros rompía vínculos necesarios para la integridad del historial.
+Se generaron \textbf{13 migraciones} a lo largo del desarrollo. Dos de ellas ilustran bien el proceso iterativo. La primera fue la conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}: la versión inicial del esquema usó \texttt{DOUBLE} por simplicidad, pero al verificar el comportamiento de las sumas se detectaron discrepancias en los totales acumulados causadas por la aritmética de punto flotante; la migración corrigió el tipo de dato en todas las tablas afectadas sin pérdida de información. La segunda fue la adición iterativa de \texttt{deleted\_at} a varias tablas: al analizar los flujos del sistema con mayor detalle se identificaron las entidades cuya eliminación física rompería la integridad del historial, y se añadió el borrado lógico mediante migraciones adicionales sin necesidad de rediseñar el esquema desde cero.
 
-Este proceso iterativo demuestra que el diseño de la base de datos fue resultado de un ciclo continuo de verificación y corrección, y no de una especificación completamente definida desde el inicio.
+El uso de Alembic garantizó además que el entorno de desarrollo local y el entorno de producción desplegado en Railway mantuvieran siempre la misma versión del esquema, eliminando inconsistencias entre ambos entornos.
