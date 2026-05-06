@@ -565,21 +565,21 @@ El diagrama siguiente resume el flujo de interacción del modo lector desde el m
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
-    ok/.style={rectangle, draw, rounded corners=3pt, fill=green!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
+    node distance=0.55cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small, text width=7.8cm},
+    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=2pt},
+    ok/.style={rectangle, draw, rounded corners=3pt, fill=green!10, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
     arr/.style={-{Stealth}, thick}
 ]
 \node[box, fill=gray!15]  (start) {\textbf{1.} Formulario de creación de venta abierto};
 \node[box, fill=blue!8,   below=of start] (f2)    {\textbf{2.} Usuario presiona F2 → modo lector activo};
-\node[box, fill=blue!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras del producto};
-\node[box, fill=gray!10,  below=of scan]  (look)  {\textbf{4.} Buscar código en catálogo cargado en memoria};
+\node[box, fill=blue!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras};
+\node[box, fill=gray!10,  below=of scan]  (look)  {\textbf{4.} Buscar código en el catálogo local};
 \node[dec,                below=of look]  (found) {¿Producto\\encontrado?};
-\node[ok,                 right=of found] (add)   {Agregar / incrementar\\en la lista de venta};
-\node[err,                left=of found]  (nf)    {Señal visual\\de error};
-\node[box, fill=green!10, below=of found] (flash) {\textbf{5.} Confirmar resultado (borde verde / rojo)};
+\node[ok,  right=of found, xshift=0.6cm]  (add)   {Agregar /\\incrementar\\en la lista};
+\node[err, left=of found,  xshift=-0.6cm] (nf)    {Señal visual\\de error};
+\node[box, fill=green!10, below=1.6cm of found] (flash) {\textbf{5.} Confirmar resultado (borde verde o rojo)};
 \node[dec,                below=of flash] (more)  {¿Más artículos\\por escanear?};
 \node[box, fill=gray!15,  below=of more]  (end)   {\textbf{6.} Clic fuera del área → modo desactivado};
 
@@ -587,12 +587,13 @@ El diagrama siguiente resume el flujo de interacción del modo lector desde el m
 \draw[arr] (f2)    -- (scan);
 \draw[arr] (scan)  -- (look);
 \draw[arr] (look)  -- (found);
-\draw[arr] (found) -- node[above, font=\footnotesize]{Sí} (add);
-\draw[arr] (found) -- node[above, font=\footnotesize]{No} (nf);
-\draw[arr] (add)   |- (flash);
-\draw[arr] (nf)    |- (flash);
+\draw[arr] (found.east) -- node[above, font=\footnotesize]{Sí} (add.west);
+\draw[arr] (found.west) -- node[above, font=\footnotesize]{No} (nf.east);
+\draw[arr] (add.south)  |- (flash.east);
+\draw[arr] (nf.south)   |- (flash.west);
 \draw[arr] (flash) -- (more);
-\draw[arr] (more.west) -- ++(-1.6,0) |- node[left, font=\footnotesize, pos=0.25]{Sí} (scan.west);
+\coordinate (loopL) at ($(more.west)+(-2.8,0)$);
+\draw[arr] (more.west) -- (loopL) -- (loopL |- scan.west) -- node[above, font=\footnotesize]{Sí} (scan.west);
 \draw[arr] (more)  -- node[left, font=\footnotesize]{No} (end);
 \end{tikzpicture}
 \caption{Flujo del modo lector de código de barras en el registro de ventas}
