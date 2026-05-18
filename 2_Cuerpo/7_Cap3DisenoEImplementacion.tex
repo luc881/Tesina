@@ -22,13 +22,17 @@ Para cumplir con el primer objetivo específico se diseñó e implementó una ba
 
 \subsection{Selección de PostgreSQL}
 
-Se eligió PostgreSQL como sistema gestor de base de datos en lugar de alternativas como MySQL o SQLite por tres razones técnicas concretas.
-
-La primera es el cumplimiento de las propiedades \textbf{ACID} (Atomicidad, Consistencia, Aislamiento y Durabilidad), que garantizan que cada operación sobre la base de datos se completa en su totalidad o no se aplica en absoluto. En un sistema que registra ventas y descuenta inventario simultáneamente, esto es crítico: si el proceso se interrumpe a la mitad —por un corte de energía o un error de red, por ejemplo— la base de datos no puede quedar en un estado donde el inventario ya fue descontado pero la venta no fue registrada.
-
-La segunda razón es la disponibilidad del tipo de dato \textbf{NUMERIC}, que almacena valores decimales con precisión exacta. Los tipos de punto flotante (\texttt{FLOAT}, \texttt{DOUBLE}), al representar números internamente en base binaria, no pueden representar con exactitud ciertos valores decimales como \$0.10. Esto genera errores de redondeo que se acumulan al sumar muchas operaciones. Para cantidades monetarias esta imprecisión es inaceptable; NUMERIC elimina el problema al almacenar los dígitos exactos, a cambio de un mayor uso de almacenamiento que es justificable en un sistema con volúmenes de datos moderados.
-
-La tercera razón es el soporte para \textbf{índices únicos parciales}, una funcionalidad que permite aplicar una restricción de unicidad solo a los registros que cumplen cierta condición. Su uso específico se describe en el módulo de inventario.
+  Se eligió PostgreSQL como sistema gestor de base de datos por ser la opción
+  recomendada por los ecosistemas de las herramientas utilizadas en este proyecto
+  y por su amplia adopción en el desarrollo de aplicaciones
+  web profesionales. Frente a alternativas como MySQL o SQLite, ofrece una ventaja
+  concreta para este sistema.
+  
+  Esta es, el tipo de dato \textbf{NUMERIC}, que almacena cantidades monetarias
+  con precisión exacta, sin los errores de redondeo que presentan los tipos de punto
+  flotante al acumular operaciones. En un sistema que calcula totales de ventas y
+  maneja precios con decimales, esta precisión es necesaria para garantizar que los
+  montos registrados sean exactos.
 
 \subsection{Organización modular del esquema}
 

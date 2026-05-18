@@ -354,6 +354,27 @@ Para la transmisión de datos y comandos desde una unidad microcontroladora (MCU
 
 El almacenamiento de la información visual se gestiona mediante la Memoria de Datos de Pantalla Gráfica (GDDRAM, Graphic Display Data RAM), una memoria estática integrada con una capacidad de 1024 bytes (1 KB).
 
+Para optimizar la actualización de la pantalla según los requerimientos del software, el controlador proporciona tres modos de direccionamiento:
+
+\begin{itemize}
+    \item Direccionamiento por página (Page Addressing Mode): El puntero de memoria avanza sobre las columnas de la página actual, requiriendo un cambio manual de página al finalizar.
+
+    \item Direccionamiento horizontal (Horizontal Addressing Mode): El puntero recorre la pantalla secuencialmente, saltando automáticamente a la siguiente página al completar las 128 columnas.
+
+    \item Direccionamiento vertical (Vertical Addressing Mode): La actualización se realiza rellenando las columnas a través de todas las páginas antes de avanzar al siguiente eje horizontal.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/pineado-pantalla-oled-arduino-esp8266-02.jpg}}
+    \caption{Pantalla OLED SSD1306}
+    \label{fig:mi_imagen}
+    
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} \url{https://programarfacil.com/blog/arduino-blog/ssd1306-pantalla-oled-con-arduino/}
+\end{figure}
+
+
 \subsection{Lector de Códigos de Barras}
 
 El lector de códigos de barras es un dispositivo de entrada que permite registrar productos de manera rápida y precisa. Su objetivo principal es reemplazar la captura manual de códigos, reduciendo errores y agilizando los procesos de venta y control de inventario.
