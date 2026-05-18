@@ -16,7 +16,7 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 % OE 1: BASE DE DATOS
 % =============================================
 
-\section{Desarrollo de la base de datos en PostgreSQL}
+\section{Objetivo Específico 1 — Desarrollo de la base de datos en PostgreSQL}
 
 Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
@@ -180,7 +180,7 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
-\section{Desarrollo de la API REST con FastAPI}
+\section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
 
 Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python utilizando el \textit{framework} FastAPI. Una API REST es una interfaz de comunicación que permite a los clientes —la aplicación web y el nodo sensor— enviar peticiones HTTP y recibir datos estructurados en formato JSON. La API resultante expone \textbf{23 módulos de rutas} organizados bajo el prefijo \texttt{/api/v1} y gestiona las operaciones de inventario, ventas, usuarios, compras y lecturas del sensor.
 
@@ -331,7 +331,7 @@ La información sensible —credenciales de la base de datos, clave de seguridad
 % =============================================
 
 \clearpage
-\section{Desarrollo de la interfaz web con React}
+\section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
 
 Para cumplir con el tercer objetivo específico se diseñó e implementó la interfaz de usuario como una \textbf{aplicación web de página única} (\textit{Single Page Application}, SPA): una vez cargada en el navegador, las transiciones entre vistas ocurren sin recargar completamente la página, lo que mejora la fluidez de la experiencia para el usuario. La interfaz se comunica con la API desarrollada en el OE2 para consultar y registrar información. El resultado es una aplicación con \textbf{dieciséis módulos de navegación} cubiertos por una biblioteca de más de cuarenta componentes de interfaz reutilizables, desplegada en la plataforma Vercel.
 
@@ -432,7 +432,7 @@ Las variables de configuración —principalmente la URL de la API— se definen
 % =============================================
 
 \clearpage
-\section{Desarrollo del nodo sensor con ESP32}
+\section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
 
 Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico de monitoreo ambiental que mide temperatura y humedad relativa dentro del área de almacenamiento de la farmacia y envía esas lecturas a la API desarrollada en el OE2. El nodo está construido sobre un microcontrolador \textbf{ESP32-C5} con un sensor \textbf{AHT10}, y su firmware fue programado en C++ utilizando el entorno de desarrollo Arduino.
 
@@ -540,7 +540,7 @@ Esta incorporación mejora la usabilidad del nodo durante la instalación y el m
 % =============================================
 
 \clearpage
-\section{Integración física y lector de código de barras}
+\section{Objetivo Específico 5 — Integración física y lector de código de barras}
 
 El quinto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
 
