@@ -182,21 +182,21 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 \clearpage
 \section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
 
-Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes —la aplicación web y el nodo sensor— y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
+Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
 
 \subsection{Selección de FastAPI}
 
 Se eligió FastAPI sobre alternativas como Flask o Django por dos razones concretas.
 
-La primera es que verifica automáticamente que los datos que llegan en cada petición sean correctos —tipo de dato, campos obligatorios, rangos válidos— antes de procesarlos. Si algo no cumple lo esperado, rechaza la petición con un mensaje descriptivo sin necesidad de escribir ese código de validación manualmente.
+La primera es que verifica automáticamente que los datos que llegan en cada petición sean correctos antes de procesarlos. Si algo no cumple lo esperado, rechaza la petición con un mensaje descriptivo sin necesidad de escribir ese código de validación manualmente.
 
 La segunda es que genera automáticamente una página de documentación interactiva donde se puede ver cada operación disponible, sus parámetros y las posibles respuestas. Esto permitió verificar el funcionamiento de la API directamente desde el navegador durante el desarrollo, sin herramientas adicionales.
 
 \subsection{Arquitectura en capas}
 
-La API funciona como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos —en lugar de un único bloque de código— porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
+La API funciona como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
 
-El primer filtro actúa como un enrutador: dependiendo de la dirección de la petición, determina a qué operación corresponde —consultar productos, registrar una venta, leer el sensor— y la redirige al área correspondiente, de forma similar a como un router de red decide por qué camino enviar el tráfico. El segundo filtro verifica que el usuario esté identificado y que tenga permiso para realizar esa operación; si no cumple alguna de las dos condiciones, la petición es rechazada sin continuar. El tercero aplica las reglas del negocio, como confirmar que hay existencias suficientes antes de registrar una venta. El último ejecuta la operación sobre la base de datos y devuelve el resultado al cliente.
+El primer filtro actúa como un enrutador: dependiendo de la dirección de la petición, determina a qué operación corresponde y la redirige al área correspondiente, de forma similar a como un router de red decide por qué camino enviar el tráfico. El segundo filtro verifica que el usuario esté identificado y que tenga permiso para realizar esa operación; si no cumple alguna de las dos condiciones, la petición es rechazada sin continuar. El tercero aplica las reglas del negocio, como confirmar que hay existencias suficientes antes de registrar una venta. El último ejecuta la operación sobre la base de datos y devuelve el resultado al cliente.
 
 \begin{figure}[H]
 \centering
