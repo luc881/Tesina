@@ -18,7 +18,7 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 
 \section{Desarrollo de la base de datos en PostgreSQL}
 
-Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales, y su evolución a lo largo del desarrollo fue gestionada mediante \textbf{13 archivos de migración} versionados con Alembic.
+Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
 \subsection{Selección de PostgreSQL}
 
@@ -171,14 +171,6 @@ El identificador se definió como un texto simple en lugar de crear una tabla de
 %    \vspace{0.2cm}
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
-
-\subsection{Gestión de cambios con Alembic}
-
-El esquema no fue diseñado de forma estática desde el inicio, sino que evolucionó de manera iterativa conforme el desarrollo avanzó y se identificaron ajustes necesarios. Para gestionar esta evolución se utilizó \textbf{Alembic}, una herramienta que actúa como control de versiones para el esquema de la base de datos: cada cambio estructural —crear una tabla, añadir una columna, modificar un tipo de dato— se describe en un archivo de migración numerado que puede aplicarse o revertirse de forma controlada y reproducible.
-
-Se generaron \textbf{13 migraciones} a lo largo del desarrollo. Dos de ellas ilustran el proceso iterativo: la primera fue la conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}, necesaria tras detectar discrepancias en totales causadas por la aritmética de punto flotante; la segunda fue la adición de \texttt{deleted\_at} a las tablas cuya eliminación física rompería el historial de ventas. Ambos cambios se aplicaron sin pérdida de información ni rediseño del esquema.
-
-El uso de Alembic garantizó además que el entorno de desarrollo local y el entorno de producción desplegado en Railway mantuvieran siempre la misma versión del esquema, eliminando inconsistencias entre ambos entornos.
 
 Con esta estructura, el esquema cubre la totalidad de las entidades descritas en el objetivo: el módulo de autenticación gestiona los usuarios y el control de acceso, el catálogo y el inventario cubren los productos y sus niveles de existencia por lote, el módulo de ventas registra las transacciones comerciales y su trazabilidad, y el módulo de sensor almacena las mediciones ambientales del nodo electrónico.
 
