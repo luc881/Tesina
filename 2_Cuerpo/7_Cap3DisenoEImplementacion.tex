@@ -84,13 +84,13 @@ Para los registros que no deben eliminarse permanentemente —usuarios, roles y 
 \clearpage
 \subsection{Módulo 2: Catálogo de productos}
 
-Este módulo administra la información de los medicamentos mediante seis tablas: \texttt{products}, \texttt{product\_master}, \texttt{product\_categories}, \texttt{product\_brands}, \texttt{ingredients} y \texttt{product\_has\_ingredients}.
+Este módulo gestiona la información de los medicamentos a través de seis tablas: el catálogo general de productos, los medicamentos genéricos, las categorías, las marcas, los ingredientes activos y la relación entre productos e ingredientes.
 
-Se separó \texttt{product\_master} (medicamento genérico) de \texttt{products} (presentación específica). Por ejemplo, \textit{Paracetamol} es un único registro en \texttt{product\_master}, y sus presentaciones concretas —\textit{Paracetamol 500~mg 20 tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— son registros distintos en \texttt{products} que apuntan al mismo genérico. Esto evita duplicar el nombre del principio activo en cada presentación y permite generar reportes agrupados por nombre genérico sin procesamiento adicional.
+Se separó el medicamento genérico de sus presentaciones comerciales. Por ejemplo, \textit{Paracetamol} existe como un único registro genérico, y cada presentación concreta —\textit{Paracetamol 500~mg tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— es un registro distinto que apunta a ese genérico. Esto evita repetir el nombre del principio activo en cada presentación y permite agrupar reportes por nombre genérico sin trabajo adicional.
 
-La tabla \texttt{product\_categories} implementa una \textbf{jerarquía autorelacionada}: la columna \texttt{parent\_id} referencia a la misma tabla, lo que permite representar categorías anidadas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) con una única tabla y sin límite fijo de niveles de profundidad.
+Las categorías se organizan en una jerarquía de niveles: una categoría puede contener subcategorías, y estas pueden contener otras más específicas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}). Todo esto se almacena en una sola tabla, sin límite fijo de profundidad.
 
-La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra qué ingredientes activos contiene cada producto, junto con la cantidad y la unidad de medida (mg, g, ml, UI). Almacenar la composición en la base de datos —en lugar de solo en la etiqueta del producto— hace posible consultar o filtrar medicamentos por principio activo directamente desde el sistema.
+La relación entre productos e ingredientes activos se registra con la cantidad y unidad de medida de cada componente. Guardar esta información en la base de datos —no solo en la etiqueta física— permite buscar o filtrar medicamentos por principio activo directamente desde la aplicación.
 
 % -------------------------------------------------------
 % DIAGRAMA 2 — Módulo de Catálogo de Productos
