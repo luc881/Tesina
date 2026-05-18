@@ -262,7 +262,7 @@ La autenticación se implementó con \textbf{JWT} (\textit{JSON Web Token}), un 
 \draw[arr] (tokval) -- node[left, font=\footnotesize]{Sí} (exec);
 \draw[arr] (tokval) -- node[above, font=\footnotesize]{No} (err2);
 \end{tikzpicture}
-\caption{Flujo de autenticación mediante JWT}
+\caption{Diagrama de flujo de autenticación mediante JWT}
 \label{fig:cap3-jwt-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -366,6 +366,7 @@ El siguiente diagrama resume el flujo general de interacción del usuario con la
 \draw[arr] (jwt)    -- (valid);
 \draw[arr] (valid)  -- node[left,  font=\footnotesize]{Sí} (dash);
 \draw[arr] (valid)  -- node[above, font=\footnotesize]{No} (err);
+
 \draw[arr] (dash)   -- (nav);
 \draw[arr] (nav)    -- (list);
 \draw[arr] (list)   -- (action);
@@ -375,7 +376,7 @@ El siguiente diagrama resume el flujo general de interacción del usuario con la
 \draw[arr] (formv)  -- node[above, font=\footnotesize]{No} (formerr);
 \draw[arr] (api)    -- (update);
 \end{tikzpicture}
-\caption{Flujo general de interacción del usuario con la aplicación web}
+\caption{Diagrama de flujo general de interacción del usuario con la aplicación web}
 \label{fig:cap3-frontend-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -486,7 +487,7 @@ El diagrama siguiente muestra el flujo completo de ejecución del firmware, desd
 \draw[arr] (val)  -- node[above, font=\footnotesize]{No} (disc);
 \draw[arr] (post) -- (res);
 \end{tikzpicture}
-\caption{Flujo de ejecución del firmware del nodo sensor}
+\caption{Diagrama de flujo de ejecución del firmware del nodo sensor}
 \label{fig:cap3-sensor-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -592,11 +593,11 @@ El diagrama siguiente resume el flujo de interacción del modo lector desde el m
 \draw[arr] (add.south)  |- (flash.east);
 \draw[arr] (nf.south)   |- (flash.west);
 \draw[arr] (flash) -- (more);
-\coordinate (loopL) at ($(more.west)+(-2.8,0)$);
+\coordinate (loopL) at ($(more.west)+(-4.2,0)$);
 \draw[arr] (more.west) -- (loopL) -- (loopL |- scan.west) -- node[above, font=\footnotesize]{Sí} (scan.west);
 \draw[arr] (more)  -- node[left, font=\footnotesize]{No} (end);
 \end{tikzpicture}
-\caption{Flujo del modo lector de código de barras en el registro de ventas}
+\caption{Diagrama de flujo del modo lector de código de barras en el registro de ventas}
 \label{fig:cap3-barcode-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.

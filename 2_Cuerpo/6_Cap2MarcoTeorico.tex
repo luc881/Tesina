@@ -338,6 +338,22 @@ De esta forma, el sistema contribuye al cumplimiento de buenas prácticas de alm
     \footnotesize \textbf{Fuente:} \url{https://uelectronics.com/wp-content/uploads/2022/04/AR3107-AHT10-Sensor-de-Temperatura-y-Humedad-V2-800x800.jpg}
 \end{figure}
 
+\subsection{Pantalla OLED SSD1306}
+
+Controlador de un solo chip con tecnología CMOS, diseñado para el manejo de paneles de Diodos Orgánicos Emisores de Luz de matriz pasiva (PMOLED, por sus siglas en inglés). Su arquitectura interna integra tanto el controlador de la pantalla como la memoria de video (SRAM), eliminando la necesidad de componentes externos complejos. Dada la naturaleza de la tecnología OLED, la cual prescinde de una capa de retroiluminación activa (backlight), cada píxel actúa como un emisor de luz independiente. Esta característica proporciona ventajas significativas en el diseño de sistemas embebidos, tales como un perfil físico reducido, un contraste sumamente elevado y una alta eficiencia energética.
+
+El presente apartado detalla las especificaciones técnicas fundamentales de los módulos comerciales que implementan este controlador con una resolución de 128x64 píxeles.
+
+El diseño eléctrico del SSD1306 requiere el manejo de dos niveles de voltaje distintos. Por un lado, el voltaje de la lógica del circuito ($V_{DD}$) opera en un rango de 1.65 V a 3.3 V. Por otro lado, el voltaje de conducción del panel OLED ($V_{CC}$) exige un rango de 7 V a 15 V. Para solventar esta diferencia, el controlador incorpora una bomba de carga capacitiva (charge pump) que genera el voltaje necesario para el panel a partir de una fuente de alimentación baja, simplificando la topología del circuito de alimentación. Cabe destacar que la mayoría de los módulos comerciales de desarrollo integran un regulador LDO (Low Dropout) que permite su alimentación directa con 5 V.
+
+Para la transmisión de datos y comandos desde una unidad microcontroladora (MCU), el SSD1306 utilizara el protocolo de comunicación estándar:
+
+\begin{itemize}
+    \item Protocolo I2C (Inter-Integrated Circuit): Es la configuración de mayor predominancia en la implementación de módulos compactos. Soporta velocidades en modo rápido (Fast Mode) de hasta 400 kHz. Convencionalmente, el direccionamiento esclavo de estos módulos está predefinido en 0x3C o 0x3D.
+\end{itemize}
+
+El almacenamiento de la información visual se gestiona mediante la Memoria de Datos de Pantalla Gráfica (GDDRAM, Graphic Display Data RAM), una memoria estática integrada con una capacidad de 1024 bytes (1 KB).
+
 \subsection{Lector de Códigos de Barras}
 
 El lector de códigos de barras es un dispositivo de entrada que permite registrar productos de manera rápida y precisa. Su objetivo principal es reemplazar la captura manual de códigos, reduciendo errores y agilizando los procesos de venta y control de inventario.
