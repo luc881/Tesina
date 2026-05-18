@@ -130,8 +130,6 @@ Se identificó durante el análisis una situación concreta: algunos medicamento
 \clearpage
 \subsection{Módulo 4: Registro de ventas}
 
-Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
-
 Este módulo registra las transacciones comerciales a través de cinco tablas: la venta en sí, el detalle de productos incluidos, el vínculo con los lotes descontados, los pagos y las devoluciones.
 
 Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción —empleado, sucursal, descuento y total— y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
