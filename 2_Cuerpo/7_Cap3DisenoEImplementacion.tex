@@ -329,97 +329,141 @@ La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tan
 \clearpage
 \section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
 
-Para cumplir con el tercer objetivo específico se diseñó e implementó la interfaz de usuario como una \textbf{aplicación web de página única} (\textit{Single Page Application}, SPA): una vez cargada en el navegador, las transiciones entre vistas ocurren sin recargar completamente la página, lo que mejora la fluidez de la experiencia para el usuario. La interfaz se comunica con la API desarrollada en el OE2 para consultar y registrar información. El resultado es una aplicación con \textbf{dieciséis módulos de navegación} cubiertos por una biblioteca de más de cuarenta componentes de interfaz reutilizables, desplegada en la plataforma Vercel.
+Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
 
 \subsection{Selección de React y Vite}
 
-Se eligió \textbf{React} como biblioteca base para la construcción de la interfaz por dos razones principales. La primera es su modelo basado en \textbf{componentes reutilizables}: cada elemento visual —una tabla, un formulario, un botón de acción— se define una vez y puede utilizarse en cualquier módulo sin reescribir código. Esto fue determinante dado que la aplicación comparte patrones visuales casi idénticos entre módulos: la estructura de lista con filtros, el formulario de creación y el diálogo de confirmación de eliminación se repiten en inventario, ventas, catálogo y usuarios. La segunda razón es la amplitud de su ecosistema: bibliotecas para gestión de formularios, caché de datos, animaciones y exportación de documentos existen, están mantenidas activamente y se integran entre sí, evitando desarrollar estas funcionalidades desde cero.
+Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajustaba directamente al diseño de la aplicación: la estructura de lista con buscador y filtros, el formulario de creación y el diálogo de confirmación se repiten en prácticamente todos los módulos, lo que permite definirlos una sola vez y usarlos en cualquier vista sin reescribir código. Para el entorno de desarrollo se utilizó \textbf{Vite}, que reduce el tiempo entre guardar un cambio y verlo en pantalla al servir los archivos directamente al navegador sin reempaquetar todo el proyecto en cada modificación.
 
-Junto con React se utilizó \textbf{Vite} como herramienta de construcción y servidor de desarrollo. Vite moderniza el proceso al servir los módulos directamente al navegador sin reempaquetar todo el proyecto en cada cambio, reduciendo el tiempo entre guardar una modificación y verla reflejada en pantalla. Esto aceleró el ciclo de desarrollo durante la etapa de diseño de la interfaz.
+\subsection{Estructura e interfaz de la aplicación}
 
-\subsection{Estructura de la aplicación}
+La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados —tablas paginadas, formularios, diálogos, selectores de fecha— que garantiza consistencia visual en toda la aplicación y evita desarrollar esos elementos desde cero.
 
-La aplicación se organizó en tres niveles de granularidad. Las \textbf{páginas} son los puntos de entrada de cada ruta; las \textbf{secciones} contienen la lógica y la disposición visual específica de cada módulo de negocio; y los \textbf{componentes} son los bloques visuales reutilizables que las secciones ensamblan. El enrutamiento entre páginas se gestiona con \textbf{React Router}, que mapea cada URL a su vista correspondiente sin recargar el servidor. La navegación se realiza desde una barra lateral persistente que agrupa los módulos por área funcional.
-
-El siguiente diagrama resume el flujo general de interacción del usuario con la aplicación, desde el acceso hasta la confirmación de una operación:
+La figura siguiente muestra la disposición de la interfaz: una barra lateral persistente agrupa los módulos por área funcional, y el área de contenido presenta en todos los módulos la misma estructura de componentes reutilizables.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
-    arr/.style={-{Stealth}, thick}
-]
-\node[box, fill=gray!15]  (login)   {\textbf{1.} Pantalla de inicio de sesión};
-\node[box, fill=blue!8,   below=of login]   (jwt)    {\textbf{2.} Verificación de credenciales con la API};
-\node[dec,                below=of jwt]     (valid)  {¿Válidas?};
-\node[err,                right=of valid]   (err)    {Mensaje de\\error al usuario};
-\node[box, fill=blue!12,  below=of valid]   (dash)   {\textbf{3.} Panel principal: ventas del día, alertas de stock y sensor};
-\node[box, fill=gray!10,  below=of dash]    (nav)    {\textbf{4.} Selección de módulo desde la barra lateral};
-\node[box, fill=blue!8,   below=of nav]     (list)   {\textbf{5.} Vista de lista con búsqueda, filtros y paginación};
-\node[box, fill=gray!10,  below=of list]    (action) {\textbf{6.} Seleccionar operación: crear, editar o eliminar};
-\node[box, fill=blue!8,   below=of action]  (form)   {\textbf{7.} Formulario con validación de datos en el cliente};
-\node[dec,                below=of form]    (formv)  {¿Datos\\válidos?};
-\node[err,                right=of formv]   (formerr){Indicadores de\\error por campo};
-\node[box, fill=green!10, below=of formv]   (api)    {\textbf{8.} Envío a la API y respuesta del servidor};
-\node[box, fill=green!8,  below=of api]     (update) {\textbf{9.} Notificación de éxito y actualización automática de la vista};
-\draw[arr] (login)  -- (jwt);
-\draw[arr] (jwt)    -- (valid);
-\draw[arr] (valid)  -- node[left,  font=\footnotesize]{Sí} (dash);
-\draw[arr] (valid)  -- node[above, font=\footnotesize]{No} (err);
+\begin{tikzpicture}[font=\small]
 
-\draw[arr] (dash)   -- (nav);
-\draw[arr] (nav)    -- (list);
-\draw[arr] (list)   -- (action);
-\draw[arr] (action) -- (form);
-\draw[arr] (form)   -- (formv);
-\draw[arr] (formv)  -- node[left,  font=\footnotesize]{Sí} (api);
-\draw[arr] (formv)  -- node[above, font=\footnotesize]{No} (formerr);
-\draw[arr] (api)    -- (update);
+% Marco exterior (ventana del navegador)
+\draw[thick, rounded corners=3pt] (0, 0) rectangle (12.5, 7.6);
+
+% Encabezado
+\fill[gray!20] (0, 7.0) rectangle (12.5, 7.6);
+\draw[gray!50] (0, 7.0) -- (12.5, 7.0);
+\node[anchor=west, font=\small\bfseries] at (0.3, 7.3) {Sistema de Gestión — Farmacia Selene};
+
+% Barra lateral
+\fill[gray!8] (0, 0) rectangle (2.7, 7.0);
+\draw[gray!50] (2.7, 0) -- (2.7, 7.0);
+
+% Grupos de navegación
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 6.65) {PRINCIPAL};
+\node[anchor=west, font=\scriptsize] at (0.4, 6.32) {Dashboard};
+\fill[gray!25] (0, 5.92) rectangle (2.7, 6.22); % ítem activo
+\node[anchor=west, font=\scriptsize\bfseries] at (0.4, 6.07) {Inventario};
+\node[anchor=west, font=\scriptsize] at (0.4, 5.65) {Ventas};
+\node[anchor=west, font=\scriptsize] at (0.4, 5.3) {Catálogo};
+\draw[gray!40] (0.25, 5.05) -- (2.45, 5.05);
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 4.75) {CONFIGURACIÓN};
+\node[anchor=west, font=\scriptsize] at (0.4, 4.42) {Usuarios};
+\node[anchor=west, font=\scriptsize] at (0.4, 4.08) {Roles};
+\node[anchor=west, font=\scriptsize] at (0.4, 3.74) {Sucursales};
+\draw[gray!40] (0.25, 3.5) -- (2.45, 3.5);
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 3.2) {MONITOREO};
+\node[anchor=west, font=\scriptsize] at (0.4, 2.87) {Sensor};
+\node[anchor=west, font=\scriptsize] at (0.4, 2.53) {Estadísticas};
+\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 1.1) {16 módulos};
+\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 0.7) {agrupados por área};
+
+% ── Área de contenido ─────────────────────────────────────
+
+% Barra de acciones del módulo
+\fill[gray!12] (2.9, 6.6) rectangle (12.3, 7.0);
+\node[anchor=west, font=\small\bfseries] at (3.1, 6.8) {Inventario — Lotes};
+\draw[draw=gray!60, fill=white, rounded corners=1pt] (10.5, 6.65) rectangle (12.1, 6.95);
+\node[font=\scriptsize] at (11.3, 6.8) {+ Nuevo lote};
+\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 7.22) {\textit{(a) Barra de acciones}};
+
+% Buscador y filtros
+\draw[draw=gray!50, fill=white, rounded corners=2pt] (2.9, 6.15) rectangle (8.8, 6.5);
+\node[anchor=west, font=\scriptsize, text=gray!60] at (3.1, 6.32) {Buscar producto o lote\ldots};
+\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (9.0, 6.15) rectangle (10.3, 6.5);
+\node[font=\scriptsize] at (9.65, 6.32) {Filtros};
+\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (10.5, 6.15) rectangle (12.1, 6.5);
+\node[font=\scriptsize] at (11.3, 6.32) {Exportar};
+\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 6.32) {\textit{(b) Buscador}};
+
+% Encabezado de tabla
+\fill[gray!20] (2.9, 5.68) rectangle (12.3, 6.05);
+\node[anchor=west, font=\scriptsize\bfseries] at (3.1, 5.87) {Producto};
+\node[anchor=west, font=\scriptsize\bfseries] at (6.0, 5.87) {No.\ Lote};
+\node[anchor=west, font=\scriptsize\bfseries] at (7.8, 5.87) {Vencimiento};
+\node[anchor=west, font=\scriptsize\bfseries] at (9.8, 5.87) {Stock};
+
+% Fila 1
+\draw[gray!30] (2.9, 5.3) -- (12.3, 5.3);
+\node[anchor=west, font=\scriptsize] at (3.1, 5.49) {Paracetamol 500 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 5.49) {L-0124};
+\node[anchor=west, font=\scriptsize] at (7.8, 5.49) {Jun 2025};
+\node[anchor=west, font=\scriptsize] at (9.8, 5.49) {120 pzas.};
+
+% Fila 2
+\draw[gray!30] (2.9, 4.92) -- (12.3, 4.92);
+\node[anchor=west, font=\scriptsize] at (3.1, 5.11) {Ibuprofeno 400 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 5.11) {L-0224};
+\node[anchor=west, font=\scriptsize] at (7.8, 5.11) {Ene 2026};
+\node[anchor=west, font=\scriptsize] at (9.8, 5.11) {85 pzas.};
+
+% Fila 3
+\draw[gray!30] (2.9, 4.54) -- (12.3, 4.54);
+\node[anchor=west, font=\scriptsize] at (3.1, 4.73) {Amoxicilina 500 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 4.73) {L-0324};
+\node[anchor=west, font=\scriptsize] at (7.8, 4.73) {Mar 2026};
+\node[anchor=west, font=\scriptsize] at (9.8, 4.73) {200 pzas.};
+
+% Borde de tabla
+\draw[gray!60] (2.9, 4.54) rectangle (12.3, 6.05);
+\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 5.3) {\textit{(c) Tabla paginada}};
+
+% Paginación
+\node[font=\scriptsize] at (7.5, 4.18) {$\langle$\enspace 1 \enspace 2 \enspace 3 \enspace $\cdots$\enspace $\rangle$};
+\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 4.18) {\textit{(d) Paginación}};
+
+% Nota de barra lateral
+\node[font=\scriptsize\itshape, text=gray!50, anchor=west] at (0.05, 7.38) {\textit{(e) Barra lateral}};
+
 \end{tikzpicture}
-\caption{Diagrama de flujo general de interacción del usuario con la aplicación web}
-\label{fig:cap3-frontend-flujo}
+\caption{Disposición de componentes reutilizables en la interfaz web (vista de módulo de inventario)}
+\label{fig:cap3-frontend-wireframe}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Componentes visuales con Material-UI}
+% TODO: agregar captura de pantalla real de la aplicación
+% Guardar imagen en 0_imagenes/Cap3/ScreenshotApp.png y descomentar:
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
+%    \caption{Captura de pantalla de la interfaz web — módulo de inventario}
+%    \label{fig:cap3-screenshot}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
-Para el diseño visual se eligió \textbf{Material-UI} (MUI), una biblioteca que proporciona un conjunto de componentes construidos sobre las guías de diseño Material Design de Google. La razón principal fue evitar diseñar desde cero elementos como tablas paginadas, formularios, diálogos de confirmación y selectores de fecha, que de otro modo habrían requerido semanas de desarrollo adicional. MUI ofrece estos componentes con comportamiento accesible, adaptación a distintos tamaños de pantalla y un sistema de temas que permite ajustar colores y tipografía de forma centralizada para toda la aplicación.
+\subsection{Gestión de datos y formularios}
 
-Para las vistas que muestran listados de registros —productos, lotes, ventas, usuarios— se utilizó el componente de tabla avanzada de MUI, que soporta ordenamiento, filtrado por columna y paginación sin configuración adicional. Dado el volumen moderado de registros que maneja una farmacia de pequeña escala, ordenar y filtrar los datos directamente en la vista es suficiente y evita peticiones adicionales al servidor para cada cambio de orden o filtro.
+El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} —usuario, rol y permisos— se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
-\subsection{Gestión de datos y estado}
-
-La gestión del estado se dividió en dos responsabilidades distintas. El \textbf{estado de sesión} —la información del usuario autenticado, su rol y sus permisos— se almacena en un contexto global accesible desde cualquier componente. Este estado es necesario para decidir qué secciones del menú mostrar y qué operaciones están disponibles según el rol del usuario activo.
-
-El \textbf{estado de los datos del servidor} —listas de productos, ventas, lotes y demás registros— se gestiona con una biblioteca de caché del lado del cliente. Esta biblioteca conserva en memoria los datos ya consultados; al navegar entre módulos, la información previamente cargada se muestra de inmediato mientras se verifica en segundo plano si hay actualizaciones. Cuando se completa una operación —crear, editar o eliminar un registro—, la vista se refresca automáticamente sin que el usuario tenga que recargar la página. Esta separación entre estado de sesión y estado de datos evitó la necesidad de una solución de gestión de estado global más compleja, cuya configuración no se justifica para una aplicación de esta escala.
-
-\subsection{Formularios y validación}
-
-Todos los formularios de creación y edición se implementaron con \textbf{React Hook Form}, una biblioteca que gestiona el estado del formulario sin causar un re-renderizado completo del componente en cada pulsación de tecla. El beneficio principal es el rendimiento: en formularios con muchos campos —como el registro de ventas con múltiples productos o el alta de un medicamento con ingredientes— la interfaz responde de forma fluida incluso en equipos con recursos limitados.
-
-La validación de cada campo se define mediante esquemas que especifican el tipo de dato esperado, los rangos permitidos y los mensajes de error correspondientes. Esta validación se ejecuta \textit{antes} de enviar la petición a la API, evitando peticiones innecesarias cuando el usuario omite un campo obligatorio o introduce un valor fuera de rango. Los esquemas de validación del cliente se diseñaron para reflejar las mismas restricciones que los esquemas Pydantic definidos en la API (OE2), de modo que las reglas sean consistentes en ambas capas.
-
-Para mantener la consistencia visual y evitar duplicar código, se construyó una biblioteca interna de \textbf{componentes de formulario reutilizables}: campos de texto, selectores, autocompletados con búsqueda, selectores de fecha y casillas de verificación. Cada componente integra la lógica de validación y el estilo de MUI, y puede utilizarse en cualquier formulario de la aplicación conectándolo al esquema de validación correspondiente.
+Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas —precio negativo, campo requerido vacío— el formulario lo indica visualmente sin generar una petición al servidor. Las reglas de validación se diseñaron para ser consistentes con los contratos de la API definidos en el OE2.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación recibe los tokens generados por la API (OE2) y los almacena en el navegador: el token de acceso en el almacenamiento de sesión —que se elimina automáticamente cuando el usuario cierra la pestaña o el navegador—, y el token de renovación en el almacenamiento persistente, únicamente cuando el usuario activa la opción de recordar la sesión.
-
-El token de acceso acompaña cada petición a la API. Cuando expira, la aplicación utiliza el token de renovación para obtener uno nuevo de forma transparente, sin interrumpir la sesión. Este mecanismo se implementó en la capa de comunicación HTTP de forma centralizada, de modo que todos los módulos se benefician de él sin código adicional en cada vista.
-
-Las rutas de la aplicación están protegidas mediante \textbf{guardias de acceso}: si el usuario no tiene sesión activa, cualquier intento de acceder a una página del sistema lo redirige a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, modificación de roles— el guardia verifica además que los permisos del token incluyan los requeridos, consistente con el módulo RBAC definido en el OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, configuración de sucursales— se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
 
 \subsection{Despliegue en Vercel}
 
-La aplicación web se desplegó en \textbf{Vercel}, una plataforma especializada en el alojamiento de aplicaciones JavaScript modernas. Al igual que con Railway para la API, se eligió Vercel sobre alternativas como AWS por la misma razón de escala: ofrece los componentes necesarios —red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización— sin la complejidad de configuración que implica una infraestructura de mayor tamaño.
-
-Un aspecto particular del despliegue de una SPA es el enrutamiento: dado que React Router gestiona las rutas completamente en el cliente, el servidor de Vercel debe redirigir cualquier URL al punto de entrada de la aplicación para que sea React quien determine qué vista mostrar. Sin esta configuración, acceder directamente a una URL como \texttt{/dashboard/product} devolvería un error del servidor. La redirección se definió en el archivo de configuración de Vercel y garantiza que el usuario pueda acceder a cualquier ruta o recargar la página sin errores.
-
-Las variables de configuración —principalmente la URL de la API— se definen en la plataforma de forma separada al código fuente, siguiendo el mismo criterio de seguridad aplicado en el despliegue de la API.
+La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en aplicaciones JavaScript modernas. Se eligió sobre alternativas como AWS por la misma razón de escala que Railway: ofrece red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización, sin la complejidad de una infraestructura mayor. Se configuró además una regla de enrutamiento que redirige cualquier URL al punto de entrada de la aplicación, necesaria para que React Router pueda gestionar la navegación correctamente cuando el usuario accede directamente a una ruta o recarga la página.
 
 
 
