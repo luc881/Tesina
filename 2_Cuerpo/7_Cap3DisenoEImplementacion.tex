@@ -250,47 +250,42 @@ Cada operación de la API define un contrato: qué información acepta cuando el
 
 \subsection{Autenticación y autorización}
 
-\subsubsection*{JSON Web Token (JWT): Autenticación y Seguridad}
+El acceso al sistema se controla en dos pasos. El primero es la \textbf{autenticación}: al iniciar sesión, la API verifica la contraseña y, si es correcta, emite un \textbf{token de sesión} con vigencia de 30 minutos que contiene el identificador del usuario y sus permisos. Este token acompaña cada petición posterior; el servidor lo verifica sin consultar la base de datos, ya que la información necesaria está incluida y firmada dentro del propio token. Cuando expira, se renueva de forma automática sin que el usuario tenga que ingresar su contraseña de nuevo.
 
-La autenticación se implementó con \textbf{JWT} (\textit{JSON Web Token}), un estándar que permite emitir credenciales firmadas digitalmente. Al iniciar sesión, la API verifica la contraseña y emite dos elementos: un \textbf{token de acceso} con vigencia de 30 minutos que contiene el identificador del usuario, su rol y sus permisos; y un \textbf{token de renovación} de 7 días almacenado en la base de datos. El token de acceso acompaña cada petición posterior y el servidor lo verifica sin consultar la base de datos, ya que toda la información necesaria está incluida y firmada dentro del propio token. Cuando el token de acceso expira, el cliente usa el token de renovación para obtener uno nuevo sin que el usuario tenga que iniciar sesión de nuevo.
-
+El segundo paso es la \textbf{autorización}: cada operación de la API declara qué permiso requiere para ejecutarse. Antes de procesar la petición, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada. Esto conecta con la estructura de roles del OE1: un cajero puede registrar ventas pero no modificar usuarios ni configurar sucursales.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm and 2.2cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=6.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.4cm, minimum height=0.82cm, align=center, font=\small},
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=7.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.8, align=center, font=\small, inner sep=2pt},
+    err/.style={rectangle, draw, fill=gray!20, minimum width=3.2cm, minimum height=0.82cm, align=center, font=\footnotesize, text width=3.0cm},
     arr/.style={-{Stealth}, thick}
 ]
-\node[box, fill=gray!15]  (login)   {\textbf{1.} POST /auth/login con credenciales};
-\node[box, fill=blue!10,  below=of login]    (verify)  {\textbf{2.} API verifica contraseña (bcrypt)};
-\node[dec,                below=of verify]   (valid)   {¿válida?};
-\node[box, fill=green!10, below=of valid]    (tokens)  {\textbf{3.} Emitir access token (30 min)\\y refresh token (7 días)};
-\node[box, fill=blue!10,  below=of tokens]   (request) {\textbf{4.} Petición enviada con el token de acceso};
-\node[dec,                below=of request]  (tokval)  {¿token\\válido?};
-\node[box, fill=green!10, below=of tokval]   (exec)    {\textbf{5.} Ejecutar endpoint → respuesta JSON};
-\node[err, right=of valid]    (err1) {HTTP 401\\Unauthorized};
-\node[err, right=of tokval]   (err2) {HTTP 401\\Token inválido};
-\draw[arr] (login) -- (verify);
-\draw[arr] (verify) -- (valid);
-\draw[arr] (valid) -- node[left, font=\footnotesize]{Sí} (tokens);
-\draw[arr] (valid) -- node[above, font=\footnotesize]{No} (err1);
-\draw[arr] (tokens) -- (request);
+\node[box, fill=gray!15] (login)   {\textbf{1.} El usuario ingresa su nombre de usuario y contraseña};
+\node[box, fill=gray!5,  below=0.6cm of login]   (verify)  {\textbf{2.} La API verifica que la contraseña sea correcta};
+\node[dec,               below=0.6cm of verify]  (valid)   {¿Contraseña correcta?};
+\node[box, fill=gray!10, below=0.6cm of valid]   (tokens)  {\textbf{3.} Se emite un token de sesión (válido por 30 minutos)};
+\node[box, fill=gray!5,  below=0.6cm of tokens]  (request) {\textbf{4.} El cliente incluye el token en cada petición};
+\node[dec,               below=0.6cm of request] (tokval)  {¿Sesión activa y con permiso?};
+\node[box, fill=gray!10, below=0.6cm of tokval]  (exec)    {\textbf{5.} Se ejecuta la operación y se devuelve el resultado};
+\node[err, right=1.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
+\node[err, right=1.5cm of tokval] (err2) {Acceso denegado:\\ sesión inválida o sin permiso};
+\draw[arr] (login)   -- (verify);
+\draw[arr] (verify)  -- (valid);
+\draw[arr] (valid)   -- node[left, font=\footnotesize]{Sí} (tokens);
+\draw[arr] (valid)   -- node[above, font=\footnotesize]{No} (err1);
+\draw[arr] (tokens)  -- (request);
 \draw[arr] (request) -- (tokval);
-\draw[arr] (tokval) -- node[left, font=\footnotesize]{Sí} (exec);
-\draw[arr] (tokval) -- node[above, font=\footnotesize]{No} (err2);
+\draw[arr] (tokval)  -- node[left, font=\footnotesize]{Sí} (exec);
+\draw[arr] (tokval)  -- node[above, font=\footnotesize]{No} (err2);
 \end{tikzpicture}
-\caption{Diagrama de flujo de autenticación mediante JWT}
+\caption{Diagrama de flujo de autenticación y autorización}
 \label{fig:cap3-jwt-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-\subsubsection*{Control de acceso basado en permisos}
-
-Para la autorización, cada ruta de la API declara explícitamente qué permiso necesita el usuario para acceder a ella. Antes de ejecutar cualquier operación, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada sin procesarse. Este mecanismo se apoya directamente en la estructura de roles y permisos definida en la base de datos (OE1): un usuario con rol de cajero solo puede consultar y registrar ventas, mientras que un administrador puede gestionar usuarios, productos y sucursales.
 
 \subsection{Endpoints por módulo}
 
