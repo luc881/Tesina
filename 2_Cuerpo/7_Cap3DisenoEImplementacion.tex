@@ -201,20 +201,25 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=4pt, minimum width=9.5cm, minimum height=0.82cm, align=center, font=\small},
-    arr/.style={Stealth-Stealth, thick, gray!70}
+    node distance=0.55cm,
+    box/.style={rectangle, draw, rounded corners=4pt, minimum width=9.5cm, minimum height=0.88cm, align=center, font=\small},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=gray!25, minimum width=2.8cm, minimum height=0.88cm, align=center, font=\footnotesize, text width=2.6cm},
+    biarr/.style={Stealth-Stealth, thick},
+    arr/.style={-{Stealth}, thick}
 ]
-\node[box, fill=gray!15]   (client)  {Cliente HTTP \quad (navegador / nodo sensor)};
-\node[box, fill=blue!10,   below=of client]  (router)  {Router \quad \texttt{/api/v1/\{recurso\}}};
-\node[box, fill=blue!18,   below=of router]  (auth)    {Seguridad — verificación de identidad y permisos};
-\node[box, fill=green!10,  below=of auth]    (logic)   {Lógica de negocio — validaciones de dominio y cálculos};
-\node[box, fill=orange!10, below=of logic]   (orm)     {Capa de acceso a datos};
-\node[box, fill=red!10,    below=of orm]     (db)      {PostgreSQL};
-\foreach \a/\b in {client/router, router/auth, auth/logic, logic/orm, orm/db}
-    \draw[arr] (\a) -- (\b);
+\node[box, fill=gray!20]  (client) {Cliente HTTP \quad (navegador / nodo sensor)};
+\node[box, fill=gray!5,   below=of client] (router) {\textbf{Filtro 1 — Enrutador:} dirige la petición a la operación correspondiente};
+\node[box, fill=gray!10,  below=of router] (auth)   {\textbf{Filtro 2 — Seguridad:} verifica identidad y permisos del usuario};
+\node[err,                right=of auth, xshift=0.5cm] (reject) {Petición\\rechazada};
+\node[box, fill=gray!5,   below=of auth]  (logic)  {\textbf{Filtro 3 — Reglas del negocio:} valida condiciones de la operación};
+\node[box, fill=gray!20,  below=of logic] (db)     {Base de datos — ejecuta la operación y devuelve el resultado};
+\draw[biarr] (client) -- (router);
+\draw[biarr] (router) -- (auth);
+\draw[arr]   (auth.east) -- node[above, font=\footnotesize]{No} (reject.west);
+\draw[biarr] (auth)   -- node[left,  font=\footnotesize]{Sí} (logic);
+\draw[biarr] (logic)  -- (db);
 \end{tikzpicture}
-\caption{Arquitectura en capas de la API REST}
+\caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
