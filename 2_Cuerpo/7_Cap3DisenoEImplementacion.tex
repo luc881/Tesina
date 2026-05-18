@@ -289,9 +289,7 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 
 \subsection{Endpoints por módulo}
 
-Un \textit{endpoint} es una dirección específica dentro de la API a la que los clientes envían peticiones para realizar una operación concreta, como consultar el inventario, registrar una venta o actualizar un producto. Cada endpoint combina una URL y un tipo de acción: consulta, creación, actualización o eliminación.
-
-Los 23 módulos de rutas se agrupan en seis áreas funcionales. La siguiente tabla resume la estructura y las operaciones principales de cada grupo:
+Los 23 grupos de rutas de la API se organizan en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
 
 \begin{table}[H]
 \centering
@@ -316,21 +314,11 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{table}
 
-Todos los \textit{endpoints} siguen las convenciones REST: \texttt{GET} para lectura, \texttt{POST} para creación, \texttt{PUT}/\texttt{PATCH} para actualización y \texttt{DELETE} para eliminación. Los recursos con \texttt{deleted\_at} —usuarios, sucursales, roles— aplican borrado lógico, como se describió en el OE1.
-
-\subsection{Pruebas con Pytest}
-
-La API se verificó mediante dos mecanismos complementarios. El primero es \textbf{Swagger}, la documentación interactiva generada automáticamente por FastAPI en la dirección \texttt{/docs}, que permite enviar peticiones reales a cada \textit{endpoint} directamente desde el navegador y observar las respuestas. Esto facilitó la verificación manual durante el desarrollo sin necesidad de herramientas externas.
-
-El segundo es una suite de pruebas automatizadas con \textbf{Pytest}, compuesta por \textbf{20 archivos de prueba}, uno por cada módulo funcional. Cada prueba verifica que el endpoint responde con el resultado esperado y que las operaciones críticas —como el registro de ventas, el descuento de inventario y el procesamiento de devoluciones— producen resultados correctos. Las pruebas se ejecutan sobre una base de datos de prueba independiente para no interferir con los datos reales.
+Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente —usuarios, roles, sucursales— aplican borrado lógico, como se describió en el OE1.
 
 \subsection{Despliegue en Railway}
 
-La API se desplegó en \textbf{Railway}, una plataforma de infraestructura en la nube que provisiona tanto el servidor de aplicación como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala.
-
-Railway se integra directamente con el repositorio de código: cada vez que se publica una nueva versión, el despliegue se actualiza de forma automática. Antes de recibir tráfico, la plataforma ejecuta las migraciones de base de datos pendientes, garantizando que el esquema y el código sean siempre consistentes entre sí.
-
-La información sensible —credenciales de la base de datos, clave de seguridad y parámetros de configuración del entorno— se define como variables en la plataforma, separadas del código fuente, siguiendo la práctica estándar de no incluir datos sensibles en el repositorio.
+La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tanto el servidor como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala. Cada vez que se publica una nueva versión del código, el despliegue se actualiza de forma automática.
 
 
 
