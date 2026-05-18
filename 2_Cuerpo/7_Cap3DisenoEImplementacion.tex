@@ -241,15 +241,11 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \subsection{Modelos ORM con SQLAlchemy}
 
-SQLAlchemy es una biblioteca que implementa el patrón \textbf{ORM} (\textit{Object-Relational Mapping}): en lugar de escribir consultas SQL manualmente en el código, el desarrollador trabaja con clases Python que representan las tablas de la base de datos, y la biblioteca se encarga de traducir esas operaciones al lenguaje de la base de datos. Cada tabla del esquema descrito en el OE1 tiene una clase correspondiente, organizada por módulo.
-
-Este enfoque centraliza la definición de la estructura de datos en un único lugar: cualquier modificación al esquema —agregar una columna o renombrar un campo— se refleja en toda la aplicación sin tener que buscar y actualizar consultas SQL dispersas en el código. Además, al trabajar con tipos definidos en el lenguaje, se reduce la posibilidad de errores de sintaxis o de datos que son difíciles de detectar cuando el SQL se construye manualmente.
+Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Esto permite trabajar con objetos en lugar de instrucciones SQL escritas manualmente, y centraliza la definición del esquema en un único lugar: cualquier modificación —agregar una columna, renombrar un campo— se aplica una sola vez y se refleja en toda la aplicación.
 
 \subsection{Esquemas de validación con Pydantic}
 
-Cada módulo define dos tipos de modelos distintos: el \textbf{modelo ORM} para interactuar con la base de datos, y el \textbf{esquema Pydantic} que actúa como un molde o contrato de la API: establece exactamente qué información se acepta cuando el cliente envía datos, qué campos pueden modificarse y qué se devuelve en la respuesta. Si la petición no cumple la forma esperada —por ejemplo, un precio negativo o un campo obligatorio ausente—, Pydantic la rechaza antes de que llegue a la lógica de la aplicación.
-
-Para cada recurso se definieron cuatro esquemas: \texttt{*Base} (campos comunes), \texttt{*Create} (validación al crear), \texttt{*Update} (validación al actualizar) y \texttt{*Response} (estructura de la respuesta). Esta jerarquía evita duplicar definiciones y hace explícito qué datos son públicos y cuáles son internos.
+Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato —un precio negativo, un campo requerido ausente— se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
 
 
 \subsection{Autenticación y autorización}
