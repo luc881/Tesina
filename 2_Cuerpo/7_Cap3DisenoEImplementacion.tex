@@ -158,9 +158,9 @@ Los pagos se registran en una tabla separada para soportar el cobro con más de 
 \clearpage
 \subsection{Módulo 5: Mediciones del sensor}
 
-Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena cada medición enviada por el nodo electrónico: el valor de temperatura, el valor de humedad, la marca de tiempo en que fue registrada (\texttt{recorded\_at}) y un identificador del dispositivo que la envió (\texttt{device\_id}).
+Este módulo comprende una sola tabla que almacena cada medición enviada por el nodo electrónico: la temperatura, la humedad, la fecha y hora del registro, y un identificador del dispositivo que la envió.
 
-El identificador de dispositivo se definió como cadena de texto en lugar de una llave foránea hacia una tabla de dispositivos, ya que el sistema opera con un único nodo sensor. Crear una tabla de dispositivos completa representaría complejidad estructural sin un beneficio funcional inmediato; el identificador como cadena permite distinguir futuros nodos adicionales sin necesidad de modificar el esquema.
+El identificador se definió como un texto simple en lugar de crear una tabla de dispositivos aparte, ya que el sistema opera con un único nodo sensor. Agregar esa tabla representaría complejidad sin beneficio inmediato; el identificador como texto es suficiente para distinguir nodos adicionales en el futuro sin necesidad de modificar el esquema.
 
 % TODO: subir 0_imagenes/Cap3/DiagramaSensor.png a Overleaf para descomentar
 %\begin{figure}[H]
