@@ -60,11 +60,11 @@ Esta separación hace que las tablas de un módulo puedan crecer o modificarse s
 \clearpage
 \subsection{Módulo 1: Autenticación y control de acceso}
 
-Este módulo está formado por cinco tablas: \texttt{users} (usuarios), \texttt{roles}, \texttt{permissions} (permisos), \texttt{role\_has\_permissions} y \texttt{branches} (sucursales).
+Este módulo agrupa las cinco tablas relacionadas con el acceso al sistema: usuarios, roles, permisos, la relación entre roles y permisos, y sucursales.
 
-Se implementó el patrón \textbf{RBAC} (\textit{Role-Based Access Control}, control de acceso basado en roles): en lugar de asignar permisos directamente a cada usuario, se definen roles —por ejemplo, \textit{administrador} o \textit{empleado}— y cada rol agrupa un conjunto de permisos. El usuario únicamente recibe un rol asignado. La ventaja de esta estructura es que modificar los privilegios de un grupo entero de usuarios requiere únicamente actualizar el rol, no cada cuenta por separado. Los vínculos entre roles y permisos se almacenan en la tabla \texttt{role\_has\_permissions}, que funciona como tabla de unión para la relación de muchos a muchos entre ambas entidades.
+El control de acceso se estructuró por roles: cada usuario pertenece a un rol —por ejemplo, \textit{administrador} o \textit{cajero}— y el rol define qué operaciones puede realizar. Esto simplifica la administración: cambiar los privilegios de un grupo de usuarios requiere modificar únicamente el rol, no cada cuenta individualmente.
 
-Las tablas \texttt{users}, \texttt{roles} y \texttt{branches} incluyen una columna \texttt{deleted\_at}. Cuando un usuario o sucursal es dado de baja, en lugar de eliminar el registro se anota la fecha en esa columna. Esta estrategia se denomina \textbf{borrado lógico} y fue necesaria porque las ventas registradas referencian al usuario que las realizó: si ese registro se eliminara físicamente, el historial de ventas quedaría con referencias rotas o habría que duplicar la información del usuario dentro de cada venta.
+Para los registros que no deben eliminarse permanentemente —usuarios, roles y sucursales— se optó por conservar el registro en la base de datos y anotar la fecha de baja en una columna adicional. Esto es necesario porque el historial de ventas referencia al usuario que realizó cada transacción; eliminar físicamente ese registro rompería esa relación.
 
 % -------------------------------------------------------
 % DIAGRAMA 1 — Módulo de Autenticación y Control de Acceso
@@ -160,6 +160,14 @@ Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena c
 
 El identificador de dispositivo se definió como cadena de texto en lugar de una llave foránea hacia una tabla de dispositivos, ya que el sistema opera con un único nodo sensor. Crear una tabla de dispositivos completa representaría complejidad estructural sin un beneficio funcional inmediato; el identificador como cadena permite distinguir futuros nodos adicionales sin necesidad de modificar el esquema.
 
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=1\textwidth]{0_imagenes/Cap3/DiagramaSensor.png}}
+    \caption{Diagrama relacional del módulo de mediciones del sensor}
+    \label{fig:cap3-diagrama-sensor}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Gestión de cambios con Alembic}
 
@@ -168,6 +176,8 @@ El esquema no fue diseñado de forma estática desde el inicio, sino que evoluci
 Se generaron \textbf{13 migraciones} a lo largo del desarrollo. Dos de ellas ilustran el proceso iterativo: la primera fue la conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}, necesaria tras detectar discrepancias en totales causadas por la aritmética de punto flotante; la segunda fue la adición de \texttt{deleted\_at} a las tablas cuya eliminación física rompería el historial de ventas. Ambos cambios se aplicaron sin pérdida de información ni rediseño del esquema.
 
 El uso de Alembic garantizó además que el entorno de desarrollo local y el entorno de producción desplegado en Railway mantuvieran siempre la misma versión del esquema, eliminando inconsistencias entre ambos entornos.
+
+Con esta estructura, el esquema cubre la totalidad de las entidades descritas en el objetivo: el módulo de autenticación gestiona los usuarios y el control de acceso, el catálogo y el inventario cubren los productos y sus niveles de existencia por lote, el módulo de ventas registra las transacciones comerciales y su trazabilidad, y el módulo de sensor almacena las mediciones ambientales del nodo electrónico.
 
 
 
@@ -503,7 +513,7 @@ Una característica de diseño relevante es que el ciclo operativo utiliza \text
 
 Un requisito de diseño fue que el nodo no tuviera credenciales WiFi escritas directamente en el firmware, ya que eso obligaría a recompilar y recargar el programa cada vez que se cambie la red o el dispositivo se instale en una ubicación distinta. Para resolver esto se utilizó la biblioteca \textbf{WiFiManager}, que implementa un mecanismo de provisión mediante portal cautivo:
 
-En el primer arranque, el ESP32 no encuentra credenciales guardadas y crea una red WiFi temporal de nombre \texttt{PharmaTrack-Sensor}. El técnico de instalación se conecta a esa red desde un teléfono o computadora, accede a una página de configuración que aparece automáticamente en el navegador, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales en su memoria interna y se conecta. En arranques posteriores, utiliza las credenciales guardadas de forma automática sin intervención del usuario.
+En el primer arranque, el ESP32 no encuentra credenciales guardadas y crea una red WiFi temporal de nombre \texttt{Sensor-Farmacia}. El técnico de instalación se conecta a esa red desde un teléfono o computadora, accede a una página de configuración que aparece automáticamente en el navegador, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales en su memoria interna y se conecta. En arranques posteriores, utiliza las credenciales guardadas de forma automática sin intervención del usuario.
 
 Si en algún momento se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio del ESP32 durante tres segundos borra las credenciales guardadas y el dispositivo vuelve al modo de provisión.
 
@@ -517,7 +527,7 @@ Antes de enviar cada lectura a la API, el firmware verifica que los valores est�
 
 \subsection{Envío de datos a la API}
 
-Cada lectura válida se envía al endpoint \texttt{/api/v1/sensor-readings/} de la API mediante una petición \textbf{POST HTTPS}. El uso de HTTPS garantiza que los datos viajan cifrados entre el nodo y el servidor, lo cual es relevante dado que la comunicación atraviesa la red WiFi del establecimiento y redes públicas de Internet hasta el servidor en Railway.
+Cada lectura válida se envía al endpoint \texttt{/api/v1/sensor-readings} de la API mediante una petición \textbf{POST HTTPS}. El uso de HTTPS garantiza que los datos viajan cifrados entre el nodo y el servidor, lo cual es relevante dado que la comunicación atraviesa la red WiFi del establecimiento y redes públicas de Internet hasta el servidor en Railway.
 
 El cuerpo de la petición es un objeto JSON con tres campos: la temperatura, la humedad y un identificador del dispositivo. El identificador permite que la API registre qué nodo envió cada lectura, relevante si en el futuro se despliegan múltiples nodos en distintas áreas o sucursales.
 
@@ -546,6 +556,17 @@ El quinto objetivo específico comprende dos componentes de integración: el dis
 Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó un gabinete personalizado que se fabricó mediante \textbf{impresión 3D}. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja de propósito general disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
 
 El diseño se realizó en \textbf{Bambu Studio}, el software de preparación de modelos tridimensionales para impresoras de la línea Bambu Lab. El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares dimensionadas con exactitud para exponer las pantallas OLED al frente. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos, lo que simplifica el acceso al interior para mantenimiento o ajustes.
+
+Las decisiones de diseño mecánico respondieron a restricciones concretas. El ensamble a presión —en lugar de tornillos— se eligió porque los componentes electrónicos internos pueden requerir ajuste o sustitución durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje por presión, abrir y cerrar el gabinete no deteriora el mecanismo de cierre. En cuanto al espacio, la tapa frontal debe acomodar tres módulos OLED dispuestos en fila horizontal con sus conectores traseros orientados hacia la base, lo que determinó el ancho mínimo del gabinete y la profundidad de las ventanas. La ventilación del sensor AHT10 se resolvió dejando una ranura en la base, lo suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del ambiente de almacenamiento hasta el sensor.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/GabineteFoto.png}}
+    \caption{Gabinete impreso en 3D con las tres pantallas OLED y el nodo sensor ensamblados}
+    \label{fig:cap3-gabinete}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 El resultado es un dispositivo autónomo que puede colocarse sobre una superficie o fijarse en el área de almacenamiento, visible sin necesidad de conexión a ningún monitor externo ni acceso a la aplicación web.
 
