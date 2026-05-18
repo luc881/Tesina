@@ -186,23 +186,6 @@ Gracias a SQLAlchemy, el sistema puede:
 
 Esto contribuye a un desarrollo más ordenado y reduce la probabilidad de errores en el manejo de la información.
 
-\subsection{Alembic: Control de Versiones de la Base de Datos}
-
-Durante el desarrollo del sistema se utilizó \textbf{Alembic}, una herramienta especializada en la gestión de versiones de bases de datos que trabaja en conjunto con SQLAlchemy. Su función principal es permitir la modificación estructurada y controlada del esquema de la base de datos a lo largo del tiempo.
-
-En un proyecto en constante evolución, es común que las tablas requieran cambios, como la adición de nuevas columnas, la creación de relaciones entre entidades o la modificación de restricciones. Realizar estos cambios manualmente puede generar errores y afectar la integridad de la información. Alembic resuelve este problema mediante el uso de \textbf{migraciones}, que son archivos que describen de manera explícita las modificaciones realizadas en la estructura de la base de datos.
-
-Entre las principales ventajas de utilizar Alembic se encuentran:
-
-\begin{itemize}
-    \item \textbf{Control de versiones del esquema:} Permite llevar un historial ordenado de los cambios estructurales en la base de datos.
-    \item \textbf{Actualización controlada:} Facilita aplicar o revertir modificaciones de manera segura.
-    \item \textbf{Integración con SQLAlchemy:} Detecta cambios en los modelos definidos en Python y genera scripts de migración correspondientes.
-    \item \textbf{Reducción de errores:} Disminuye riesgos asociados a cambios manuales en la estructura de las tablas.
-\end{itemize}
-
-El uso de Alembic en este proyecto garantiza que la base de datos pueda evolucionar conforme crecen los requerimientos del sistema, manteniendo consistencia, trazabilidad y buenas prácticas de desarrollo.
-
 \subsection{Railway: Plataforma de Despliegue del Backend}
 
 Para el alojamiento y ejecución del backend en un entorno accesible desde internet se utiliza \textbf{Railway}, una plataforma de infraestructura en la nube que permite desplegar aplicaciones y bases de datos de manera sencilla.

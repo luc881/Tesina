@@ -16,9 +16,9 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 % OE 1: BASE DE DATOS
 % =============================================
 
-\section{Desarrollo de la base de datos en PostgreSQL}
+\section{Objetivo Específico 1 — Desarrollo de la base de datos en PostgreSQL}
 
-Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales, y su evolución a lo largo del desarrollo fue gestionada mediante \textbf{13 archivos de migración} versionados con Alembic.
+Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
 \subsection{Selección de PostgreSQL}
 
@@ -84,13 +84,13 @@ Para los registros que no deben eliminarse permanentemente —usuarios, roles y 
 \clearpage
 \subsection{Módulo 2: Catálogo de productos}
 
-Este módulo administra la información de los medicamentos mediante seis tablas: \texttt{products}, \texttt{product\_master}, \texttt{product\_categories}, \texttt{product\_brands}, \texttt{ingredients} y \texttt{product\_has\_ingredients}.
+Este módulo gestiona la información de los medicamentos a través de seis tablas: el catálogo general de productos, los medicamentos genéricos, las categorías, las marcas, los ingredientes activos y la relación entre productos e ingredientes.
 
-Se separó \texttt{product\_master} (medicamento genérico) de \texttt{products} (presentación específica). Por ejemplo, \textit{Paracetamol} es un único registro en \texttt{product\_master}, y sus presentaciones concretas —\textit{Paracetamol 500~mg 20 tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— son registros distintos en \texttt{products} que apuntan al mismo genérico. Esto evita duplicar el nombre del principio activo en cada presentación y permite generar reportes agrupados por nombre genérico sin procesamiento adicional.
+Se separó el medicamento genérico de sus presentaciones comerciales. Por ejemplo, \textit{Paracetamol} existe como un único registro genérico, y cada presentación concreta —\textit{Paracetamol 500~mg tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— es un registro distinto que apunta a ese genérico. Esto evita repetir el nombre del principio activo en cada presentación y permite agrupar reportes por nombre genérico sin trabajo adicional.
 
-La tabla \texttt{product\_categories} implementa una \textbf{jerarquía autorelacionada}: la columna \texttt{parent\_id} referencia a la misma tabla, lo que permite representar categorías anidadas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) con una única tabla y sin límite fijo de niveles de profundidad.
+Las categorías se organizan en una jerarquía de niveles: una categoría puede contener subcategorías, y estas pueden contener otras más específicas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}). Todo esto se almacena en una sola tabla, sin límite fijo de profundidad.
 
-La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra qué ingredientes activos contiene cada producto, junto con la cantidad y la unidad de medida (mg, g, ml, UI). Almacenar la composición en la base de datos —en lugar de solo en la etiqueta del producto— hace posible consultar o filtrar medicamentos por principio activo directamente desde el sistema.
+La relación entre productos e ingredientes activos se registra con la cantidad y unidad de medida de cada componente. Guardar esta información en la base de datos —no solo en la etiqueta física— permite buscar o filtrar medicamentos por principio activo directamente desde la aplicación.
 
 % -------------------------------------------------------
 % DIAGRAMA 2 — Módulo de Catálogo de Productos
@@ -98,7 +98,7 @@ La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra 
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=1\textwidth]{0_imagenes/Cap3/DiagramaCatalogo.png}}
+    \fbox{\includegraphics[width=0.8\textwidth]{0_imagenes/Cap3/DiagramaCatalogo.png}}
     \caption{Diagrama relacional del módulo de catálogo de productos}
     \label{fig:cap3-diagrama-catalogo}
     \vspace{0.2cm}
@@ -108,11 +108,11 @@ La tabla \texttt{product\_has\_ingredients} es una tabla de unión que registra 
 \clearpage
 \subsection{Módulo 3: Inventario y compras}
 
-Este módulo controla las existencias físicas y el abastecimiento mediante cuatro tablas: \texttt{product\_batches} (lotes), \texttt{suppliers} (proveedores), \texttt{purchases} (órdenes de compra) y \texttt{purchase\_details} (líneas de cada orden).
+Este módulo controla las existencias físicas y el abastecimiento. Sus tablas registran los lotes de cada producto, los proveedores y las órdenes de compra con el detalle de cada línea.
 
-La tabla central del módulo es \texttt{product\_batches}, que registra cada \textbf{lote} de un producto con su código de lote, fecha de caducidad y cantidad disponible en ese lote. Gestionar el inventario a nivel de lote es técnicamente necesario en una farmacia porque los medicamentos tienen fecha de caducidad por lote, y las regulaciones de buenas prácticas de almacenamiento farmacéutico establecen que deben despacharse primero los lotes que vencen antes, criterio conocido como \textbf{FEFO} (\textit{First Expired, First Out}). Sin este nivel de detalle, el sistema conocería cuántas unidades hay de un producto, pero no podría determinar cuál lote se consumió en cada salida.
+El inventario se gestiona a nivel de \textbf{lote}, no solo por producto. Cada lote tiene su propio código, fecha de caducidad y cantidad disponible. Esto es necesario en una farmacia porque las regulaciones de buenas prácticas de almacenamiento establecen que los medicamentos deben despacharse en orden de caducidad: primero los lotes que vencen antes. Sin este desglose por lote, el sistema sabría cuántas unidades hay de un producto, pero no podría determinar cuál lote se está consumiendo en cada venta.
 
-Para la columna \texttt{lot\_code} se diseñó un \textbf{índice único parcial} que aplica únicamente cuando el valor no es nulo. Esta restricción resuelve una situación concreta identificada durante el análisis del negocio: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Un índice único convencional rechazaría varias entradas con valor nulo para el mismo producto, impidiendo registrar estos ingresos. El índice parcial permite tantos lotes sin código como sea necesario, pero impide que dos lotes del mismo producto compartan el mismo código no nulo, previniendo registros duplicados por error.
+Se identificó durante el análisis una situación concreta: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Para no bloquear ese registro, la restricción de unicidad sobre el código de lote se configuró de forma que aplique solo cuando el código existe —si no hay código, se permiten múltiples entradas del mismo producto sin conflicto. Cuando sí hay código, no se permite duplicarlo para el mismo producto, previniendo registros erróneos.
 
 % -------------------------------------------------------
 % DIAGRAMA 3 — Módulo de Inventario y Compras
@@ -120,7 +120,7 @@ Para la columna \texttt{lot\_code} se diseñó un \textbf{índice único parcial
 % -------------------------------------------------------
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=1\textwidth]{0_imagenes/Cap3/DiagramaInventario.png}}
+    \fbox{\includegraphics[width=0.8\textwidth]{0_imagenes/Cap3/DiagramaInventario.png}}
     \caption{Diagrama relacional del módulo de inventario y compras}
     \label{fig:cap3-diagrama-inventario}
     \vspace{0.2cm}
@@ -130,15 +130,15 @@ Para la columna \texttt{lot\_code} se diseñó un \textbf{índice único parcial
 \clearpage
 \subsection{Módulo 4: Registro de ventas}
 
-Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
+Este módulo registra las transacciones comerciales a través de cinco tablas: la venta en sí, el detalle de productos incluidos, el vínculo con los lotes descontados, los pagos y las devoluciones.
 
-Se utilizó un diseño de \textbf{cabecera-detalle}: \texttt{sales} almacena los datos generales de cada transacción (empleado que la realizó, sucursal, descuento, impuesto y total), y \texttt{sale\_details} registra cada producto incluido en esa venta con su cantidad y precio unitario. Separar el encabezado de las líneas de detalle permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea, y facilita calcular totales agregados con consultas directas a la base de datos.
+Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción —empleado, sucursal, descuento y total— y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
 
-La tabla \texttt{sale\_batch\_usage} vincula cada línea de venta con el lote específico del que se descontaron las unidades. Esta estructura proporciona \textbf{trazabilidad completa de cada lote}: dado un número de lote, es posible identificar en qué ventas fue despachado. En el contexto farmacéutico, esto resulta necesario ante un retiro de mercado o una alerta sanitaria, ya que permite determinar exactamente qué ventas contienen el lote afectado.
+Adicionalmente, cada línea de detalle queda vinculada al lote específico del que se descontaron las unidades. Esto permite rastrear, dado un lote, en qué ventas fue despachado. En el contexto farmacéutico es relevante ante un retiro de mercado: el sistema puede identificar exactamente qué ventas contienen el lote afectado.
 
-La columna de estado en \texttt{sales} distingue tres situaciones posibles: venta \textbf{en progreso}, \textbf{completada} o \textbf{cancelada}. Mientras la venta está en progreso, el inventario no se descuenta todavía; el descuento ocurre únicamente al confirmar la transacción. Esto evita que una venta incompleta o cancelada descuente existencias de forma prematura.
+La venta puede encontrarse en uno de tres estados: en progreso, completada o cancelada. El descuento del inventario ocurre únicamente al confirmar la transacción, no antes. Esto evita que una venta que no se concreta descuente existencias.
 
-La tabla \texttt{sale\_payments} se separó de \texttt{sales} para soportar \textbf{pagos divididos}: una misma transacción puede liquidarse con dos métodos de pago distintos —parte en efectivo, parte con tarjeta— registrando cada pago como una fila independiente con su método e importe.
+Los pagos se registran en una tabla separada para soportar el cobro con más de un método: una transacción puede liquidarse parte en efectivo y parte con tarjeta, registrando cada pago de forma independiente.
 
 % -------------------------------------------------------
 % DIAGRAMA 4 — Módulo de Registro de Ventas
@@ -156,9 +156,9 @@ La tabla \texttt{sale\_payments} se separó de \texttt{sales} para soportar \tex
 \clearpage
 \subsection{Módulo 5: Mediciones del sensor}
 
-Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena cada medición enviada por el nodo electrónico: el valor de temperatura, el valor de humedad, la marca de tiempo en que fue registrada (\texttt{recorded\_at}) y un identificador del dispositivo que la envió (\texttt{device\_id}).
+Este módulo comprende una sola tabla que almacena cada medición enviada por el nodo electrónico: la temperatura, la humedad, la fecha y hora del registro, y un identificador del dispositivo que la envió.
 
-El identificador de dispositivo se definió como cadena de texto en lugar de una llave foránea hacia una tabla de dispositivos, ya que el sistema opera con un único nodo sensor. Crear una tabla de dispositivos completa representaría complejidad estructural sin un beneficio funcional inmediato; el identificador como cadena permite distinguir futuros nodos adicionales sin necesidad de modificar el esquema.
+El identificador se definió como un texto simple en lugar de crear una tabla de dispositivos aparte, ya que el sistema opera con un único nodo sensor. Agregar esa tabla representaría complejidad sin beneficio inmediato; el identificador como texto es suficiente para distinguir nodos adicionales en el futuro sin necesidad de modificar el esquema.
 
 % TODO: subir 0_imagenes/Cap3/DiagramaSensor.png a Overleaf para descomentar
 %\begin{figure}[H]
@@ -170,14 +170,6 @@ El identificador de dispositivo se definió como cadena de texto en lugar de una
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
-\subsection{Gestión de cambios con Alembic}
-
-El esquema no fue diseñado de forma estática desde el inicio, sino que evolucionó de manera iterativa conforme el desarrollo avanzó y se identificaron ajustes necesarios. Para gestionar esta evolución se utilizó \textbf{Alembic}, una herramienta que actúa como control de versiones para el esquema de la base de datos: cada cambio estructural —crear una tabla, añadir una columna, modificar un tipo de dato— se describe en un archivo de migración numerado que puede aplicarse o revertirse de forma controlada y reproducible.
-
-Se generaron \textbf{13 migraciones} a lo largo del desarrollo. Dos de ellas ilustran el proceso iterativo: la primera fue la conversión de columnas monetarias de \texttt{DOUBLE} a \texttt{NUMERIC}, necesaria tras detectar discrepancias en totales causadas por la aritmética de punto flotante; la segunda fue la adición de \texttt{deleted\_at} a las tablas cuya eliminación física rompería el historial de ventas. Ambos cambios se aplicaron sin pérdida de información ni rediseño del esquema.
-
-El uso de Alembic garantizó además que el entorno de desarrollo local y el entorno de producción desplegado en Railway mantuvieran siempre la misma versión del esquema, eliminando inconsistencias entre ambos entornos.
-
 Con esta estructura, el esquema cubre la totalidad de las entidades descritas en el objetivo: el módulo de autenticación gestiona los usuarios y el control de acceso, el catálogo y el inventario cubren los productos y sus niveles de existencia por lote, el módulo de ventas registra las transacciones comerciales y su trazabilidad, y el módulo de sensor almacena las mediciones ambientales del nodo electrónico.
 
 
@@ -188,23 +180,23 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
-\section{Desarrollo de la API REST con FastAPI}
+\section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
 
-Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python utilizando el \textit{framework} FastAPI. Una API REST es una interfaz de comunicación que permite a los clientes —la aplicación web y el nodo sensor— enviar peticiones HTTP y recibir datos estructurados en formato JSON. La API resultante expone \textbf{23 módulos de rutas} organizados bajo el prefijo \texttt{/api/v1} y gestiona las operaciones de inventario, ventas, usuarios, compras y lecturas del sensor.
+Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
 
 \subsection{Selección de FastAPI}
 
-Se eligió FastAPI en lugar de alternativas como Flask o Django REST Framework por tres razones técnicas concretas.
+Se eligió FastAPI sobre alternativas como Flask o Django por dos razones concretas.
 
-La primera es la \textbf{validación automática de datos de entrada} a través de Pydantic. Cada petición es verificada contra los tipos y restricciones definidos en los esquemas antes de que el código del \textit{endpoint} se ejecute; si un campo obligatorio falta o un valor está fuera de rango, FastAPI devuelve un error descriptivo sin necesidad de código de validación manual.
+La primera es que verifica automáticamente que los datos que llegan en cada petición sean correctos antes de procesarlos. Si algo no cumple lo esperado, rechaza la petición con un mensaje descriptivo sin necesidad de escribir ese código de validación manualmente.
 
-La segunda es el soporte nativo para \textbf{programación asíncrona} (\texttt{async/await}), que permite al servidor atender múltiples peticiones concurrentes sin bloquear el hilo de ejecución durante las operaciones de entrada/salida —como las consultas a PostgreSQL— mejorando la capacidad de respuesta bajo carga simultánea.
-
-La tercera es la \textbf{generación automática de documentación interactiva} en \texttt{/docs} (estándar OpenAPI), que describe cada \textit{endpoint}, sus parámetros y sus posibles respuestas directamente a partir del código. Esto eliminó la necesidad de mantener documentación separada durante el desarrollo.
+La segunda es que genera automáticamente una página de documentación interactiva donde se puede ver cada operación disponible, sus parámetros y las posibles respuestas. Esto permitió verificar el funcionamiento de la API directamente desde el navegador durante el desarrollo, sin herramientas adicionales.
 
 \subsection{Arquitectura en capas}
 
-La API se estructuró en capas con responsabilidades distintas: cada petición HTTP desciende por la pila hasta la base de datos y la respuesta asciende por el mismo camino. Esta separación garantiza que los cambios en una capa —por ejemplo, modificar la lógica de negocio o sustituir el motor de base de datos— no requieran modificar las demás.
+La API funciona como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
+
+El primer filtro actúa como un enrutador: dependiendo de la dirección de la petición, determina a qué operación corresponde y la redirige al área correspondiente, de forma similar a como un router de red decide por qué camino enviar el tráfico. El segundo filtro verifica que el usuario esté identificado y que tenga permiso para realizar esa operación; si no cumple alguna de las dos condiciones, la petición es rechazada sin continuar. El tercero aplica las reglas del negocio, como confirmar que hay existencias suficientes antes de registrar una venta. El último ejecuta la operación sobre la base de datos y devuelve el resultado al cliente.
 
 \begin{figure}[H]
 \centering
@@ -227,8 +219,6 @@ La API se estructuró en capas con responsabilidades distintas: cada petición H
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-El \textbf{enrutador} recibe cada petición y la dirige al componente correcto según la dirección solicitada; la \textbf{capa de seguridad} verifica que el usuario esté identificado y tenga autorización para realizar la operación antes de continuar; la \textbf{lógica de negocio} aplica las reglas del sistema —por ejemplo, comprobar que haya stock suficiente antes de registrar una venta—; la \textbf{capa de acceso a datos} comunica esas operaciones con la base de datos; y \textbf{PostgreSQL} almacena y recupera la información.
 
 \subsection{Modelos ORM con SQLAlchemy}
 
@@ -339,7 +329,7 @@ La información sensible —credenciales de la base de datos, clave de seguridad
 % =============================================
 
 \clearpage
-\section{Desarrollo de la interfaz web con React}
+\section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
 
 Para cumplir con el tercer objetivo específico se diseñó e implementó la interfaz de usuario como una \textbf{aplicación web de página única} (\textit{Single Page Application}, SPA): una vez cargada en el navegador, las transiciones entre vistas ocurren sin recargar completamente la página, lo que mejora la fluidez de la experiencia para el usuario. La interfaz se comunica con la API desarrollada en el OE2 para consultar y registrar información. El resultado es una aplicación con \textbf{dieciséis módulos de navegación} cubiertos por una biblioteca de más de cuarenta componentes de interfaz reutilizables, desplegada en la plataforma Vercel.
 
@@ -440,7 +430,7 @@ Las variables de configuración —principalmente la URL de la API— se definen
 % =============================================
 
 \clearpage
-\section{Desarrollo del nodo sensor con ESP32}
+\section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
 
 Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico de monitoreo ambiental que mide temperatura y humedad relativa dentro del área de almacenamiento de la farmacia y envía esas lecturas a la API desarrollada en el OE2. El nodo está construido sobre un microcontrolador \textbf{ESP32-C5} con un sensor \textbf{AHT10}, y su firmware fue programado en C++ utilizando el entorno de desarrollo Arduino.
 
@@ -548,7 +538,7 @@ Esta incorporación mejora la usabilidad del nodo durante la instalación y el m
 % =============================================
 
 \clearpage
-\section{Integración física y lector de código de barras}
+\section{Objetivo Específico 5 — Integración física y lector de código de barras}
 
 El quinto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
 
