@@ -282,7 +282,7 @@ El uso del ESP32-C5 permite que la captura de datos ambientales sea automática 
     \centering
     \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Cap2MarcoTeorico/ESP32-C5-DevKitC-1_v1.1_callouts.png}}
     \caption{Microcontrolador ESP32-C5}
-    \label{fig:mi_imagen}
+    \label{fig:cap2-esp32c5}
     
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} \url{https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c5/_images/ESP32-C5-DevKitC-1_v1.1_callouts.png}
@@ -293,7 +293,7 @@ El uso del ESP32-C5 permite que la captura de datos ambientales sea automática 
 
 Durante el despliegue de dispositivos IoT en entornos reales, uno de los desafíos frecuentes es la configuración de la red inalámbrica sin necesidad de recompilar el firmware o acceder físicamente al código fuente. Para resolver esta problemática, el sistema utiliza la librería \textbf{WiFiManager}, desarrollada por tzapu, que permite gestionar las credenciales Wi-Fi del ESP32-C5 de manera dinámica desde cualquier dispositivo con navegador web.
 
-El funcionamiento de WiFiManager se basa en el siguiente mecanismo: si el microcontrolador no encuentra una red Wi-Fi previamente configurada, genera automáticamente un punto de acceso inalámbrico (Access Point) con el nombre \texttt{PharmaTrack-Sensor}. El usuario puede conectarse a dicho punto desde un teléfono o computadora, acceder a un portal de configuración web y seleccionar la red deseada ingresando sus credenciales. Una vez guardada la información, el dispositivo se reconecta automáticamente a la red configurada cada vez que se reinicia.
+El funcionamiento de WiFiManager se basa en el siguiente mecanismo: si el microcontrolador no encuentra una red Wi-Fi previamente configurada, genera automáticamente un punto de acceso inalámbrico (Access Point) con el nombre \texttt{Sensor-Farmacia}. El usuario puede conectarse a dicho punto desde un teléfono o computadora, acceder a un portal de configuración web y seleccionar la red deseada ingresando sus credenciales. Una vez guardada la información, el dispositivo se reconecta automáticamente a la red configurada cada vez que se reinicia.
 
 Adicionalmente, el sistema incorpora un mecanismo de restablecimiento de credenciales mediante el botón BOOT del ESP32-C5 (GPIO~0). Al mantener presionado dicho botón durante más de tres segundos, el sistema borra las credenciales almacenadas y reinicia el portal de configuración, permitiendo cambiar la red de forma sencilla sin necesidad de herramientas adicionales.
 
@@ -332,7 +332,7 @@ De esta forma, el sistema contribuye al cumplimiento de buenas prácticas de alm
     \centering
     \fbox{\includegraphics[width=0.4\textwidth]{0_imagenes/Cap2MarcoTeorico/AR3107-AHT10-Sensor-de-Temperatura-y-Humedad-V2-800x800.jpg}}
     \caption{Sensor AHT10}
-    \label{fig:mi_imagen}
+    \label{fig:cap2-aht10}
     
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} \url{https://uelectronics.com/wp-content/uploads/2022/04/AR3107-AHT10-Sensor-de-Temperatura-y-Humedad-V2-800x800.jpg}

@@ -160,14 +160,15 @@ Este módulo comprende una sola tabla, \texttt{sensor\_readings}, que almacena c
 
 El identificador de dispositivo se definió como cadena de texto en lugar de una llave foránea hacia una tabla de dispositivos, ya que el sistema opera con un único nodo sensor. Crear una tabla de dispositivos completa representaría complejidad estructural sin un beneficio funcional inmediato; el identificador como cadena permite distinguir futuros nodos adicionales sin necesidad de modificar el esquema.
 
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=1\textwidth]{0_imagenes/Cap3/DiagramaSensor.png}}
-    \caption{Diagrama relacional del módulo de mediciones del sensor}
-    \label{fig:cap3-diagrama-sensor}
-    \vspace{0.2cm}
-    \footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
+% TODO: subir 0_imagenes/Cap3/DiagramaSensor.png a Overleaf para descomentar
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=1\textwidth]{0_imagenes/Cap3/DiagramaSensor.png}}
+%    \caption{Diagrama relacional del módulo de mediciones del sensor}
+%    \label{fig:cap3-diagrama-sensor}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
 \subsection{Gestión de cambios con Alembic}
 
@@ -559,14 +560,15 @@ El diseño se realizó en \textbf{Bambu Studio}, el software de preparación de 
 
 Las decisiones de diseño mecánico respondieron a restricciones concretas. El ensamble a presión —en lugar de tornillos— se eligió porque los componentes electrónicos internos pueden requerir ajuste o sustitución durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje por presión, abrir y cerrar el gabinete no deteriora el mecanismo de cierre. En cuanto al espacio, la tapa frontal debe acomodar tres módulos OLED dispuestos en fila horizontal con sus conectores traseros orientados hacia la base, lo que determinó el ancho mínimo del gabinete y la profundidad de las ventanas. La ventilación del sensor AHT10 se resolvió dejando una ranura en la base, lo suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del ambiente de almacenamiento hasta el sensor.
 
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/GabineteFoto.png}}
-    \caption{Gabinete impreso en 3D con las tres pantallas OLED y el nodo sensor ensamblados}
-    \label{fig:cap3-gabinete}
-    \vspace{0.2cm}
-    \footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
+% TODO: subir 0_imagenes/Cap3/GabineteFoto.png a Overleaf para descomentar
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/GabineteFoto.png}}
+%    \caption{Gabinete impreso en 3D con las tres pantallas OLED y el nodo sensor ensamblados}
+%    \label{fig:cap3-gabinete}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
 El resultado es un dispositivo autónomo que puede colocarse sobre una superficie o fijarse en el área de almacenamiento, visible sin necesidad de conexión a ningún monitor externo ni acceso a la aplicación web.
 
