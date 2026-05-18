@@ -182,17 +182,15 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 \clearpage
 \section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
 
-Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python utilizando el \textit{framework} FastAPI. Una API REST es una interfaz de comunicación que permite a los clientes —la aplicación web y el nodo sensor— enviar peticiones HTTP y recibir datos estructurados en formato JSON. La API resultante expone \textbf{23 módulos de rutas} organizados bajo el prefijo \texttt{/api/v1} y gestiona las operaciones de inventario, ventas, usuarios, compras y lecturas del sensor.
+Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes —la aplicación web y el nodo sensor— y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
 
 \subsection{Selección de FastAPI}
 
-Se eligió FastAPI en lugar de alternativas como Flask o Django REST Framework por tres razones técnicas concretas.
+Se eligió FastAPI sobre alternativas como Flask o Django por dos razones concretas.
 
-La primera es la \textbf{validación automática de datos de entrada} a través de Pydantic. Cada petición es verificada contra los tipos y restricciones definidos en los esquemas antes de que el código del \textit{endpoint} se ejecute; si un campo obligatorio falta o un valor está fuera de rango, FastAPI devuelve un error descriptivo sin necesidad de código de validación manual.
+La primera es que verifica automáticamente que los datos que llegan en cada petición sean correctos —tipo de dato, campos obligatorios, rangos válidos— antes de procesarlos. Si algo no cumple lo esperado, rechaza la petición con un mensaje descriptivo sin necesidad de escribir ese código de validación manualmente.
 
-La segunda es el soporte nativo para \textbf{programación asíncrona} (\texttt{async/await}), que permite al servidor atender múltiples peticiones concurrentes sin bloquear el hilo de ejecución durante las operaciones de entrada/salida —como las consultas a PostgreSQL— mejorando la capacidad de respuesta bajo carga simultánea.
-
-La tercera es la \textbf{generación automática de documentación interactiva} en \texttt{/docs} (estándar OpenAPI), que describe cada \textit{endpoint}, sus parámetros y sus posibles respuestas directamente a partir del código. Esto eliminó la necesidad de mantener documentación separada durante el desarrollo.
+La segunda es que genera automáticamente una página de documentación interactiva donde se puede ver cada operación disponible, sus parámetros y las posibles respuestas. Esto permitió verificar el funcionamiento de la API directamente desde el navegador durante el desarrollo, sin herramientas adicionales.
 
 \subsection{Arquitectura en capas}
 
