@@ -1,2 +1,150 @@
 \chapterstar{Glosario de Términos}
-\lipsum[15]
+
+{\renewcommand{\arraystretch}{1.45}
+\begin{longtable}{@{\hspace{4pt}}p{3.8cm}p{10.2cm}@{\hspace{4pt}}}
+
+\toprule
+\textbf{Término} & \textbf{Definición} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Término} & \textbf{Definición} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{2}{r@{\hspace{4pt}}}{\small\textit{Continúa en la siguiente página}} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+Alerta automatizada &
+Notificación generada de forma automática por el sistema cuando una variable supervisada supera un umbral predefinido, como una temperatura fuera del rango permitido o un nivel de inventario inferior al mínimo establecido. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Arquitectura en capas &
+Modelo de diseño de software en el que el sistema se divide en niveles funcionales independientes —como la interfaz de usuario, la lógica de negocio y el almacenamiento de datos— cada uno con responsabilidades específicas y comunicación definida entre ellos. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Autenticación &
+Proceso mediante el cual el sistema verifica la identidad de un usuario antes de concederle acceso. En este proyecto se implementa mediante JSON Web Tokens (JWT), que aseguran que solo usuarios registrados puedan interactuar con la API. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Backend &
+Componente del sistema que opera en el servidor y es invisible para el usuario final. Se encarga de procesar solicitudes, aplicar la lógica de negocio, gestionar el acceso a la base de datos y devolver respuestas al frontend o a los dispositivos físicos. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Base de datos relacional &
+Sistema de almacenamiento de información organizado en tablas compuestas por filas y columnas, en el que las relaciones entre tablas se establecen mediante claves. Permite realizar consultas estructuradas mediante el lenguaje SQL. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Biblioteca de software &
+Conjunto de módulos de código reutilizables que proporcionan funcionalidades específicas a una aplicación sin ser ejecutados de forma independiente. A diferencia de un framework, una biblioteca es invocada por el desarrollador según sus necesidades. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Buenas prácticas de almacenamiento &
+Conjunto de normas y procedimientos recomendados para conservar la calidad e integridad de los medicamentos durante su almacenamiento, incluyendo el control de temperatura, humedad, iluminación y fecha de caducidad. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Bus de comunicación &
+Canal físico o lógico compartido a través del cual varios dispositivos electrónicos intercambian datos. En este proyecto se utiliza el bus I²C para la comunicación entre el microcontrolador ESP32-C5 y el sensor AHT10. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Código fuente &
+Conjunto de instrucciones escritas en un lenguaje de programación que definen el comportamiento de un sistema de software. En este proyecto el código fuente está organizado en repositorios separados para el backend, el frontend y el firmware del microcontrolador. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Cómputo en la nube &
+Modelo de prestación de servicios tecnológicos —como servidores, almacenamiento y bases de datos— a través de internet, sin necesidad de infraestructura física propia. En este proyecto el backend se aloja en Railway y el frontend en Vercel. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Componente &
+En el contexto del desarrollo con React, unidad autónoma de la interfaz de usuario que encapsula su propia estructura, lógica y presentación visual. Puede reutilizarse en distintas partes de la aplicación, como botones, tablas o formularios. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Control de versiones &
+Sistema que registra los cambios realizados en el código fuente a lo largo del tiempo, permitiendo recuperar versiones anteriores, identificar modificaciones y coordinar el trabajo entre varios desarrolladores. En este proyecto se utiliza Git junto con GitHub. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Credenciales &
+Información confidencial —generalmente un nombre de usuario y una contraseña— que identifica a un usuario o dispositivo y le permite acceder a un sistema protegido. En el contexto del ESP32-C5, las credenciales hacen referencia a los datos de la red Wi-Fi almacenados para la conexión automática. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Despliegue &
+Proceso de publicar y poner en operación una aplicación en un entorno accesible para los usuarios finales, ya sea en un servidor local o en una plataforma en la nube. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Endpoint &
+Dirección específica dentro de una API a la que se pueden enviar solicitudes para ejecutar una operación determinada, como consultar productos, registrar una venta o recibir datos de sensores. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Escalabilidad &
+Capacidad de un sistema para mantener su desempeño cuando aumenta la carga de trabajo, el número de usuarios o el volumen de datos, sin necesidad de rediseñar su arquitectura. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Firmware &
+Software que se almacena de forma permanente en la memoria no volátil de un dispositivo electrónico y controla directamente su hardware. En este proyecto, el firmware del ESP32-C5 gestiona la lectura del sensor AHT10, la conexión Wi-Fi y el envío de datos al backend. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Framework &
+Estructura de software que proporciona una base preestablecida de herramientas, convenciones y componentes sobre la cual se desarrolla una aplicación. A diferencia de una biblioteca, el framework define el flujo de control del programa. En este proyecto se utiliza FastAPI para el backend y React para el frontend. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Frontend &
+Componente del sistema con el que interactúa directamente el usuario a través del navegador web. Presenta la información de forma visual mediante tablas, formularios y gráficos, y envía las acciones del usuario al backend para su procesamiento. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Humedad relativa &
+Porcentaje de vapor de agua presente en el aire respecto al máximo que el aire puede contener a una temperatura determinada. Es una variable crítica para el almacenamiento de medicamentos, ya que valores fuera del rango recomendado degradan su composición química. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Inventario &
+Registro organizado de los productos disponibles en un establecimiento, que incluye información como nombre, cantidad, precio y fecha de caducidad. Su gestión eficiente es fundamental para evitar el desabasto y la acumulación de productos caducados. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Kárdex &
+Sistema manual de registro de existencias en el que cada producto cuenta con una tarjeta individual que documenta las entradas, salidas y saldo disponible. Fue el método de control de inventario utilizado por la Farmacia Selene antes de la implementación del sistema digital. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Latencia &
+Tiempo que transcurre entre el momento en que un sistema envía una solicitud y el momento en que recibe una respuesta. En sistemas de monitoreo ambiental, una latencia baja es deseable para que las alertas lleguen al administrador con la menor demora posible. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Microcontrolador &
+Circuito integrado que combina en un solo chip un procesador, memoria y periféricos de entrada/salida programables. Se utiliza para controlar dispositivos electrónicos y ejecutar tareas específicas de forma autónoma. En este proyecto se emplea el ESP32-C5 para la gestión de sensores y la comunicación con el servidor. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Migración &
+En el contexto de bases de datos, archivo o script que describe de forma estructurada un cambio en el esquema de la base de datos, como la creación de una tabla o la adición de una columna. Se utiliza con Alembic para aplicar modificaciones de manera controlada y reversible. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Módulo &
+Unidad funcional independiente dentro de un sistema de software o hardware que agrupa elementos relacionados entre sí. La división en módulos facilita el mantenimiento, la comprensión y la ampliación del sistema. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+ORM &
+Object-Relational Mapper — Mapeador Objeto-Relacional. Herramienta que permite interactuar con una base de datos relacional utilizando objetos del lenguaje de programación, sin necesidad de escribir instrucciones SQL directamente. En este proyecto se utiliza SQLAlchemy como ORM. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Repositorio &
+Almacén centralizado donde se guarda y gestiona el código fuente de un proyecto, incluyendo el historial completo de cambios. En este proyecto se utilizan repositorios en GitHub para el backend, el frontend y el firmware. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Sensor &
+Dispositivo electrónico que detecta una magnitud física del entorno —como temperatura, humedad, presión o luz— y la convierte en una señal eléctrica interpretable por un sistema digital. En este proyecto se utiliza el sensor AHT10 para medir temperatura y humedad relativa. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Sistema embebido &
+Sistema de cómputo diseñado para realizar una función específica dentro de un dispositivo más grande, generalmente con recursos limitados de memoria y procesamiento. El ESP32-C5 programado para gestionar el sensor y la conexión Wi-Fi es un ejemplo de sistema embebido. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Token de autenticación &
+Cadena de texto generada por el servidor tras una autenticación exitosa, que el cliente incluye en solicitudes posteriores para demostrar su identidad sin necesidad de volver a ingresar credenciales. En este proyecto se implementa mediante el estándar JWT. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Validación de datos &
+Proceso mediante el cual el sistema verifica que la información recibida cumple con el formato, tipo y rango esperados antes de procesarla o almacenarla. Evita errores e inconsistencias en la base de datos originados por datos mal formados o fuera de rango. \\
+
+\end{longtable}}

@@ -18,13 +18,15 @@
 %   TIPOGRAFÍA Y FORMATO DE TEXTO
 % ======================================================================================================================
 \usepackage{fontspec}          % Fuentes del sistema (XeLaTeX/LuaLaTeX)
-\setmainfont{Arial }  % Fuente principal
+\setmainfont{Arial}  % Fuente principal
 
 \usepackage{setspace}          % Interlineado
 \setstretch{1.5}               % Interlineado 1.5
 
 \setlength{\parindent}{0pt}    % Sin sangría en párrafos
 \setlength{\parskip}{6pt}      % Espacio entre párrafos (opcional, se ve más limpio)
+\setlength{\emergencystretch}{3em} % Evita overfull hbox en párrafos con texto monoespaciado largo
+\raggedbottom % Evita que LaTeX estire el espacio vertical para llenar páginas
 
 % ======================================================================================================================
 %   MÁRGENES Y GEOMETRÍA
@@ -180,7 +182,7 @@
 }
 
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, calc}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric}
 
 
 % Comando para imagenes
