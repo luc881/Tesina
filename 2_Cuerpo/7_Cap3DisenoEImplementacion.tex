@@ -196,7 +196,9 @@ La tercera es la \textbf{generación automática de documentación interactiva} 
 
 \subsection{Arquitectura en capas}
 
-La API se estructuró en capas con responsabilidades distintas: cada petición HTTP desciende por la pila hasta la base de datos y la respuesta asciende por el mismo camino. Esta separación garantiza que los cambios en una capa —por ejemplo, modificar la lógica de negocio o sustituir el motor de base de datos— no requieran modificar las demás.
+La API funciona como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos —en lugar de un único bloque de código— porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
+
+El primer filtro actúa como un enrutador: dependiendo de la dirección de la petición, determina a qué operación corresponde —consultar productos, registrar una venta, leer el sensor— y la redirige al área correspondiente, de forma similar a como un router de red decide por qué camino enviar el tráfico. El segundo filtro verifica que el usuario esté identificado y que tenga permiso para realizar esa operación; si no cumple alguna de las dos condiciones, la petición es rechazada sin continuar. El tercero aplica las reglas del negocio, como confirmar que hay existencias suficientes antes de registrar una venta. El último ejecuta la operación sobre la base de datos y devuelve el resultado al cliente.
 
 \begin{figure}[H]
 \centering
@@ -219,8 +221,6 @@ La API se estructuró en capas con responsabilidades distintas: cada petición H
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-El \textbf{enrutador} recibe cada petición y la dirige al componente correcto según la dirección solicitada; la \textbf{capa de seguridad} verifica que el usuario esté identificado y tenga autorización para realizar la operación antes de continuar; la \textbf{lógica de negocio} aplica las reglas del sistema —por ejemplo, comprobar que haya stock suficiente antes de registrar una venta—; la \textbf{capa de acceso a datos} comunica esas operaciones con la base de datos; y \textbf{PostgreSQL} almacena y recupera la información.
 
 \subsection{Modelos ORM con SQLAlchemy}
 
