@@ -201,23 +201,37 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.55cm,
-    box/.style={rectangle, draw, rounded corners=4pt, minimum width=9.5cm, minimum height=0.88cm, align=center, font=\small},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=gray!25, minimum width=2.8cm, minimum height=0.88cm, align=center, font=\footnotesize, text width=2.6cm},
-    biarr/.style={Stealth-Stealth, thick},
+    node distance=0.7cm,
+    box/.style={rectangle, draw, rounded corners=4pt, minimum width=6.8cm, minimum height=0.90cm, align=center, font=\small},
+    err/.style={rectangle, draw, fill=gray!20, minimum width=2.8cm, minimum height=0.90cm, align=center, font=\footnotesize, text width=2.6cm},
     arr/.style={-{Stealth}, thick}
 ]
-\node[box, fill=gray!20]  (client) {Cliente HTTP \quad (navegador / nodo sensor)};
-\node[box, fill=gray!5,   below=of client] (router) {\textbf{Filtro 1 — Enrutador:} dirige la petición a la operación correspondiente};
-\node[box, fill=gray!10,  below=of router] (auth)   {\textbf{Filtro 2 — Seguridad:} verifica identidad y permisos del usuario};
-\node[err,                right=of auth, xshift=0.5cm] (reject) {Petición\\rechazada};
-\node[box, fill=gray!5,   below=of auth]  (logic)  {\textbf{Filtro 3 — Reglas del negocio:} valida condiciones de la operación};
-\node[box, fill=gray!20,  below=of logic] (db)     {Base de datos — ejecuta la operación y devuelve el resultado};
-\draw[biarr] (client) -- (router);
-\draw[biarr] (router) -- (auth);
-\draw[arr]   (auth.east) -- node[above, font=\footnotesize]{No} (reject.west);
-\draw[biarr] (auth)   -- node[left,  font=\footnotesize]{Sí} (logic);
-\draw[biarr] (logic)  -- (db);
+\node[box, fill=gray!20] (client) {Cliente HTTP \quad (navegador / nodo sensor)};
+\node[box, fill=gray!5,  below=0.8cm of client] (f1) {\textbf{Filtro 1 — Enrutador:} dirige la petición a la operación correspondiente};
+\node[box, fill=gray!10, below=0.8cm of f1]     (f2) {\textbf{Filtro 2 — Seguridad:} verifica identidad y permisos del usuario};
+\node[box, fill=gray!5,  below=0.8cm of f2]     (f3) {\textbf{Filtro 3 — Reglas del negocio:} valida condiciones de la operación};
+\node[box, fill=gray!20, below=0.8cm of f3]     (db) {Base de datos — ejecuta la operación y devuelve el resultado};
+\node[err, right=1.0cm of f1] (err1) {Ruta no\\ encontrada};
+\node[err, right=1.0cm of f2] (err2) {Acceso\\ denegado};
+\node[err, right=1.0cm of f3] (err3) {Operación\\ no permitida};
+% Flujo principal (petición hacia abajo)
+\draw[arr] (client.south) -- node[right, font=\footnotesize]{petición} (f1.north);
+\draw[arr] (f1.south) -- node[left, font=\footnotesize]{Sí} (f2.north);
+\draw[arr] (f2.south) -- node[left, font=\footnotesize]{Sí} (f3.north);
+\draw[arr] (f3.south) -- node[left, font=\footnotesize]{Sí} (db.north);
+% Ramas de error (No)
+\draw[arr] (f1.east) -- node[above, font=\footnotesize]{No} (err1.west);
+\draw[arr] (f2.east) -- node[above, font=\footnotesize]{No} (err2.west);
+\draw[arr] (f3.east) -- node[above, font=\footnotesize]{No} (err3.west);
+% Carril derecho: respuestas de error de vuelta al cliente
+\coordinate (rail) at ($(err1.east)+(0.5,0)$);
+\draw (err1.east) -- (err1.east -| rail);
+\draw (err2.east) -- (err2.east -| rail);
+\draw (err3.east) -- (err3.east -| rail);
+\draw[arr] (err3.east -| rail) -- node[right, font=\footnotesize]{respuesta\\[-2pt]de error} (client.east -| rail) -- (client.east);
+% Carril izquierdo: respuesta exitosa de vuelta al cliente
+\coordinate (lrail) at ($(db.west)+(-0.5,0)$);
+\draw[arr] (db.west) -- (db.west -| lrail) -- node[left, font=\footnotesize]{respuesta\\[-2pt]exitosa} (client.west -| lrail) -- (client.west);
 \end{tikzpicture}
 \caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
