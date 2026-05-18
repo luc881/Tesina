@@ -228,10 +228,10 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \draw (err1.east) -- (err1.east -| rail);
 \draw (err2.east) -- (err2.east -| rail);
 \draw (err3.east) -- (err3.east -| rail);
-\draw[arr] (err3.east -| rail) -- node[right, font=\footnotesize, align=left]{respuesta\\de error} (client.east -| rail) -- (client.east);
+\draw[arr] (err3.east -| rail) -- node[right, font=\footnotesize]{respuesta de error} (client.east -| rail) -- (client.east);
 % Carril izquierdo: respuesta exitosa de vuelta al cliente
 \coordinate (lrail) at ($(db.west)+(-0.5,0)$);
-\draw[arr] (db.west) -- (db.west -| lrail) -- node[left, font=\footnotesize, align=right]{respuesta\\exitosa} (client.west -| lrail) -- (client.west);
+\draw[arr] (db.west) -- (db.west -| lrail) -- node[left, font=\footnotesize]{respuesta exitosa} (client.west -| lrail) -- (client.west);
 \end{tikzpicture}
 \caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
