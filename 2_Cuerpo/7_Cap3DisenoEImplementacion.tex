@@ -132,13 +132,15 @@ Se identificó durante el análisis una situación concreta: algunos medicamento
 
 Este módulo registra las transacciones comerciales mediante cinco tablas: \texttt{sales}, \texttt{sale\_details}, \texttt{sale\_batch\_usage}, \texttt{sale\_payments} y \texttt{refund\_products}.
 
-Se utilizó un diseño de \textbf{cabecera-detalle}: \texttt{sales} almacena los datos generales de cada transacción (empleado que la realizó, sucursal, descuento, impuesto y total), y \texttt{sale\_details} registra cada producto incluido en esa venta con su cantidad y precio unitario. Separar el encabezado de las líneas de detalle permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea, y facilita calcular totales agregados con consultas directas a la base de datos.
+Este módulo registra las transacciones comerciales a través de cinco tablas: la venta en sí, el detalle de productos incluidos, el vínculo con los lotes descontados, los pagos y las devoluciones.
 
-La tabla \texttt{sale\_batch\_usage} vincula cada línea de venta con el lote específico del que se descontaron las unidades. Esta estructura proporciona \textbf{trazabilidad completa de cada lote}: dado un número de lote, es posible identificar en qué ventas fue despachado. En el contexto farmacéutico, esto resulta necesario ante un retiro de mercado o una alerta sanitaria, ya que permite determinar exactamente qué ventas contienen el lote afectado.
+Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción —empleado, sucursal, descuento y total— y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
 
-La columna de estado en \texttt{sales} distingue tres situaciones posibles: venta \textbf{en progreso}, \textbf{completada} o \textbf{cancelada}. Mientras la venta está en progreso, el inventario no se descuenta todavía; el descuento ocurre únicamente al confirmar la transacción. Esto evita que una venta incompleta o cancelada descuente existencias de forma prematura.
+Adicionalmente, cada línea de detalle queda vinculada al lote específico del que se descontaron las unidades. Esto permite rastrear, dado un lote, en qué ventas fue despachado. En el contexto farmacéutico es relevante ante un retiro de mercado: el sistema puede identificar exactamente qué ventas contienen el lote afectado.
 
-La tabla \texttt{sale\_payments} se separó de \texttt{sales} para soportar \textbf{pagos divididos}: una misma transacción puede liquidarse con dos métodos de pago distintos —parte en efectivo, parte con tarjeta— registrando cada pago como una fila independiente con su método e importe.
+La venta puede encontrarse en uno de tres estados: en progreso, completada o cancelada. El descuento del inventario ocurre únicamente al confirmar la transacción, no antes. Esto evita que una venta que no se concreta descuente existencias.
+
+Los pagos se registran en una tabla separada para soportar el cobro con más de un método: una transacción puede liquidarse parte en efectivo y parte con tarjeta, registrando cada pago de forma independiente.
 
 % -------------------------------------------------------
 % DIAGRAMA 4 — Módulo de Registro de Ventas
