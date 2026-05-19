@@ -467,7 +467,7 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 \clearpage
 \section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
 
-Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas OLED, programado en C++ con el entorno Arduino.
+Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
 
 \subsection{Selección del hardware}
 
@@ -556,7 +556,7 @@ Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85
 
 \subsection{Pantallas OLED}
 
-Se incorporaron tres pantallas OLED de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
+Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
 
 % =============================================
