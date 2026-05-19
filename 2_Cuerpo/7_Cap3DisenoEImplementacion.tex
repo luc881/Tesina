@@ -383,7 +383,6 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 \node[anchor=west, font=\small\bfseries] at (3.1, 6.8) {Inventario — Lotes};
 \draw[draw=gray!60, fill=white, rounded corners=1pt] (10.5, 6.65) rectangle (12.1, 6.95);
 \node[font=\scriptsize] at (11.3, 6.8) {+ Nuevo lote};
-\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 7.22) {\textit{(a) Barra de acciones}};
 
 % Buscador y filtros
 \draw[draw=gray!50, fill=white, rounded corners=2pt] (2.9, 6.15) rectangle (8.8, 6.5);
@@ -392,7 +391,6 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 \node[font=\scriptsize] at (9.65, 6.32) {Filtros};
 \draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (10.5, 6.15) rectangle (12.1, 6.5);
 \node[font=\scriptsize] at (11.3, 6.32) {Exportar};
-\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 6.32) {\textit{(b) Buscador}};
 
 % Encabezado de tabla
 \fill[gray!20] (2.9, 5.68) rectangle (12.3, 6.05);
@@ -424,17 +422,12 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 
 % Borde de tabla
 \draw[gray!60] (2.9, 4.54) rectangle (12.3, 6.05);
-\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 5.3) {\textit{(c) Tabla paginada}};
 
 % Paginación
 \node[font=\scriptsize] at (7.5, 4.18) {$\langle$\enspace 1 \enspace 2 \enspace 3 \enspace $\cdots$\enspace $\rangle$};
-\node[font=\scriptsize\itshape, text=gray!50, anchor=east] at (12.25, 4.18) {\textit{(d) Paginación}};
-
-% Nota de barra lateral
-\node[font=\scriptsize\itshape, text=gray!50, anchor=west] at (0.05, 7.38) {\textit{(e) Barra lateral}};
 
 \end{tikzpicture}
-\caption{Disposición de componentes reutilizables en la interfaz web (vista de módulo de inventario)}
+\caption{Estructura de la interfaz web: barra lateral con grupos de navegación (izquierda), barra de acciones con botón de alta, buscador con filtros, tabla de datos paginada y control de paginación (área de contenido)}
 \label{fig:cap3-frontend-wireframe}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
