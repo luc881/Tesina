@@ -577,11 +577,11 @@ El quinto objetivo específico comprende dos componentes de integración: el dis
 
 \subsection{Gabinete impreso en 3D}
 
-Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó un gabinete personalizado que se fabricó mediante \textbf{impresión 3D}. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja de propósito general disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
+Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
 
-El diseño se realizó en \textbf{Bambu Studio}, el software de preparación de modelos tridimensionales para impresoras de la línea Bambu Lab. El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares dimensionadas con exactitud para exponer las pantallas OLED al frente. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos, lo que simplifica el acceso al interior para mantenimiento o ajustes.
+El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
-Las decisiones de diseño mecánico respondieron a restricciones concretas. El ensamble a presión —en lugar de tornillos— se eligió porque los componentes electrónicos internos pueden requerir ajuste o sustitución durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje por presión, abrir y cerrar el gabinete no deteriora el mecanismo de cierre. En cuanto al espacio, la tapa frontal debe acomodar tres módulos OLED dispuestos en fila horizontal con sus conectores traseros orientados hacia la base, lo que determinó el ancho mínimo del gabinete y la profundidad de las ventanas. La ventilación del sensor AHT10 se resolvió dejando una ranura en la base, lo suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del ambiente de almacenamiento hasta el sensor.
+Las decisiones de diseño respondieron a restricciones concretas. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje a presión, abrir y cerrar el gabinete no deteriora el mecanismo. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una ranura en la base, suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del área de almacenamiento.
 
 % TODO: subir 0_imagenes/Cap3/GabineteFoto.png a Overleaf para descomentar
 %\begin{figure}[H]
@@ -592,8 +592,6 @@ Las decisiones de diseño mecánico respondieron a restricciones concretas. El e
 %    \vspace{0.2cm}
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
-
-El resultado es un dispositivo autónomo que puede colocarse sobre una superficie o fijarse en el área de almacenamiento, visible sin necesidad de conexión a ningún monitor externo ni acceso a la aplicación web.
 
 \subsection{Integración del lector de código de barras}
 
