@@ -9,8 +9,22 @@
 
 En este capítulo se describe el proceso de diseño e implementación del sistema, desarrollando cada uno de los objetivos específicos del proyecto en el orden en que fueron planteados. Para cada objetivo se presentan las decisiones técnicas tomadas y la justificación que las respalda.
 
+% =============================================
+% SECCIÓN 3.1: DIAGRAMA DE BLOQUES
+% =============================================
 
+\section{Arquitectura general del sistema}
 
+El diagrama de bloques muestra los tres componentes principales del sistema y los canales de comunicación entre ellos: el nodo sensor instalado en la farmacia, el servidor y base de datos alojados en la nube, y la interfaz web accesible desde el navegador. Cada componente corresponde a uno de los objetivos específicos del proyecto y se describe en detalle en las secciones siguientes.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/DiagramaBloques/DiagramaBloques.png}}
+    \caption{Diagrama de bloques del sistema}
+    \label{fig:cap3-diagrama-bloques}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 % =============================================
 % OE 1: BASE DE DATOS
