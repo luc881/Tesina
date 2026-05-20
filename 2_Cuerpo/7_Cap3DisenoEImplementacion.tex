@@ -243,6 +243,8 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Esto permite trabajar con objetos en lugar de instrucciones SQL escritas manualmente, y centraliza la definición del esquema en un único lugar: cualquier modificación —agregar una columna, renombrar un campo— se aplica una sola vez y se refleja en toda la aplicación.
 
+\newpage
+
 \subsection{Esquemas de validación con Pydantic}
 
 Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato —un precio negativo, un campo requerido ausente— se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
@@ -270,7 +272,7 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \node[box, fill=gray!5,  below=0.6cm of tokens]  (request) {\textbf{4.} El cliente incluye el token en cada petición};
 \node[dec,               below=0.6cm of request] (tokval)  {¿Sesión activa y con permiso?};
 \node[box, fill=gray!10, below=0.6cm of tokval]  (exec)    {\textbf{5.} Se ejecuta la operación y se devuelve el resultado};
-\node[err, right=1.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
+\node[err, right=2.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
 \node[err, right=1.5cm of tokval] (err2) {Acceso denegado:\\ sesión inválida o sin permiso};
 \draw[arr] (login)   -- (verify);
 \draw[arr] (verify)  -- (valid);
@@ -280,6 +282,13 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \draw[arr] (request) -- (tokval);
 \draw[arr] (tokval)  -- node[left, font=\footnotesize]{Sí} (exec);
 \draw[arr] (tokval)  -- node[above, font=\footnotesize]{No} (err2);
+% Carril derecho de reintento → vuelven al paso 1
+\coordinate (rrail)  at ($(err2.east)+(0.5,  0)$);
+\coordinate (rrail2) at ($(err2.east)+(0.68, 0)$);
+\draw[arr] (err1.east) -- (err1.east -| rrail)
+    -- node[right, font=\footnotesize]{Reintentar} (rrail |- login.east) -- (login.east);
+\draw[arr] (err2.east) -- ([xshift=2cm]err2.east -| rrail2)
+    -- ([xshift=2cm]rrail2 |- login.east) -- (login.east);
 \end{tikzpicture}
 \caption{Diagrama de flujo de autenticación y autorización}
 \label{fig:cap3-jwt-flujo}
@@ -287,6 +296,7 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
+\newpage
 \subsection{Endpoints por módulo}
 
 Los 23 grupos de rutas de la API se organizan en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
