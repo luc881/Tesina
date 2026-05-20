@@ -445,7 +445,7 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
+    \fbox{\includegraphics[width=0.9\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
     \caption{Captura de pantalla de la interfaz web — módulo de inventario}
     \label{fig:cap3-screenshot}
     \vspace{0.2cm}
@@ -456,11 +456,11 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 
 El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} —usuario, rol y permisos— se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
-Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas —precio negativo, campo requerido vacío— el formulario lo indica visualmente sin generar una petición al servidor. Las reglas de validación se diseñaron para ser consistentes con los contratos de la API definidos en el OE2.
+Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas el formulario lo indica visualmente sin generar una petición al servidor.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, configuración de sucursales— se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
 
 \subsection{Despliegue en Vercel}
 
