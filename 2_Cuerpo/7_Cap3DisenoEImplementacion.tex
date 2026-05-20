@@ -207,11 +207,11 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
     arr/.style={-{Stealth}, thick}
 ]
 \node[box, fill=gray!20] (client) {Cliente HTTP \quad (navegador / nodo sensor)};
-\node[box, fill=gray!5,  below=0.8cm of client] (f1) {\textbf{Filtro 1 — Enrutador:} dirige la petición a la operación correspondiente};
+\node[box, fill=gray!5,  below=0.8cm of client] (f1) {\textbf{Filtro 1 — Enrutador:} dirige la petición};
 \node[box, fill=gray!10, below=0.8cm of f1]     (f2) {\textbf{Filtro 2 — Seguridad:} verifica identidad y permisos del usuario};
 \node[box, fill=gray!5,  below=0.8cm of f2]     (f3) {\textbf{Filtro 3 — Reglas del negocio:} valida condiciones de la operación};
 \node[box, fill=gray!20, below=0.8cm of f3]     (db) {Base de datos — ejecuta la operación y devuelve el resultado};
-\node[err, right=1.0cm of f1] (err1) {Ruta no\\ encontrada};
+\node[err, right=3.5cm of f1] (err1) {Ruta no\\ encontrada};
 \node[err, right=1.0cm of f2] (err2) {Acceso\\ denegado};
 \node[err, right=1.0cm of f3] (err3) {Operación\\ no permitida};
 % Flujo principal (petición hacia abajo)
@@ -231,7 +231,7 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \draw[arr] (err3.east -| rail) -- (client.east -| rail) -- node[above, font=\footnotesize]{respuesta de error} (client.east);
 % Carril izquierdo: respuesta exitosa de vuelta al cliente
 \coordinate (lrail) at ($(db.west)+(-0.5,0)$);
-\draw[arr] (db.west) -- (db.west -| lrail) -- (client.west -| lrail) -- node[above, font=\footnotesize]{respuesta exitosa} (client.west);
+\draw[arr] (db.west) -- ([xshift=-1cm]db.west -| lrail) -- ([xshift=-1cm]client.west -| lrail) -- node[above, font=\footnotesize]{respuesta exitosa} (client.west);
 \end{tikzpicture}
 \caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
@@ -515,7 +515,7 @@ El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bu
 \draw[thick] (aht.east)  -- (3.0, 1.4);
 \draw[thick] (oled.east) -- (3.0, -0.7);
 \draw[thick] (3.0, 0.35) -- (esp.west);
-\node[font=\footnotesize, anchor=east] at (2.85, 0.9)
+\node[font=\footnotesize, anchor=east] at (2.85, 0.4)
     {Bus I\textsuperscript{2}C};
 
 % Conexión WiFi / HTTPS hacia la API
