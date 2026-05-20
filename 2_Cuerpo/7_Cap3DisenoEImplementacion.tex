@@ -280,12 +280,13 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \draw[arr] (request) -- (tokval);
 \draw[arr] (tokval)  -- node[left, font=\footnotesize]{Sí} (exec);
 \draw[arr] (tokval)  -- node[above, font=\footnotesize]{No} (err2);
-% Carril izquierdo de reintento → vuelven al paso 1
-\coordinate (lrail) at ($(login.west)+(-0.9, 0)$);
-\draw[arr] (err1.south) -- ++(0,-0.35)
-    -| (lrail) -- node[above, font=\footnotesize]{Reintentar} (login.west);
-\draw[arr] (err2.south) -- ++(0,-0.35)
-    -| ($(lrail)+(0.18,0)$) -- (login.west);
+% Carril derecho de reintento → vuelven al paso 1
+\coordinate (rrail)  at ($(err2.east)+(0.5,  0)$);
+\coordinate (rrail2) at ($(err2.east)+(0.68, 0)$);
+\draw[arr] (err1.east) -- (err1.east -| rrail)
+    -- node[right, font=\footnotesize]{Reintentar} (rrail |- login.east) -- (login.east);
+\draw[arr] (err2.east) -- (err2.east -| rrail2)
+    -- (rrail2 |- login.east) -- (login.east);
 \end{tikzpicture}
 \caption{Diagrama de flujo de autenticación y autorización (los errores regresan al paso 1)}
 \label{fig:cap3-jwt-flujo}
