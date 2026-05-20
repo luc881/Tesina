@@ -101,6 +101,10 @@ Sensor AHT10 & 1 &
 Sensor digital de temperatura y humedad relativa. Precisión de ±0.3~°C en temperatura y ±2\% en humedad. Se conecta al microcontrolador mediante un protocolo de comunicación digital de corto alcance (I²C). \\
 \hline
 
+Pantallas OLED SSD1306 & 3 &
+Pantalla monocromática de 128×64 píxeles con interfaz I²C. Cada una muestra un dato distinto del nodo sensor: temperatura, humedad relativa y estado de conexión. \\
+\hline
+
 Lector de códigos de barras & 1 &
 Dispositivo de entrada con conexión USB para la captura automática de los códigos de los productos farmacéuticos. \\
 \hline
@@ -266,6 +270,8 @@ Protocolo de seguridad \\
 % ===============================
 \pgfmathsetmacro{\ESPPrecio}{220}
 \pgfmathsetmacro{\SensorPrecio}{150}
+\pgfmathsetmacro{\OLEDPrecio}{80}
+\pgfmathsetmacro{\OLEDTotal}{\OLEDPrecio * 3}
 \pgfmathsetmacro{\ScannerPrecio}{500}
 \pgfmathsetmacro{\CablesPrecio}{50}
 \pgfmathsetmacro{\FuentePrecio}{120}
@@ -273,7 +279,7 @@ Protocolo de seguridad \\
 \pgfmathsetmacro{\GabinetePrecio}{120}
 
 \pgfmathsetmacro{\HardwareTotal}{%
-  \ESPPrecio + \SensorPrecio + \ScannerPrecio +
+  \ESPPrecio + \SensorPrecio + \OLEDTotal + \ScannerPrecio +
   \CablesPrecio + \FuentePrecio + \USBPrecio + \GabinetePrecio
 }
 
@@ -334,6 +340,8 @@ Protocolo de seguridad \\
 ESP32-C5 Microcontrolador & \num{\ESPPrecio} & 1 & \num{\ESPPrecio} & 0 & 0 \\
 \hline
 Sensor AHT10 & \num{\SensorPrecio} & 1 & \num{\SensorPrecio} & 0 & 0 \\
+\hline
+Pantallas OLED SSD1306 & \num{\OLEDPrecio} & 3 & \num{\OLEDTotal} & 0 & 0 \\
 \hline
 Lector de códigos de barras & \num{\ScannerPrecio} & 1 & \num{\ScannerPrecio} & 0 & 0 \\
 \hline

@@ -201,20 +201,39 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=4pt, minimum width=9.5cm, minimum height=0.82cm, align=center, font=\small},
-    arr/.style={Stealth-Stealth, thick, gray!70}
+    node distance=0.7cm,
+    box/.style={rectangle, draw, rounded corners=4pt, minimum width=6.8cm, minimum height=0.90cm, align=center, font=\small},
+    err/.style={rectangle, draw, fill=gray!20, minimum width=2.8cm, minimum height=0.90cm, align=center, font=\footnotesize, text width=2.6cm},
+    arr/.style={-{Stealth}, thick}
 ]
-\node[box, fill=gray!15]   (client)  {Cliente HTTP \quad (navegador / nodo sensor)};
-\node[box, fill=blue!10,   below=of client]  (router)  {Router \quad \texttt{/api/v1/\{recurso\}}};
-\node[box, fill=blue!18,   below=of router]  (auth)    {Seguridad — verificación de identidad y permisos};
-\node[box, fill=green!10,  below=of auth]    (logic)   {Lógica de negocio — validaciones de dominio y cálculos};
-\node[box, fill=orange!10, below=of logic]   (orm)     {Capa de acceso a datos};
-\node[box, fill=red!10,    below=of orm]     (db)      {PostgreSQL};
-\foreach \a/\b in {client/router, router/auth, auth/logic, logic/orm, orm/db}
-    \draw[arr] (\a) -- (\b);
+\node[box, fill=gray!20] (client) {Cliente HTTP \quad (navegador / nodo sensor)};
+\node[box, fill=gray!5,  below=0.8cm of client] (f1) {\textbf{Filtro 1 — Enrutador:} dirige la petición};
+\node[box, fill=gray!10, below=0.8cm of f1]     (f2) {\textbf{Filtro 2 — Seguridad:} verifica identidad y permisos del usuario};
+\node[box, fill=gray!5,  below=0.8cm of f2]     (f3) {\textbf{Filtro 3 — Reglas del negocio:} valida condiciones de la operación};
+\node[box, fill=gray!20, below=0.8cm of f3]     (db) {Base de datos — ejecuta la operación y devuelve el resultado};
+\node[err, right=3.5cm of f1] (err1) {Ruta no\\ encontrada};
+\node[err, right=1.0cm of f2] (err2) {Acceso\\ denegado};
+\node[err, right=1.0cm of f3] (err3) {Operación\\ no permitida};
+% Flujo principal (petición hacia abajo)
+\draw[arr] (client.south) -- node[right, font=\footnotesize]{petición} (f1.north);
+\draw[arr] (f1.south) -- node[left, font=\footnotesize]{Sí} (f2.north);
+\draw[arr] (f2.south) -- node[left, font=\footnotesize]{Sí} (f3.north);
+\draw[arr] (f3.south) -- node[left, font=\footnotesize]{Sí} (db.north);
+% Ramas de error (No)
+\draw[arr] (f1.east) -- node[above, font=\footnotesize]{No} (err1.west);
+\draw[arr] (f2.east) -- node[above, font=\footnotesize]{No} (err2.west);
+\draw[arr] (f3.east) -- node[above, font=\footnotesize]{No} (err3.west);
+% Carril derecho: respuestas de error de vuelta al cliente
+\coordinate (rail) at ($(err1.east)+(0.5,0)$);
+\draw (err1.east) -- (err1.east -| rail);
+\draw (err2.east) -- (err2.east -| rail);
+\draw (err3.east) -- (err3.east -| rail);
+\draw[arr] (err3.east -| rail) -- (client.east -| rail) -- node[above, font=\footnotesize]{respuesta de error} (client.east);
+% Carril izquierdo: respuesta exitosa de vuelta al cliente
+\coordinate (lrail) at ($(db.west)+(-0.5,0)$);
+\draw[arr] (db.west) -- ([xshift=-1cm]db.west -| lrail) -- ([xshift=-1cm]client.west -| lrail) -- node[above, font=\footnotesize]{respuesta exitosa} (client.west);
 \end{tikzpicture}
-\caption{Arquitectura en capas de la API REST}
+\caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -222,66 +241,55 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \subsection{Modelos ORM con SQLAlchemy}
 
-SQLAlchemy es una biblioteca que implementa el patrón \textbf{ORM} (\textit{Object-Relational Mapping}): en lugar de escribir consultas SQL manualmente en el código, el desarrollador trabaja con clases Python que representan las tablas de la base de datos, y la biblioteca se encarga de traducir esas operaciones al lenguaje de la base de datos. Cada tabla del esquema descrito en el OE1 tiene una clase correspondiente, organizada por módulo.
-
-Este enfoque centraliza la definición de la estructura de datos en un único lugar: cualquier modificación al esquema —agregar una columna o renombrar un campo— se refleja en toda la aplicación sin tener que buscar y actualizar consultas SQL dispersas en el código. Además, al trabajar con tipos definidos en el lenguaje, se reduce la posibilidad de errores de sintaxis o de datos que son difíciles de detectar cuando el SQL se construye manualmente.
+Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Esto permite trabajar con objetos en lugar de instrucciones SQL escritas manualmente, y centraliza la definición del esquema en un único lugar: cualquier modificación —agregar una columna, renombrar un campo— se aplica una sola vez y se refleja en toda la aplicación.
 
 \subsection{Esquemas de validación con Pydantic}
 
-Cada módulo define dos tipos de modelos distintos: el \textbf{modelo ORM} para interactuar con la base de datos, y el \textbf{esquema Pydantic} que actúa como un molde o contrato de la API: establece exactamente qué información se acepta cuando el cliente envía datos, qué campos pueden modificarse y qué se devuelve en la respuesta. Si la petición no cumple la forma esperada —por ejemplo, un precio negativo o un campo obligatorio ausente—, Pydantic la rechaza antes de que llegue a la lógica de la aplicación.
-
-Para cada recurso se definieron cuatro esquemas: \texttt{*Base} (campos comunes), \texttt{*Create} (validación al crear), \texttt{*Update} (validación al actualizar) y \texttt{*Response} (estructura de la respuesta). Esta jerarquía evita duplicar definiciones y hace explícito qué datos son públicos y cuáles son internos.
+Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato —un precio negativo, un campo requerido ausente— se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
 
 
 \subsection{Autenticación y autorización}
 
-\subsubsection*{JSON Web Token (JWT): Autenticación y Seguridad}
+El acceso al sistema se controla en dos pasos. El primero es la \textbf{autenticación}: al iniciar sesión, la API verifica la contraseña y, si es correcta, emite un \textbf{token de sesión} con vigencia de 30 minutos que contiene el identificador del usuario y sus permisos. Este token acompaña cada petición posterior; el servidor lo verifica sin consultar la base de datos, ya que la información necesaria está incluida y firmada dentro del propio token. Cuando expira, se renueva de forma automática sin que el usuario tenga que ingresar su contraseña de nuevo.
 
-La autenticación se implementó con \textbf{JWT} (\textit{JSON Web Token}), un estándar que permite emitir credenciales firmadas digitalmente. Al iniciar sesión, la API verifica la contraseña y emite dos elementos: un \textbf{token de acceso} con vigencia de 30 minutos que contiene el identificador del usuario, su rol y sus permisos; y un \textbf{token de renovación} de 7 días almacenado en la base de datos. El token de acceso acompaña cada petición posterior y el servidor lo verifica sin consultar la base de datos, ya que toda la información necesaria está incluida y firmada dentro del propio token. Cuando el token de acceso expira, el cliente usa el token de renovación para obtener uno nuevo sin que el usuario tenga que iniciar sesión de nuevo.
-
+El segundo paso es la \textbf{autorización}: cada operación de la API declara qué permiso requiere para ejecutarse. Antes de procesar la petición, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada. Esto conecta con la estructura de roles del OE1: un cajero puede registrar ventas pero no modificar usuarios ni configurar sucursales.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm and 2.2cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=6.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.4cm, minimum height=0.82cm, align=center, font=\small},
+    node distance=0.5cm,
+    box/.style={rectangle, draw, rounded corners=3pt, minimum width=7.2cm, minimum height=0.82cm, align=center, font=\small},
+    dec/.style={diamond, draw, aspect=2.8, align=center, font=\small, inner sep=2pt},
+    err/.style={rectangle, draw, fill=gray!20, minimum width=3.2cm, minimum height=0.82cm, align=center, font=\footnotesize, text width=3.0cm},
     arr/.style={-{Stealth}, thick}
 ]
-\node[box, fill=gray!15]  (login)   {\textbf{1.} POST /auth/login con credenciales};
-\node[box, fill=blue!10,  below=of login]    (verify)  {\textbf{2.} API verifica contraseña (bcrypt)};
-\node[dec,                below=of verify]   (valid)   {¿válida?};
-\node[box, fill=green!10, below=of valid]    (tokens)  {\textbf{3.} Emitir access token (30 min)\\y refresh token (7 días)};
-\node[box, fill=blue!10,  below=of tokens]   (request) {\textbf{4.} Petición enviada con el token de acceso};
-\node[dec,                below=of request]  (tokval)  {¿token\\válido?};
-\node[box, fill=green!10, below=of tokval]   (exec)    {\textbf{5.} Ejecutar endpoint → respuesta JSON};
-\node[err, right=of valid]    (err1) {HTTP 401\\Unauthorized};
-\node[err, right=of tokval]   (err2) {HTTP 401\\Token inválido};
-\draw[arr] (login) -- (verify);
-\draw[arr] (verify) -- (valid);
-\draw[arr] (valid) -- node[left, font=\footnotesize]{Sí} (tokens);
-\draw[arr] (valid) -- node[above, font=\footnotesize]{No} (err1);
-\draw[arr] (tokens) -- (request);
+\node[box, fill=gray!15] (login)   {\textbf{1.} El usuario ingresa su nombre de usuario y contraseña};
+\node[box, fill=gray!5,  below=0.6cm of login]   (verify)  {\textbf{2.} La API verifica que la contraseña sea correcta};
+\node[dec,               below=0.6cm of verify]  (valid)   {¿Contraseña correcta?};
+\node[box, fill=gray!10, below=0.6cm of valid]   (tokens)  {\textbf{3.} Se emite un token de sesión (válido por 30 minutos)};
+\node[box, fill=gray!5,  below=0.6cm of tokens]  (request) {\textbf{4.} El cliente incluye el token en cada petición};
+\node[dec,               below=0.6cm of request] (tokval)  {¿Sesión activa y con permiso?};
+\node[box, fill=gray!10, below=0.6cm of tokval]  (exec)    {\textbf{5.} Se ejecuta la operación y se devuelve el resultado};
+\node[err, right=1.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
+\node[err, right=1.5cm of tokval] (err2) {Acceso denegado:\\ sesión inválida o sin permiso};
+\draw[arr] (login)   -- (verify);
+\draw[arr] (verify)  -- (valid);
+\draw[arr] (valid)   -- node[left, font=\footnotesize]{Sí} (tokens);
+\draw[arr] (valid)   -- node[above, font=\footnotesize]{No} (err1);
+\draw[arr] (tokens)  -- (request);
 \draw[arr] (request) -- (tokval);
-\draw[arr] (tokval) -- node[left, font=\footnotesize]{Sí} (exec);
-\draw[arr] (tokval) -- node[above, font=\footnotesize]{No} (err2);
+\draw[arr] (tokval)  -- node[left, font=\footnotesize]{Sí} (exec);
+\draw[arr] (tokval)  -- node[above, font=\footnotesize]{No} (err2);
 \end{tikzpicture}
-\caption{Diagrama de flujo de autenticación mediante JWT}
+\caption{Diagrama de flujo de autenticación y autorización}
 \label{fig:cap3-jwt-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsubsection*{Control de acceso basado en permisos}
-
-Para la autorización, cada ruta de la API declara explícitamente qué permiso necesita el usuario para acceder a ella. Antes de ejecutar cualquier operación, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada sin procesarse. Este mecanismo se apoya directamente en la estructura de roles y permisos definida en la base de datos (OE1): un usuario con rol de cajero solo puede consultar y registrar ventas, mientras que un administrador puede gestionar usuarios, productos y sucursales.
-
 \subsection{Endpoints por módulo}
 
-Un \textit{endpoint} es una dirección específica dentro de la API a la que los clientes envían peticiones para realizar una operación concreta, como consultar el inventario, registrar una venta o actualizar un producto. Cada endpoint combina una URL y un tipo de acción: consulta, creación, actualización o eliminación.
-
-Los 23 módulos de rutas se agrupan en seis áreas funcionales. La siguiente tabla resume la estructura y las operaciones principales de cada grupo:
+Los 23 grupos de rutas de la API se organizan en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
 
 \begin{table}[H]
 \centering
@@ -306,21 +314,11 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{table}
 
-Todos los \textit{endpoints} siguen las convenciones REST: \texttt{GET} para lectura, \texttt{POST} para creación, \texttt{PUT}/\texttt{PATCH} para actualización y \texttt{DELETE} para eliminación. Los recursos con \texttt{deleted\_at} —usuarios, sucursales, roles— aplican borrado lógico, como se describió en el OE1.
-
-\subsection{Pruebas con Pytest}
-
-La API se verificó mediante dos mecanismos complementarios. El primero es \textbf{Swagger}, la documentación interactiva generada automáticamente por FastAPI en la dirección \texttt{/docs}, que permite enviar peticiones reales a cada \textit{endpoint} directamente desde el navegador y observar las respuestas. Esto facilitó la verificación manual durante el desarrollo sin necesidad de herramientas externas.
-
-El segundo es una suite de pruebas automatizadas con \textbf{Pytest}, compuesta por \textbf{20 archivos de prueba}, uno por cada módulo funcional. Cada prueba verifica que el endpoint responde con el resultado esperado y que las operaciones críticas —como el registro de ventas, el descuento de inventario y el procesamiento de devoluciones— producen resultados correctos. Las pruebas se ejecutan sobre una base de datos de prueba independiente para no interferir con los datos reales.
+Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente —usuarios, roles, sucursales— aplican borrado lógico, como se describió en el OE1.
 
 \subsection{Despliegue en Railway}
 
-La API se desplegó en \textbf{Railway}, una plataforma de infraestructura en la nube que provisiona tanto el servidor de aplicación como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala.
-
-Railway se integra directamente con el repositorio de código: cada vez que se publica una nueva versión, el despliegue se actualiza de forma automática. Antes de recibir tráfico, la plataforma ejecuta las migraciones de base de datos pendientes, garantizando que el esquema y el código sean siempre consistentes entre sí.
-
-La información sensible —credenciales de la base de datos, clave de seguridad y parámetros de configuración del entorno— se define como variables en la plataforma, separadas del código fuente, siguiendo la práctica estándar de no incluir datos sensibles en el repositorio.
+La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tanto el servidor como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala. Cada vez que se publica una nueva versión del código, el despliegue se actualiza de forma automática.
 
 
 
@@ -331,97 +329,134 @@ La información sensible —credenciales de la base de datos, clave de seguridad
 \clearpage
 \section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
 
-Para cumplir con el tercer objetivo específico se diseñó e implementó la interfaz de usuario como una \textbf{aplicación web de página única} (\textit{Single Page Application}, SPA): una vez cargada en el navegador, las transiciones entre vistas ocurren sin recargar completamente la página, lo que mejora la fluidez de la experiencia para el usuario. La interfaz se comunica con la API desarrollada en el OE2 para consultar y registrar información. El resultado es una aplicación con \textbf{dieciséis módulos de navegación} cubiertos por una biblioteca de más de cuarenta componentes de interfaz reutilizables, desplegada en la plataforma Vercel.
+Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
 
 \subsection{Selección de React y Vite}
 
-Se eligió \textbf{React} como biblioteca base para la construcción de la interfaz por dos razones principales. La primera es su modelo basado en \textbf{componentes reutilizables}: cada elemento visual —una tabla, un formulario, un botón de acción— se define una vez y puede utilizarse en cualquier módulo sin reescribir código. Esto fue determinante dado que la aplicación comparte patrones visuales casi idénticos entre módulos: la estructura de lista con filtros, el formulario de creación y el diálogo de confirmación de eliminación se repiten en inventario, ventas, catálogo y usuarios. La segunda razón es la amplitud de su ecosistema: bibliotecas para gestión de formularios, caché de datos, animaciones y exportación de documentos existen, están mantenidas activamente y se integran entre sí, evitando desarrollar estas funcionalidades desde cero.
+Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajustaba directamente al diseño de la aplicación: la estructura de lista con buscador y filtros, el formulario de creación y el diálogo de confirmación se repiten en prácticamente todos los módulos, lo que permite definirlos una sola vez y usarlos en cualquier vista sin reescribir código. Para el entorno de desarrollo se utilizó \textbf{Vite}, que reduce el tiempo entre guardar un cambio y verlo en pantalla al servir los archivos directamente al navegador sin reempaquetar todo el proyecto en cada modificación.
 
-Junto con React se utilizó \textbf{Vite} como herramienta de construcción y servidor de desarrollo. Vite moderniza el proceso al servir los módulos directamente al navegador sin reempaquetar todo el proyecto en cada cambio, reduciendo el tiempo entre guardar una modificación y verla reflejada en pantalla. Esto aceleró el ciclo de desarrollo durante la etapa de diseño de la interfaz.
+\subsection{Estructura e interfaz de la aplicación}
 
-\subsection{Estructura de la aplicación}
+La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados —tablas paginadas, formularios, diálogos, selectores de fecha— que garantiza consistencia visual en toda la aplicación y evita desarrollar esos elementos desde cero.
 
-La aplicación se organizó en tres niveles de granularidad. Las \textbf{páginas} son los puntos de entrada de cada ruta; las \textbf{secciones} contienen la lógica y la disposición visual específica de cada módulo de negocio; y los \textbf{componentes} son los bloques visuales reutilizables que las secciones ensamblan. El enrutamiento entre páginas se gestiona con \textbf{React Router}, que mapea cada URL a su vista correspondiente sin recargar el servidor. La navegación se realiza desde una barra lateral persistente que agrupa los módulos por área funcional.
-
-El siguiente diagrama resume el flujo general de interacción del usuario con la aplicación, desde el acceso hasta la confirmación de una operación:
+La figura siguiente muestra la disposición de la interfaz: una barra lateral persistente agrupa los módulos por área funcional, y el área de contenido presenta en todos los módulos la misma estructura de componentes reutilizables.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
-    arr/.style={-{Stealth}, thick}
-]
-\node[box, fill=gray!15]  (login)   {\textbf{1.} Pantalla de inicio de sesión};
-\node[box, fill=blue!8,   below=of login]   (jwt)    {\textbf{2.} Verificación de credenciales con la API};
-\node[dec,                below=of jwt]     (valid)  {¿Válidas?};
-\node[err,                right=of valid]   (err)    {Mensaje de\\error al usuario};
-\node[box, fill=blue!12,  below=of valid]   (dash)   {\textbf{3.} Panel principal: ventas del día, alertas de stock y sensor};
-\node[box, fill=gray!10,  below=of dash]    (nav)    {\textbf{4.} Selección de módulo desde la barra lateral};
-\node[box, fill=blue!8,   below=of nav]     (list)   {\textbf{5.} Vista de lista con búsqueda, filtros y paginación};
-\node[box, fill=gray!10,  below=of list]    (action) {\textbf{6.} Seleccionar operación: crear, editar o eliminar};
-\node[box, fill=blue!8,   below=of action]  (form)   {\textbf{7.} Formulario con validación de datos en el cliente};
-\node[dec,                below=of form]    (formv)  {¿Datos\\válidos?};
-\node[err,                right=of formv]   (formerr){Indicadores de\\error por campo};
-\node[box, fill=green!10, below=of formv]   (api)    {\textbf{8.} Envío a la API y respuesta del servidor};
-\node[box, fill=green!8,  below=of api]     (update) {\textbf{9.} Notificación de éxito y actualización automática de la vista};
-\draw[arr] (login)  -- (jwt);
-\draw[arr] (jwt)    -- (valid);
-\draw[arr] (valid)  -- node[left,  font=\footnotesize]{Sí} (dash);
-\draw[arr] (valid)  -- node[above, font=\footnotesize]{No} (err);
+\begin{tikzpicture}[font=\small]
 
-\draw[arr] (dash)   -- (nav);
-\draw[arr] (nav)    -- (list);
-\draw[arr] (list)   -- (action);
-\draw[arr] (action) -- (form);
-\draw[arr] (form)   -- (formv);
-\draw[arr] (formv)  -- node[left,  font=\footnotesize]{Sí} (api);
-\draw[arr] (formv)  -- node[above, font=\footnotesize]{No} (formerr);
-\draw[arr] (api)    -- (update);
+% Marco exterior (ventana del navegador)
+\draw[thick, rounded corners=3pt] (0, 0) rectangle (12.5, 7.6);
+
+% Encabezado
+\fill[gray!20] (0, 7.0) rectangle (12.5, 7.6);
+\draw[gray!50] (0, 7.0) -- (12.5, 7.0);
+\node[anchor=west, font=\small\bfseries] at (0.3, 7.3) {Sistema de Gestión — Farmacia Selene};
+
+% Barra lateral
+\fill[gray!8] (0, 0) rectangle (2.7, 7.0);
+\draw[gray!50] (2.7, 0) -- (2.7, 7.0);
+
+% Grupos de navegación
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 6.65) {PRINCIPAL};
+\node[anchor=west, font=\scriptsize] at (0.4, 6.32) {Dashboard};
+\fill[gray!25] (0, 5.92) rectangle (2.7, 6.22); % ítem activo
+\node[anchor=west, font=\scriptsize\bfseries] at (0.4, 6.07) {Inventario};
+\node[anchor=west, font=\scriptsize] at (0.4, 5.65) {Ventas};
+\node[anchor=west, font=\scriptsize] at (0.4, 5.3) {Catálogo};
+\draw[gray!40] (0.25, 5.05) -- (2.45, 5.05);
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 4.75) {CONFIGURACIÓN};
+\node[anchor=west, font=\scriptsize] at (0.4, 4.42) {Usuarios};
+\node[anchor=west, font=\scriptsize] at (0.4, 4.08) {Roles};
+\node[anchor=west, font=\scriptsize] at (0.4, 3.74) {Sucursales};
+\draw[gray!40] (0.25, 3.5) -- (2.45, 3.5);
+\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 3.2) {MONITOREO};
+\node[anchor=west, font=\scriptsize] at (0.4, 2.87) {Sensor};
+\node[anchor=west, font=\scriptsize] at (0.4, 2.53) {Estadísticas};
+\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 1.1) {16 módulos};
+\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 0.7) {agrupados por área};
+
+% ── Área de contenido ─────────────────────────────────────
+
+% Barra de acciones del módulo
+\fill[gray!12] (2.9, 6.6) rectangle (12.3, 7.0);
+\node[anchor=west, font=\small\bfseries] at (3.1, 6.8) {Inventario — Lotes};
+\draw[draw=gray!60, fill=white, rounded corners=1pt] (10.5, 6.65) rectangle (12.1, 6.95);
+\node[font=\scriptsize] at (11.3, 6.8) {+ Nuevo lote};
+
+% Buscador y filtros
+\draw[draw=gray!50, fill=white, rounded corners=2pt] (2.9, 6.15) rectangle (8.8, 6.5);
+\node[anchor=west, font=\scriptsize, text=gray!60] at (3.1, 6.32) {Buscar producto o lote\ldots};
+\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (9.0, 6.15) rectangle (10.3, 6.5);
+\node[font=\scriptsize] at (9.65, 6.32) {Filtros};
+\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (10.5, 6.15) rectangle (12.1, 6.5);
+\node[font=\scriptsize] at (11.3, 6.32) {Exportar};
+
+% Encabezado de tabla
+\fill[gray!20] (2.9, 5.68) rectangle (12.3, 6.05);
+\node[anchor=west, font=\scriptsize\bfseries] at (3.1, 5.87) {Producto};
+\node[anchor=west, font=\scriptsize\bfseries] at (6.0, 5.87) {No.\ Lote};
+\node[anchor=west, font=\scriptsize\bfseries] at (7.8, 5.87) {Vencimiento};
+\node[anchor=west, font=\scriptsize\bfseries] at (9.8, 5.87) {Stock};
+
+% Fila 1
+\draw[gray!30] (2.9, 5.3) -- (12.3, 5.3);
+\node[anchor=west, font=\scriptsize] at (3.1, 5.49) {Paracetamol 500 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 5.49) {L-0124};
+\node[anchor=west, font=\scriptsize] at (7.8, 5.49) {Jun 2025};
+\node[anchor=west, font=\scriptsize] at (9.8, 5.49) {120 pzas.};
+
+% Fila 2
+\draw[gray!30] (2.9, 4.92) -- (12.3, 4.92);
+\node[anchor=west, font=\scriptsize] at (3.1, 5.11) {Ibuprofeno 400 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 5.11) {L-0224};
+\node[anchor=west, font=\scriptsize] at (7.8, 5.11) {Ene 2026};
+\node[anchor=west, font=\scriptsize] at (9.8, 5.11) {85 pzas.};
+
+% Fila 3
+\draw[gray!30] (2.9, 4.54) -- (12.3, 4.54);
+\node[anchor=west, font=\scriptsize] at (3.1, 4.73) {Amoxicilina 500 mg};
+\node[anchor=west, font=\scriptsize] at (6.0, 4.73) {L-0324};
+\node[anchor=west, font=\scriptsize] at (7.8, 4.73) {Mar 2026};
+\node[anchor=west, font=\scriptsize] at (9.8, 4.73) {200 pzas.};
+
+% Borde de tabla
+\draw[gray!60] (2.9, 4.54) rectangle (12.3, 6.05);
+
+% Paginación
+\node[font=\scriptsize] at (7.5, 4.18) {$\langle$\enspace 1 \enspace 2 \enspace 3 \enspace $\cdots$\enspace $\rangle$};
+
 \end{tikzpicture}
-\caption{Diagrama de flujo general de interacción del usuario con la aplicación web}
-\label{fig:cap3-frontend-flujo}
+\caption{Estructura de la interfaz web: barra lateral con grupos de navegación (izquierda), barra de acciones con botón de alta, buscador con filtros, tabla de datos paginada y control de paginación (área de contenido)}
+\label{fig:cap3-frontend-wireframe}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Componentes visuales con Material-UI}
+% TODO: agregar captura de pantalla real de la aplicación
+% Guardar imagen en 0_imagenes/Cap3/ScreenshotApp.png y descomentar:
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
+%    \caption{Captura de pantalla de la interfaz web — módulo de inventario}
+%    \label{fig:cap3-screenshot}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
-Para el diseño visual se eligió \textbf{Material-UI} (MUI), una biblioteca que proporciona un conjunto de componentes construidos sobre las guías de diseño Material Design de Google. La razón principal fue evitar diseñar desde cero elementos como tablas paginadas, formularios, diálogos de confirmación y selectores de fecha, que de otro modo habrían requerido semanas de desarrollo adicional. MUI ofrece estos componentes con comportamiento accesible, adaptación a distintos tamaños de pantalla y un sistema de temas que permite ajustar colores y tipografía de forma centralizada para toda la aplicación.
+\subsection{Gestión de datos y formularios}
 
-Para las vistas que muestran listados de registros —productos, lotes, ventas, usuarios— se utilizó el componente de tabla avanzada de MUI, que soporta ordenamiento, filtrado por columna y paginación sin configuración adicional. Dado el volumen moderado de registros que maneja una farmacia de pequeña escala, ordenar y filtrar los datos directamente en la vista es suficiente y evita peticiones adicionales al servidor para cada cambio de orden o filtro.
+El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} —usuario, rol y permisos— se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
-\subsection{Gestión de datos y estado}
-
-La gestión del estado se dividió en dos responsabilidades distintas. El \textbf{estado de sesión} —la información del usuario autenticado, su rol y sus permisos— se almacena en un contexto global accesible desde cualquier componente. Este estado es necesario para decidir qué secciones del menú mostrar y qué operaciones están disponibles según el rol del usuario activo.
-
-El \textbf{estado de los datos del servidor} —listas de productos, ventas, lotes y demás registros— se gestiona con una biblioteca de caché del lado del cliente. Esta biblioteca conserva en memoria los datos ya consultados; al navegar entre módulos, la información previamente cargada se muestra de inmediato mientras se verifica en segundo plano si hay actualizaciones. Cuando se completa una operación —crear, editar o eliminar un registro—, la vista se refresca automáticamente sin que el usuario tenga que recargar la página. Esta separación entre estado de sesión y estado de datos evitó la necesidad de una solución de gestión de estado global más compleja, cuya configuración no se justifica para una aplicación de esta escala.
-
-\subsection{Formularios y validación}
-
-Todos los formularios de creación y edición se implementaron con \textbf{React Hook Form}, una biblioteca que gestiona el estado del formulario sin causar un re-renderizado completo del componente en cada pulsación de tecla. El beneficio principal es el rendimiento: en formularios con muchos campos —como el registro de ventas con múltiples productos o el alta de un medicamento con ingredientes— la interfaz responde de forma fluida incluso en equipos con recursos limitados.
-
-La validación de cada campo se define mediante esquemas que especifican el tipo de dato esperado, los rangos permitidos y los mensajes de error correspondientes. Esta validación se ejecuta \textit{antes} de enviar la petición a la API, evitando peticiones innecesarias cuando el usuario omite un campo obligatorio o introduce un valor fuera de rango. Los esquemas de validación del cliente se diseñaron para reflejar las mismas restricciones que los esquemas Pydantic definidos en la API (OE2), de modo que las reglas sean consistentes en ambas capas.
-
-Para mantener la consistencia visual y evitar duplicar código, se construyó una biblioteca interna de \textbf{componentes de formulario reutilizables}: campos de texto, selectores, autocompletados con búsqueda, selectores de fecha y casillas de verificación. Cada componente integra la lógica de validación y el estilo de MUI, y puede utilizarse en cualquier formulario de la aplicación conectándolo al esquema de validación correspondiente.
+Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas —precio negativo, campo requerido vacío— el formulario lo indica visualmente sin generar una petición al servidor. Las reglas de validación se diseñaron para ser consistentes con los contratos de la API definidos en el OE2.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación recibe los tokens generados por la API (OE2) y los almacena en el navegador: el token de acceso en el almacenamiento de sesión —que se elimina automáticamente cuando el usuario cierra la pestaña o el navegador—, y el token de renovación en el almacenamiento persistente, únicamente cuando el usuario activa la opción de recordar la sesión.
-
-El token de acceso acompaña cada petición a la API. Cuando expira, la aplicación utiliza el token de renovación para obtener uno nuevo de forma transparente, sin interrumpir la sesión. Este mecanismo se implementó en la capa de comunicación HTTP de forma centralizada, de modo que todos los módulos se benefician de él sin código adicional en cada vista.
-
-Las rutas de la aplicación están protegidas mediante \textbf{guardias de acceso}: si el usuario no tiene sesión activa, cualquier intento de acceder a una página del sistema lo redirige a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, modificación de roles— el guardia verifica además que los permisos del token incluyan los requeridos, consistente con el módulo RBAC definido en el OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, configuración de sucursales— se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
 
 \subsection{Despliegue en Vercel}
 
-La aplicación web se desplegó en \textbf{Vercel}, una plataforma especializada en el alojamiento de aplicaciones JavaScript modernas. Al igual que con Railway para la API, se eligió Vercel sobre alternativas como AWS por la misma razón de escala: ofrece los componentes necesarios —red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización— sin la complejidad de configuración que implica una infraestructura de mayor tamaño.
-
-Un aspecto particular del despliegue de una SPA es el enrutamiento: dado que React Router gestiona las rutas completamente en el cliente, el servidor de Vercel debe redirigir cualquier URL al punto de entrada de la aplicación para que sea React quien determine qué vista mostrar. Sin esta configuración, acceder directamente a una URL como \texttt{/dashboard/product} devolvería un error del servidor. La redirección se definió en el archivo de configuración de Vercel y garantiza que el usuario pueda acceder a cualquier ruta o recargar la página sin errores.
-
-Las variables de configuración —principalmente la URL de la API— se definen en la plataforma de forma separada al código fuente, siguiendo el mismo criterio de seguridad aplicado en el despliegue de la API.
+La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en aplicaciones JavaScript modernas. Se eligió sobre alternativas como AWS por la misma razón de escala que Railway: ofrece red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización, sin la complejidad de una infraestructura mayor. Se configuró además una regla de enrutamiento que redirige cualquier URL al punto de entrada de la aplicación, necesaria para que React Router pueda gestionar la navegación correctamente cuando el usuario accede directamente a una ruta o recarga la página.
 
 
 
@@ -432,105 +467,96 @@ Las variables de configuración —principalmente la URL de la API— se definen
 \clearpage
 \section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
 
-Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico de monitoreo ambiental que mide temperatura y humedad relativa dentro del área de almacenamiento de la farmacia y envía esas lecturas a la API desarrollada en el OE2. El nodo está construido sobre un microcontrolador \textbf{ESP32-C5} con un sensor \textbf{AHT10}, y su firmware fue programado en C++ utilizando el entorno de desarrollo Arduino.
+Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
 
 \subsection{Selección del hardware}
 
-\subsubsection*{Microcontrolador ESP32-C5}
+Se eligió el \textbf{ESP32-C5} como microcontrolador por tres razones: integra conectividad WiFi de forma nativa sin necesitar un módulo adicional, soporta el protocolo I\textsuperscript{2}C necesario para comunicarse con el sensor y las pantallas, y es compatible con el entorno Arduino, que provee bibliotecas maduras para red y manejo de datos. Se descartó el Arduino Uno por carecer de WiFi integrado, y una Raspberry Pi habría resultado sobredimensionada para la tarea concreta de leer y enviar dos valores numéricos periódicamente, con un costo y consumo de energía mayores sin beneficio funcional correspondiente.
 
-Se eligió el \textbf{ESP32-C5} como microcontrolador principal por tres razones. La primera es que integra conectividad \textbf{WiFi 802.11} de forma nativa, sin necesidad de un módulo adicional, lo que simplifica el diseño físico del nodo y reduce su costo. La segunda es que soporta el protocolo de comunicación \textbf{I\textsuperscript{2}C}, necesario para leer el sensor de temperatura y humedad. La tercera es su compatibilidad con el entorno Arduino, que proporciona un ecosistema de bibliotecas maduro para tareas de red, manejo de JSON y gestión de credenciales, reduciendo significativamente el tiempo de desarrollo.
+Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones: utiliza I\textsuperscript{2}C —el mismo bus compartido con las pantallas, sin necesitar conductores adicionales—, y ofrece una precisión de ±0.3\,°C en temperatura y ±2\% en humedad, adecuada para detectar variaciones relevantes en el almacenamiento de medicamentos donde los rangos recomendados son 15–25\,°C y 30–65\% de humedad relativa.
 
-Se descartaron alternativas como un Arduino Uno porque carece de conectividad WiFi integrada, lo que habría requerido un módulo externo y aumentado la complejidad del circuito. Una Raspberry Pi habría sido sobredimensionada para una tarea de lectura y envío periódico de dos valores numéricos, con un consumo de energía y costo mayores sin un beneficio funcional correspondiente.
+\subsection{Arquitectura del nodo}
 
-\subsubsection*{Sensor AHT10}
-
-El \textbf{AHT10} es un sensor que mide simultáneamente temperatura y humedad relativa en un único componente. Se eligió sobre alternativas como los sensores DHT11 o DHT22 por dos motivos. El primero es su protocolo de comunicación: el AHT10 utiliza I\textsuperscript{2}C, un bus estándar de dos hilos (datos y reloj) que es intrínsecamente más robusto ante interferencias que el protocolo de un solo hilo de los sensores DHT. El segundo es su precisión: el AHT10 ofrece una resolución de 0.01 °C en temperatura y 0.024\% en humedad, adecuada para detectar variaciones ambientales relevantes para el almacenamiento farmacéutico, donde rangos como 15–25 °C y 30–65\% de humedad relativa son críticos para la conservación de medicamentos.
-
-\subsection{Arquitectura del firmware}
-
-El firmware sigue el modelo de ejecución de Arduino, que divide el programa en dos funciones con responsabilidades distintas: \textbf{configuración inicial} (\textit{setup}), que se ejecuta una sola vez al encender el dispositivo e inicializa el hardware y la conexión de red; y \textbf{ciclo operativo} (\textit{loop}), que se ejecuta de forma continua y realiza las lecturas periódicas del sensor y el envío de datos.
-
-El diagrama siguiente muestra el flujo completo de ejecución del firmware, desde el encendido hasta el ciclo de operación continua:
+El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bus I\textsuperscript{2}C, que requiere únicamente dos conductores compartidos entre todos los dispositivos. La alimentación proviene de una fuente USB de 5\,V. La conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[
-    node distance=0.5cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=1pt},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
-    warn/.style={rectangle, draw, rounded corners=3pt, fill=orange!10, minimum width=2.7cm, minimum height=0.82cm, align=center, font=\small},
-    arr/.style={-{Stealth}, thick}
-]
-\node[box, fill=gray!15]  (ini)   {\textbf{1.} Encendido del nodo sensor};
-\node[box, fill=blue!8,   below=of ini]   (hw)    {\textbf{2.} Inicializar bus I\textsuperscript{2}C y detectar sensor AHT10};
-\node[dec,                below=of hw]    (sdet)  {¿Sensor\\detectado?};
-\node[err,                right=of sdet]  (errs)  {Error de hardware\\(espera indefinida)};
-\node[box, fill=blue!8,   below=of sdet]  (wifi)  {\textbf{3.} Conectar a WiFi mediante portal de provisión};
-\node[dec,                below=of wifi]  (wcon)  {¿Conectado?};
-\node[err,                right=of wcon]  (errw)  {Reiniciar\\dispositivo};
-\node[box, fill=gray!10,  below=of wcon]  (chk)   {\textbf{4.} Verificar que la conexión WiFi esté activa};
-\node[dec,                below=of chk]   (wact)  {¿WiFi\\activo?};
-\node[warn,               right=of wact]  (rec)   {Reconectar\\y esperar};
-\node[box, fill=blue!10,  below=of wact]  (read)  {\textbf{5.} Leer temperatura y humedad cada 30 segundos};
-\node[dec,                below=of read]  (val)   {¿Valores en\\rango válido?};
-\node[warn,               right=of val]   (disc)  {Descartar\\lectura};
-\node[box, fill=green!10, below=of val]   (post)  {\textbf{6.} Enviar datos a la API: POST HTTPS};
-\node[box, fill=green!8,  below=of post]  (res)   {\textbf{7.} Registrar resultado → repetir desde paso 4};
-\draw[arr] (ini)  -- (hw);
-\draw[arr] (hw)   -- (sdet);
-\draw[arr] (sdet) -- node[left,  font=\footnotesize]{Sí} (wifi);
-\draw[arr] (sdet) -- node[above, font=\footnotesize]{No} (errs);
-\draw[arr] (wifi) -- (wcon);
-\draw[arr] (wcon) -- node[left,  font=\footnotesize]{Sí} (chk);
-\draw[arr] (wcon) -- node[above, font=\footnotesize]{No} (errw);
-\draw[arr] (chk)  -- (wact);
-\draw[arr] (wact) -- node[left,  font=\footnotesize]{Sí} (read);
-\draw[arr] (wact) -- node[above, font=\footnotesize]{No} (rec);
-\draw[arr] (read) -- (val);
-\draw[arr] (val)  -- node[left,  font=\footnotesize]{Sí} (post);
-\draw[arr] (val)  -- node[above, font=\footnotesize]{No} (disc);
-\draw[arr] (post) -- (res);
+\begin{tikzpicture}[font=\small]
+
+% Periféricos I²C (izquierda)
+\node[rectangle, draw, rounded corners=3pt, fill=gray!10,
+      minimum width=3.6cm, minimum height=1.0cm, align=center]
+    (aht) at (0, 1.4)
+    {\textbf{Sensor AHT10}\\{\footnotesize temperatura y humedad}};
+
+\node[rectangle, draw, rounded corners=3pt, fill=gray!10,
+      minimum width=3.6cm, minimum height=1.0cm, align=center]
+    (oled) at (0, -0.7)
+    {\textbf{3 pantallas OLED}\\{\footnotesize 128×64 px (SSD1306)}};
+
+% Microcontrolador (centro)
+\node[rectangle, draw, rounded corners=4pt, fill=gray!25,
+      minimum width=2.8cm, minimum height=3.6cm, align=center]
+    (esp) at (5.0, 0.35) {\textbf{ESP32-C5}};
+
+% Fuente de alimentación (abajo)
+\node[rectangle, draw, rounded corners=3pt, fill=gray!8,
+      minimum width=2.8cm, minimum height=0.75cm, align=center, font=\footnotesize]
+    (usb) at (5.0, -2.7) {Fuente USB 5\,V};
+
+% API en la nube (derecha)
+\node[rectangle, draw, rounded corners=6pt, fill=gray!15,
+      minimum width=3.4cm, minimum height=1.8cm, align=center]
+    (cloud) at (10.2, 0.35)
+    {\textbf{API REST}\\[2pt]{\footnotesize Railway}\\{\footnotesize (nube)}};
+
+% Bus I²C: barra vertical + ramales horizontales
+\draw[thick] (3.0, 1.9) -- (3.0, -1.1);
+\draw[thick] (aht.east)  -- (3.0, 1.4);
+\draw[thick] (oled.east) -- (3.0, -0.7);
+\draw[thick] (3.0, 0.35) -- (esp.west);
+\node[font=\footnotesize, anchor=east] at (2.85, 0.4)
+    {Bus I\textsuperscript{2}C};
+
+% Conexión WiFi / HTTPS hacia la API
+\draw[-{Stealth}, thick] (esp.east) --
+    node[above, font=\footnotesize]{WiFi\,/\,HTTPS}
+    (cloud.west);
+
+% Alimentación
+\draw[-{Stealth}, thick] (usb.north) --
+    node[right, font=\footnotesize]{5\,V}
+    (esp.south);
+
 \end{tikzpicture}
-\caption{Diagrama de flujo de ejecución del firmware del nodo sensor}
-\label{fig:cap3-sensor-flujo}
+\caption{Diagrama de conexiones del nodo sensor}
+\label{fig:cap3-sensor-hw}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Una característica de diseño relevante es que el ciclo operativo utiliza \textbf{temporización no bloqueante}: en lugar de detener la ejecución del programa durante los 30 segundos de espera, el firmware compara continuamente el tiempo transcurrido con el intervalo deseado. Esto permite que en cada ciclo se verifique el estado de la conexión WiFi y se atienda el botón de restablecimiento, sin que el programa quede congelado esperando la siguiente lectura.
+% TODO: agregar fotografía del nodo ensamblado
+% Guardar en 0_imagenes/Cap3/FotoNodo.png y descomentar:
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.72\textwidth]{0_imagenes/Cap3/FotoNodo.png}}
+%    \caption{Nodo sensor ensamblado: ESP32-C5, sensor AHT10 y pantallas OLED}
+%    \label{fig:cap3-nodo-foto}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
-\subsection{Provisión de red con WiFiManager}
+\subsection{Funcionamiento del firmware}
 
-Un requisito de diseño fue que el nodo no tuviera credenciales WiFi escritas directamente en el firmware, ya que eso obligaría a recompilar y recargar el programa cada vez que se cambie la red o el dispositivo se instale en una ubicación distinta. Para resolver esto se utilizó la biblioteca \textbf{WiFiManager}, que implementa un mecanismo de provisión mediante portal cautivo:
+El firmware sigue el modelo de Arduino: una función de configuración inicial que se ejecuta una sola vez al encender el dispositivo —inicializa el bus I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi— y un ciclo operativo continuo que realiza las lecturas cada 30 segundos y las envía a la API. El ciclo utiliza temporización no bloqueante: en lugar de pausar el programa durante la espera, compara continuamente el tiempo transcurrido, lo que permite verificar el estado de la conexión WiFi en cada iteración.
 
-En el primer arranque, el ESP32 no encuentra credenciales guardadas y crea una red WiFi temporal de nombre \texttt{Sensor-Farmacia}. El técnico de instalación se conecta a esa red desde un teléfono o computadora, accede a una página de configuración que aparece automáticamente en el navegador, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales en su memoria interna y se conecta. En arranques posteriores, utiliza las credenciales guardadas de forma automática sin intervención del usuario.
+Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
 
-Si en algún momento se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio del ESP32 durante tres segundos borra las credenciales guardadas y el dispositivo vuelve al modo de provisión.
+Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85\,°C para temperatura; 0\% a 100\% para humedad) antes de enviarse; si cae fuera de rango, se descarta sin enviar. Las lecturas válidas se envían al \textit{endpoint} \texttt{/api/v1/sensor-readings} mediante una petición POST con cifrado HTTPS. El intervalo de 30 segundos balancea la granularidad de los datos con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
 
-\subsection{Lectura del sensor y validación}
+\subsection{Pantallas OLED}
 
-El sensor AHT10 se comunica con el ESP32 mediante el protocolo \textbf{I\textsuperscript{2}C}, que requiere únicamente dos líneas: una para los datos y otra para la señal de reloj. Esta comunicación es gestionada por una biblioteca de Adafruit que abstrae los detalles del protocolo y expone una interfaz de lectura directa.
-
-La lectura se realiza cada \textbf{30 segundos}. Este intervalo representa un balance entre la granularidad de los datos almacenados y la carga generada sobre la red y el servidor: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén, pero consumirían más ancho de banda y generarían más registros en la base de datos. Las lecturas menos frecuentes, por otro lado, podrían no detectar variaciones térmicas abruptas con suficiente oportunidad.
-
-Antes de enviar cada lectura a la API, el firmware verifica que los valores estén dentro de rangos físicamente plausibles: temperatura entre −10 °C y 85 °C, y humedad entre 0\% y 100\%. Si una lectura cae fuera de esos rangos —lo que indicaría un fallo en el sensor o interferencia eléctrica— se descarta sin enviar, evitando que datos erróneos se almacenen en la base de datos. Los valores válidos se redondean a un decimal antes del envío.
-
-\subsection{Envío de datos a la API}
-
-Cada lectura válida se envía al endpoint \texttt{/api/v1/sensor-readings} de la API mediante una petición \textbf{POST HTTPS}. El uso de HTTPS garantiza que los datos viajan cifrados entre el nodo y el servidor, lo cual es relevante dado que la comunicación atraviesa la red WiFi del establecimiento y redes públicas de Internet hasta el servidor en Railway.
-
-El cuerpo de la petición es un objeto JSON con tres campos: la temperatura, la humedad y un identificador del dispositivo. El identificador permite que la API registre qué nodo envió cada lectura, relevante si en el futuro se despliegan múltiples nodos en distintas áreas o sucursales.
-
-El firmware evalúa el código de respuesta HTTP devuelto por el servidor. Si la API confirma que el registro fue creado exitosamente, el ciclo continúa normalmente. Si la API responde con un error —por un problema temporal del servidor, por ejemplo— el firmware registra el error en el puerto serial para diagnóstico y espera hasta el siguiente ciclo de 30 segundos sin intentar reenviar. Esta decisión de no reintentar el envío fue deliberada: en un sistema de monitoreo ambiental, una lectura perdida ocasionalmente es menos problemática que una lógica de reintento que podría generar peticiones en ráfaga y sobrecargar el servidor.
-
-\subsection{Visualización local con pantallas OLED}
-
-Para complementar el nodo sensor con retroalimentación visual directa, se incorporaron tres \textbf{pantallas OLED SSD1306} de 128×64 píxeles. La necesidad surgió del escenario de operación: el personal de la farmacia —o el técnico de mantenimiento— puede necesitar verificar si el sensor está activo, conectado y midiendo correctamente sin tener que abrir la aplicación web. Con tres pantallas, cada dato ocupa su propia superficie y resulta legible de un vistazo desde cierta distancia: la primera muestra la temperatura actual, la segunda la humedad relativa y la tercera el estado de la conexión WiFi.
-
-Las pantallas se conectan al mismo bus I\textsuperscript{2}C que el sensor AHT10, aprovechando que el protocolo permite que múltiples dispositivos compartan el mismo par de conductores. Para que el microcontrolador pueda dirigir instrucciones a cada pantalla de forma individual, a cada módulo OLED se le asigna una dirección de bus distinta. La actualización de las pantallas ocurre tras cada ciclo de lectura del sensor, de modo que el valor mostrado corresponde siempre a la última medición realizada.
-
-Esta incorporación mejora la usabilidad del nodo durante la instalación y el mantenimiento sin añadir complejidad al firmware: el mismo valor que se envía a la API se redirige también a las pantallas, reutilizando el dato ya obtenido sin operaciones adicionales.
+Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
 
 % =============================================
@@ -544,11 +570,11 @@ El quinto objetivo específico comprende dos componentes de integración: el dis
 
 \subsection{Gabinete impreso en 3D}
 
-Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó un gabinete personalizado que se fabricó mediante \textbf{impresión 3D}. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja de propósito general disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
+Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
 
-El diseño se realizó en \textbf{Bambu Studio}, el software de preparación de modelos tridimensionales para impresoras de la línea Bambu Lab. El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares dimensionadas con exactitud para exponer las pantallas OLED al frente. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos, lo que simplifica el acceso al interior para mantenimiento o ajustes.
+El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
-Las decisiones de diseño mecánico respondieron a restricciones concretas. El ensamble a presión —en lugar de tornillos— se eligió porque los componentes electrónicos internos pueden requerir ajuste o sustitución durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje por presión, abrir y cerrar el gabinete no deteriora el mecanismo de cierre. En cuanto al espacio, la tapa frontal debe acomodar tres módulos OLED dispuestos en fila horizontal con sus conectores traseros orientados hacia la base, lo que determinó el ancho mínimo del gabinete y la profundidad de las ventanas. La ventilación del sensor AHT10 se resolvió dejando una ranura en la base, lo suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del ambiente de almacenamiento hasta el sensor.
+Las decisiones de diseño respondieron a restricciones concretas. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje a presión, abrir y cerrar el gabinete no deteriora el mecanismo. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una ranura en la base, suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del área de almacenamiento.
 
 % TODO: subir 0_imagenes/Cap3/GabineteFoto.png a Overleaf para descomentar
 %\begin{figure}[H]
@@ -560,25 +586,15 @@ Las decisiones de diseño mecánico respondieron a restricciones concretas. El e
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
-El resultado es un dispositivo autónomo que puede colocarse sobre una superficie o fijarse en el área de almacenamiento, visible sin necesidad de conexión a ningún monitor externo ni acceso a la aplicación web.
-
 \subsection{Integración del lector de código de barras}
 
-Para agilizar el registro de ventas se incorporó el lector de código de barras modelo \textbf{Netum CS7501}, un dispositivo USB que el sistema operativo reconoce como un teclado estándar. Desde la perspectiva del navegador, el lector no requiere ningún controlador especial: al apuntar el lector a un código de barras con el cursor dentro de un campo de texto, el valor escaneado se ingresa como si hubiera sido tecleado.
+Para agilizar el registro de ventas se incorporó un lector de código de barras USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
 
-La integración no fue puramente de conexión directa. El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo de un lector de código de barras: el usuario habría tenido que hacer clic en el campo correcto, esperar el resultado de búsqueda y repetir el proceso para cada artículo. Para que la herramienta resultara práctica en un escenario de punto de venta, se diseñó e implementó un \textbf{modo lector} específico dentro del módulo de creación de ventas de la aplicación web.
+El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
 
-\subsubsection*{Modo lector en el registro de ventas}
+Al escanear un código, la aplicación lo compara contra el catálogo de productos cargado en memoria al abrir el formulario. Si hay coincidencia, el producto se agrega a la lista de artículos de la venta; si no la hay, el campo muestra una señal de error. La búsqueda se resuelve localmente sin generar una petición al servidor por cada código, lo que evita la latencia de red en un flujo donde múltiples artículos se escanean en secuencia rápida. El modo se desactiva automáticamente cuando el usuario hace clic fuera del área de escaneo.
 
-El modo lector se activa desde cualquier parte del formulario de venta mediante la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse ni hacer clic. Mientras el modo está activo, el formulario muestra un indicador visual animado con el texto "Escaneando" para confirmar que el lector está listo para recibir el siguiente código.
-
-Al escanear un código, la aplicación lo compara contra el campo de código único de cada producto en el catálogo, el cual se cargó en memoria al abrir el formulario. Si hay coincidencia, el producto se agrega a la lista de artículos de la venta, o se incrementa su cantidad si ya estaba incluido; si no hay coincidencia, el campo muestra un indicador de error para que el operador pueda identificar el producto de otra forma. La confirmación visual se realiza mediante un cambio de color en el borde del campo de entrada: verde en caso de éxito, rojo en caso de fallo.
-
-La búsqueda se realiza sobre los datos ya disponibles en el cliente, sin generar una petición adicional al servidor por cada escaneo. En un punto de venta donde múltiples productos se escanean en secuencia rápida, una consulta de red por código introduciría una latencia perceptible y dependencia de la velocidad de la conexión; al cargar el catálogo una sola vez al abrir el formulario, cada escaneo se resuelve de forma local e inmediata.
-
-El modo se desactiva automáticamente cuando el usuario hace clic fuera del área de escaneo, lo que le permite continuar completando el resto del formulario —sucursal, forma de pago— sin necesidad de una acción adicional para salir del modo.
-
-El diagrama siguiente resume el flujo de interacción del modo lector desde el momento en que el usuario lo activa hasta que completa la selección de artículos:
+El diagrama siguiente resume el flujo de interacción del modo lector:
 
 \begin{figure}[H]
 \centering
@@ -586,18 +602,18 @@ El diagrama siguiente resume el flujo de interacción del modo lector desde el m
     node distance=0.55cm,
     box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small, text width=7.8cm},
     dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=2pt},
-    ok/.style={rectangle, draw, rounded corners=3pt, fill=green!10, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=red!10, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
+    ok/.style={rectangle, draw, rounded corners=3pt, fill=gray!8, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
+    err/.style={rectangle, draw, rounded corners=3pt, fill=gray!20, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
     arr/.style={-{Stealth}, thick}
 ]
 \node[box, fill=gray!15]  (start) {\textbf{1.} Formulario de creación de venta abierto};
-\node[box, fill=blue!8,   below=of start] (f2)    {\textbf{2.} Usuario presiona F2 → modo lector activo};
-\node[box, fill=blue!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras};
+\node[box, fill=gray!8,   below=of start] (f2)    {\textbf{2.} Usuario presiona F2 → modo lector activo};
+\node[box, fill=gray!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras};
 \node[box, fill=gray!10,  below=of scan]  (look)  {\textbf{4.} Buscar código en el catálogo local};
 \node[dec,                below=of look]  (found) {¿Producto\\encontrado?};
 \node[ok,  right=of found, xshift=0.6cm]  (add)   {Agregar /\\incrementar\\en la lista};
 \node[err, left=of found,  xshift=-0.6cm] (nf)    {Señal visual\\de error};
-\node[box, fill=green!10, below=1.6cm of found] (flash) {\textbf{5.} Confirmar resultado (borde verde o rojo)};
+\node[box, fill=gray!12, below=1.6cm of found] (flash) {\textbf{5.} Confirmar resultado visualmente};
 \node[dec,                below=of flash] (more)  {¿Más artículos\\por escanear?};
 \node[box, fill=gray!15,  below=of more]  (end)   {\textbf{6.} Clic fuera del área → modo desactivado};
 
