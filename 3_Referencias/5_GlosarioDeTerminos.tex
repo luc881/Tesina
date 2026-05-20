@@ -32,70 +32,6 @@ Autenticación &
 Proceso mediante el cual el sistema verifica la identidad de un usuario antes de concederle acceso. En este proyecto se implementa mediante JSON Web Tokens (JWT), que aseguran que solo usuarios registrados puedan interactuar con la API. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
-Backend &
-Componente del sistema que opera en el servidor y es invisible para el usuario final. Se encarga de procesar solicitudes, aplicar la lógica de negocio, gestionar el acceso a la base de datos y devolver respuestas al frontend o a los dispositivos físicos. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Base de datos relacional &
-Sistema de almacenamiento de información organizado en tablas compuestas por filas y columnas, en el que las relaciones entre tablas se establecen mediante claves. Permite realizar consultas estructuradas mediante el lenguaje SQL. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Biblioteca de software &
-Conjunto de módulos de código reutilizables que proporcionan funcionalidades específicas a una aplicación sin ser ejecutados de forma independiente. A diferencia de un framework, una biblioteca es invocada por el desarrollador según sus necesidades. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Buenas prácticas de almacenamiento &
-Conjunto de normas y procedimientos recomendados para conservar la calidad e integridad de los medicamentos durante su almacenamiento, incluyendo el control de temperatura, humedad, iluminación y fecha de caducidad. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Bus de comunicación &
-Canal físico o lógico compartido a través del cual varios dispositivos electrónicos intercambian datos. En este proyecto se utiliza el bus I²C para la comunicación entre el microcontrolador ESP32-C5 y el sensor AHT10. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Código fuente &
-Conjunto de instrucciones escritas en un lenguaje de programación que definen el comportamiento de un sistema de software. En este proyecto el código fuente está organizado en repositorios separados para el backend, el frontend y el firmware del microcontrolador. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Cómputo en la nube &
-Modelo de prestación de servicios tecnológicos —como servidores, almacenamiento y bases de datos— a través de internet, sin necesidad de infraestructura física propia. En este proyecto el backend se aloja en Railway y el frontend en Vercel. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Componente &
-En el contexto del desarrollo con React, unidad autónoma de la interfaz de usuario que encapsula su propia estructura, lógica y presentación visual. Puede reutilizarse en distintas partes de la aplicación, como botones, tablas o formularios. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Control de versiones &
-Sistema que registra los cambios realizados en el código fuente a lo largo del tiempo, permitiendo recuperar versiones anteriores, identificar modificaciones y coordinar el trabajo entre varios desarrolladores. En este proyecto se utiliza Git junto con GitHub. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Credenciales &
-Información confidencial —generalmente un nombre de usuario y una contraseña— que identifica a un usuario o dispositivo y le permite acceder a un sistema protegido. En el contexto del ESP32-C5, las credenciales hacen referencia a los datos de la red Wi-Fi almacenados para la conexión automática. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Despliegue &
-Proceso de publicar y poner en operación una aplicación en un entorno accesible para los usuarios finales, ya sea en un servidor local o en una plataforma en la nube. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Endpoint &
-Dirección específica dentro de una API a la que se pueden enviar solicitudes para ejecutar una operación determinada, como consultar productos, registrar una venta o recibir datos de sensores. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Escalabilidad &
-Capacidad de un sistema para mantener su desempeño cuando aumenta la carga de trabajo, el número de usuarios o el volumen de datos, sin necesidad de rediseñar su arquitectura. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Firmware &
-Software que se almacena de forma permanente en la memoria no volátil de un dispositivo electrónico y controla directamente su hardware. En este proyecto, el firmware del ESP32-C5 gestiona la lectura del sensor AHT10, la conexión Wi-Fi y el envío de datos al backend. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Framework &
-Estructura de software que proporciona una base preestablecida de herramientas, convenciones y componentes sobre la cual se desarrolla una aplicación. A diferencia de una biblioteca, el framework define el flujo de control del programa. En este proyecto se utiliza FastAPI para el backend y React para el frontend. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
-Frontend &
-Componente del sistema con el que interactúa directamente el usuario a través del navegador web. Presenta la información de forma visual mediante tablas, formularios y gráficos, y envía las acciones del usuario al backend para su procesamiento. \\
-\specialrule{0.3pt}{0pt}{0pt}
-
 Humedad relativa &
 Porcentaje de vapor de agua presente en el aire respecto al máximo que el aire puede contener a una temperatura determinada. Es una variable crítica para el almacenamiento de medicamentos, ya que valores fuera del rango recomendado degradan su composición química. \\
 \specialrule{0.3pt}{0pt}{0pt}
@@ -125,7 +61,7 @@ Object-Relational Mapper — Mapeador Objeto-Relacional. Herramienta que permite
 \specialrule{0.3pt}{0pt}{0pt}
 
 Repositorio &
-Almacén centralizado donde se guarda y gestiona el código fuente de un proyecto, incluyendo el historial completo de cambios. En este proyecto se utilizan repositorios en GitHub para el backend, el frontend y el firmware. \\
+Almacén centralizado donde se guarda y gestiona el código fuente de un proyecto, incluyendo el historial completo de cambios. En este proyecto se utilizan repositorios en GitHub para el servidor, la interfaz web y el firmware. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Sensor &
