@@ -270,7 +270,7 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \node[box, fill=gray!5,  below=0.6cm of tokens]  (request) {\textbf{4.} El cliente incluye el token en cada petición};
 \node[dec,               below=0.6cm of request] (tokval)  {¿Sesión activa y con permiso?};
 \node[box, fill=gray!10, below=0.6cm of tokval]  (exec)    {\textbf{5.} Se ejecuta la operación y se devuelve el resultado};
-\node[err, right=1.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
+\node[err, right=2.5cm of valid]  (err1) {Acceso denegado:\\ contraseña incorrecta};
 \node[err, right=1.5cm of tokval] (err2) {Acceso denegado:\\ sesión inválida o sin permiso};
 \draw[arr] (login)   -- (verify);
 \draw[arr] (verify)  -- (valid);
@@ -285,10 +285,10 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 \coordinate (rrail2) at ($(err2.east)+(0.68, 0)$);
 \draw[arr] (err1.east) -- (err1.east -| rrail)
     -- node[right, font=\footnotesize]{Reintentar} (rrail |- login.east) -- (login.east);
-\draw[arr] (err2.east) -- (err2.east -| rrail2)
-    -- (rrail2 |- login.east) -- (login.east);
+\draw[arr] (err2.east) -- ([xshift=2cm]err2.east -| rrail2)
+    -- ([xshift=2cm]rrail2 |- login.east) -- (login.east);
 \end{tikzpicture}
-\caption{Diagrama de flujo de autenticación y autorización (los errores regresan al paso 1)}
+\caption{Diagrama de flujo de autenticación y autorización}
 \label{fig:cap3-jwt-flujo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
