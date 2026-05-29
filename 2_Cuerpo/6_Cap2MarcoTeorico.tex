@@ -401,26 +401,3 @@ El uso de JWT ofrece diversas ventajas en sistemas distribuidos, entre las que d
 En el sistema desarrollado para la Farmacia Selene, JWT se utiliza para controlar el acceso a las diferentes funciones de la API. De esta manera, únicamente los usuarios autenticados pueden consultar información del inventario, registrar ventas o modificar datos dentro del sistema.
 
 \secbreak
-\section{Normas Oficiales Mexicanas (NOM)}
-
-Los medicamentos requieren condiciones específicas de temperatura y humedad para conservar su eficacia. Almacenarlos fuera de estos rangos puede degradar su composición química y representar un riesgo para el paciente. En México, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) establece, a través de las Normas Oficiales Mexicanas, los rangos de almacenamiento que deben respetarse.
-
-\subsection{NOM-073-SSA1-2015: Estabilidad de Fármacos y Medicamentos}
-
-La NOM-073-SSA1-2015 \cite{nom073} establece las condiciones de temperatura y humedad relativa bajo las cuales deben conservarse los medicamentos para garantizar su estabilidad. Para México, que se clasifica en las Zonas Climáticas II y IVb, los rangos de referencia para almacenamiento son:
-
-\begin{itemize}
-    \item \textbf{Temperatura ambiente:} máximo $30~^{\circ}\text{C}$ con una humedad relativa máxima de $65\%$.
-    \item \textbf{Refrigeración:} entre $2~^{\circ}\text{C}$ y $8~^{\circ}\text{C}$, para medicamentos que requieren cadena de frío.
-\end{itemize}
-
-Estos rangos son los que el sistema utiliza como referencia para configurar los umbrales de alerta del nodo sensor: cuando la temperatura o la humedad supera los valores establecidos, el sistema notifica al administrador para que tome medidas correctivas.
-
-
-
-
-
-
-
-
-
