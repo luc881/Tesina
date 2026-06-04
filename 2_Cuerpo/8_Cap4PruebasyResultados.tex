@@ -13,7 +13,7 @@ En este capítulo se documentan las pruebas realizadas sobre cada componente del
 % SECCIÓN 4.1: BASE DE DATOS
 % =============================================
 
-\section{Objetivo Específico 1 — Pruebas de la base de datos}
+\section{Pruebas de la base de datos}
 
 La base de datos no se probó de forma aislada sino a través de la suite de pruebas automatizadas de la API: dado que cada prueba opera sobre una instancia real de PostgreSQL, cualquier restricción, índice o relación que no funcione correctamente provoca un fallo detectable en la prueba correspondiente. Este enfoque permitió validar el comportamiento de la base de datos en las mismas condiciones que en producción, sin necesidad de escribir pruebas separadas a nivel de base de datos.
 
@@ -150,7 +150,7 @@ El esquema final de la base de datos opera de forma estable en el entorno de pro
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 2 — Pruebas de la API REST}
+\section{Pruebas de la API REST}
 
 Para verificar el funcionamiento de la API se desarrolló una suite de pruebas automatizadas que cubre la totalidad de los módulos del sistema. Cada prueba opera sobre una base de datos PostgreSQL real en lugar de datos simulados, lo que garantiza que el comportamiento verificado sea idéntico al que se ejecuta en producción: una prueba sobre datos simulados puede pasar aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias. La suite abarca escenarios positivos —operaciones que deben completarse con éxito— y negativos —operaciones que el sistema debe rechazar—, y cubre los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
 
@@ -396,7 +396,7 @@ La suite de pruebas cubre los veinte módulos de la API con casos por operación
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 3 — Pruebas de la interfaz web}
+\section{Pruebas de la interfaz web}
 
 La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo. De forma complementaria, se desarrolló un conjunto de pruebas automatizadas para los componentes individuales de mayor criticidad.
 
@@ -538,7 +538,7 @@ Al finalizar las pruebas, los dieciséis módulos de navegación de la interfaz 
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 4 — Pruebas del nodo sensor}
+\section{Pruebas del nodo sensor}
 
 Las pruebas del nodo sensor cubrieron tres aspectos: la correcta transmisión de las lecturas al servidor, el comportamiento del firmware ante valores fuera de rango, y la estabilidad de la conexión WiFi. Las pruebas se realizaron en el entorno de desarrollo mientras se finaliza el diseño del gabinete físico para la instalación en la farmacia.
 
@@ -717,7 +717,7 @@ Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo o
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 5 — Pruebas del gabinete y lector de código de barras}
+\section{Pruebas del gabinete y lector de código de barras}
 
 \subsection{Gabinete impreso en 3D}
 

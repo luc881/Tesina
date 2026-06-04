@@ -30,7 +30,7 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
 % OE 1: BASE DE DATOS
 % =============================================
 
-\section{Objetivo Específico 1 — Desarrollo de la base de datos en PostgreSQL}
+\section{Desarrollo de la base de datos en PostgreSQL}
 
 Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
@@ -194,7 +194,7 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
+\section{Desarrollo de la API REST con FastAPI}
 
 Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
 
@@ -351,7 +351,7 @@ La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tan
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
+\section{Desarrollo de la interfaz web con React}
 
 Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
 
@@ -487,7 +487,7 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
+\section{Desarrollo del nodo sensor con ESP32}
 
 Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
 
@@ -586,7 +586,7 @@ Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para qu
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 5 — Integración física y lector de código de barras}
+\section{Integración física y lector de código de barras}
 
 El quinto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
 
