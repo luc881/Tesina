@@ -1,3 +1,88 @@
-\chapterpage{1}{Pruebas y Resultados}
-\chapter{Pruebas y Resultados}
-\lipsum[15]
+% =============================================
+% CAPÍTULO 4: PRUEBAS Y RESULTADOS
+% =============================================
+
+\chapterpage{4}{Pruebas y Resultados}
+\clearpage
+\refstepcounter{chapter}
+\addcontentsline{toc}{chapter}{Cap. 4 Pruebas y Resultados}
+
+En este capítulo se documentan las pruebas realizadas sobre cada componente del sistema construido en el capítulo anterior y los resultados obtenidos. Las pruebas se presentan siguiendo el mismo orden de los objetivos específicos: base de datos, API REST, interfaz web y nodo sensor. Para cada componente se describen los escenarios verificados, los ajustes que fue necesario realizar a partir de los resultados obtenidos, y las mejoras identificadas durante el proceso de validación.
+
+% =============================================
+% SECCIÓN 4.1: BASE DE DATOS
+% =============================================
+
+\section{Objetivo Específico 1 — Pruebas de la base de datos}
+
+% TODO
+
+% =============================================
+% SECCIÓN 4.2: API REST
+% =============================================
+
+\clearpage
+\section{Objetivo Específico 2 — Pruebas de la API REST}
+
+Para verificar el funcionamiento de la API se desarrolló una suite de pruebas automatizadas que cubre la totalidad de los módulos del sistema. Cada prueba opera sobre una base de datos PostgreSQL real en lugar de datos simulados, lo que garantiza que el comportamiento verificado sea idéntico al que se ejecuta en producción: una prueba sobre datos simulados puede pasar aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias. La suite abarca escenarios positivos —operaciones que deben completarse con éxito— y negativos —operaciones que el sistema debe rechazar—, y cubre los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
+
+Las pruebas se ejecutaron primero en el entorno local de desarrollo y posteriormente en un entorno de integración continua que las corre de forma automática con cada actualización del código.
+
+\subsection{Módulo de autenticación}
+
+Con la implementación inicial del módulo de autenticación se obtuvo un sistema que emitía un token de acceso al iniciar sesión y lo verificaba en cada operación posterior. Durante las pruebas se identificó que el tiempo de vigencia del token resultaba insuficiente para sesiones de trabajo prolongadas: el sistema cerraba la sesión del usuario mientras este se encontraba operando la aplicación, lo que interrumpía el flujo de trabajo.
+
+Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares; cuando está próximo a expirar, el sistema lo renueva de forma transparente sin que el usuario tenga que iniciar sesión nuevamente. Se añadió además la opción de sesión prolongada —equivalente a la función \textit{recordarme} en aplicaciones web— que extiende la duración del token de refresco a 30 días para los usuarios que así lo seleccionen al iniciar sesión.
+
+Durante las pruebas también se identificó que el módulo de cambio de contraseña no verificaba que el usuario con sesión activa fuera el mismo que intentaba realizar el cambio, lo que representaba una vulnerabilidad: un usuario podría haber modificado la contraseña de otro. Esta situación se corrigió añadiendo una verificación de identidad antes de procesar la solicitud.
+
+\subsection{Módulo de ventas y control de inventario por lotes}
+
+La lógica de completar una venta —que descuenta las unidades vendidas del inventario y registra de qué lote provienen— fue el componente de mayor complejidad de la API. Con la propuesta inicial del registro de ventas se contaba únicamente con el encabezado de la transacción y el detalle de los productos; el descuento efectivo del inventario por lote no estaba implementado en esa versión.
+
+Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}: primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto vendido, los ordena por fecha de caducidad y descuenta las unidades del lote que vence primero. Si las existencias de un lote no son suficientes para cubrir la cantidad vendida, el sistema distribuye automáticamente el descuento entre los lotes siguientes en orden de caducidad. Este comportamiento se verificó con pruebas que cubren los casos: descuento completo desde un único lote, distribución entre múltiples lotes, e intento de venta con existencias insuficientes —en este último caso el sistema rechaza la operación y el inventario no se ve afectado.
+
+Junto con la lógica de ventas se implementó y verificó el módulo de devoluciones. Una devolución revierte el descuento de inventario aplicado al completar la venta, reintegrando las unidades a los mismos lotes de los que fueron descontadas. El estado de la venta se actualiza automáticamente a \textit{parcialmente devuelta} o \textit{devuelta} según la cantidad retornada, sin intervención manual.
+
+\subsection{Correcciones identificadas durante las pruebas}
+
+A lo largo del proceso de verificación se identificaron y corrigieron problemas en distintos módulos de la API. La tabla siguiente resume los más representativos:
+
+\begin{table}[H]
+\centering
+\caption{Correcciones realizadas a la API durante las pruebas}
+\label{tab:cap4-api-correcciones}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{} p{3.0cm} p{4.0cm} X @{}}
+\toprule
+\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
+\midrule
+Cálculos monetarios
+    & Los totales de ventas acumulaban errores de redondeo al operar con precios decimales
+    & Se cambió el tipo de dato de las columnas de monto a precisión decimal exacta, eliminando los errores de redondeo \\[4pt]
+Registros dados de baja
+    & Los registros eliminados seguían apareciendo en los listados de búsqueda y consulta
+    & Se añadió el filtro correspondiente en todas las consultas de lectura del sistema \\[4pt]
+Comunicación con el navegador
+    & Los errores internos del servidor llegaban al navegador como errores de red genéricos, sin mensaje descriptivo
+    & Se ajustó la configuración para que todos los tipos de respuesta, incluyendo los errores, incluyeran las cabeceras de acceso necesarias \\[4pt]
+Despliegue en Railway
+    & El servidor de producción no encontraba el módulo de la aplicación al iniciar, impidiendo el arranque
+    & Se corrigió la ruta de inicio en el archivo de configuración del servidor en Railway \\[4pt]
+Búsqueda de usuarios
+    & La búsqueda por tipo de documento no funcionaba porque el motor de base de datos no permite búsqueda parcial sobre campos de tipo enumerado
+    & Se modificó la consulta para convertir el campo a texto antes de aplicar el filtro de búsqueda \\[4pt]
+Recuperación de contraseña
+    & El servicio externo de envío de correo cambió su interfaz entre versiones, interrumpiendo el flujo de recuperación
+    & Se actualizó la integración con la nueva versión del servicio \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{table}
+
+\subsection{Resultados de la suite de pruebas}
+
+La suite de pruebas cubre los veinte módulos de la API con casos por operación: lectura, creación, actualización y eliminación, más los escenarios de rechazo para cada uno —solicitudes sin autenticación, identificadores inexistentes y datos con formato incorrecto. Todos los casos de prueba pasan de forma exitosa sobre la base de datos de producción en Railway, lo que confirma que el comportamiento del sistema es consistente con el diseño descrito en el capítulo anterior.
