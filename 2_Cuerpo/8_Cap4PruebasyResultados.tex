@@ -34,6 +34,17 @@ Con la implementación inicial del módulo de autenticación se obtuvo un sistem
 
 Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares; cuando está próximo a expirar, el sistema lo renueva de forma transparente sin que el usuario tenga que iniciar sesión nuevamente. Se añadió además la opción de sesión prolongada —equivalente a la función \textit{recordarme} en aplicaciones web— que extiende la duración del token de refresco a 30 días para los usuarios que así lo seleccionen al iniciar sesión.
 
+% TODO: insertar captura de pantalla de la pantalla de inicio de sesión mostrando la opción "Recordarme"
+% Guardar en: 0_imagenes/Cap4/LoginRecordarme.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.65\textwidth]{0_imagenes/Cap4/LoginRecordarme.png}}
+%    \caption{Pantalla de inicio de sesión con la opción de sesión prolongada}
+%    \label{fig:cap4-login}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
 Durante las pruebas también se identificó que el módulo de cambio de contraseña no verificaba que el usuario con sesión activa fuera el mismo que intentaba realizar el cambio, lo que representaba una vulnerabilidad: un usuario podría haber modificado la contraseña de otro. Esta situación se corrigió añadiendo una verificación de identidad antes de procesar la solicitud.
 
 \subsection{Módulo de ventas y control de inventario por lotes}
@@ -41,6 +52,82 @@ Durante las pruebas también se identificó que el módulo de cambio de contrase
 La lógica de completar una venta —que descuenta las unidades vendidas del inventario y registra de qué lote provienen— fue el componente de mayor complejidad de la API. Con la propuesta inicial del registro de ventas se contaba únicamente con el encabezado de la transacción y el detalle de los productos; el descuento efectivo del inventario por lote no estaba implementado en esa versión.
 
 Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}: primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto vendido, los ordena por fecha de caducidad y descuenta las unidades del lote que vence primero. Si las existencias de un lote no son suficientes para cubrir la cantidad vendida, el sistema distribuye automáticamente el descuento entre los lotes siguientes en orden de caducidad. Este comportamiento se verificó con pruebas que cubren los casos: descuento completo desde un único lote, distribución entre múltiples lotes, e intento de venta con existencias insuficientes —en este último caso el sistema rechaza la operación y el inventario no se ve afectado.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+
+% ── Encabezado ────────────────────────────────────────────────
+\node[anchor=west, font=\small\bfseries] at (0.0, 5.5)
+    {Escenario: venta de 150 unidades de Paracetamol 500\,mg};
+\draw[gray!40] (0.0, 5.15) -- (12.8, 5.15);
+
+% ── Cabeceras de columna ──────────────────────────────────────
+\node[anchor=west, font=\scriptsize\bfseries] at (1.0, 4.75) {Lote};
+\node[anchor=west, font=\scriptsize\bfseries] at (2.7, 4.75) {Existencias disponibles};
+\node[anchor=west, font=\scriptsize\bfseries] at (9.0, 4.75) {Caducidad};
+\node[anchor=center,font=\scriptsize\bfseries] at (12.0, 4.75) {Desc.};
+\draw[gray!40] (0.0, 4.50) -- (12.8, 4.50);
+
+% ── Lote A (80 uds, completamente consumido) ─────────────────
+% orden
+\node[circle, draw, fill=gray!30, minimum size=0.5cm,
+      inner sep=0pt, font=\scriptsize\bfseries] at (0.35, 3.9) {1};
+\node[anchor=west, font=\scriptsize] at (1.0, 3.9) {Lote A};
+% barra: escala 0.06 cm/ud → 80 uds = 4.80 cm desde x=2.7
+\fill[gray!65] (2.7, 3.55) rectangle (7.50, 4.25);
+\draw[thick]   (2.7, 3.55) rectangle (7.50, 4.25);
+\node[font=\scriptsize, text=white] at (5.10, 3.90) {80 unidades};
+\node[anchor=west, font=\scriptsize] at (9.0, 3.90) {Ene. 2026};
+\node[anchor=center, font=\small\bfseries] at (12.0, 3.90) {$-80$};
+% etiqueta agotado
+\node[anchor=west, font=\tiny, text=gray!55] at (7.60, 3.90) {agotado};
+
+% ── Lote B (100 uds, 70 consumidas) ──────────────────────────
+\node[circle, draw, fill=gray!30, minimum size=0.5cm,
+      inner sep=0pt, font=\scriptsize\bfseries] at (0.35, 2.4) {2};
+\node[anchor=west, font=\scriptsize] at (1.0, 2.4) {Lote B};
+% barra total: 100 uds = 6.00 cm → x=2.7..8.70
+% consumido: 70 uds = 4.20 cm → x=2.7..6.90
+% restante:  30 uds = 1.80 cm → x=6.90..8.70
+\fill[gray!65] (2.7, 2.05) rectangle (6.90, 2.75);
+\fill[gray!15] (6.9, 2.05) rectangle (8.70, 2.75);
+\draw[thick]   (2.7, 2.05) rectangle (8.70, 2.75);
+\draw[dashed, gray!50] (6.9, 2.05) -- (6.9, 2.75);
+\node[font=\scriptsize, text=white]    at (4.80, 2.40) {70 uds.};
+\node[font=\scriptsize, text=gray!55]  at (7.80, 2.40) {30};
+\node[anchor=west, font=\scriptsize]   at (9.0,  2.40) {Mar. 2026};
+\node[anchor=center, font=\small\bfseries] at (12.0, 2.40) {$-70$};
+
+% ── Lote C (50 uds, sin tocar) ───────────────────────────────
+\node[font=\small, text=gray!45] at (0.35, 0.9) {$\times$};
+\node[anchor=west, font=\scriptsize, text=gray!55] at (1.0, 0.9) {Lote C};
+% barra: 50 uds = 3.00 cm → x=2.7..5.70, sin consumo
+\fill[gray!15]     (2.7, 0.55) rectangle (5.70, 1.25);
+\draw[thick, gray!40] (2.7, 0.55) rectangle (5.70, 1.25);
+\node[font=\scriptsize, text=gray!55] at (4.20, 0.90) {50 unidades};
+\node[anchor=west, font=\scriptsize, text=gray!55] at (9.0, 0.90) {Jun. 2026};
+\node[anchor=center, font=\scriptsize, text=gray!55] at (12.0, 0.90) {$0$};
+
+% ── Separador y total ─────────────────────────────────────────
+\draw[thick] (11.0, 0.20) -- (12.8, 0.20);
+\node[anchor=east, font=\small\bfseries] at (12.8, -0.18)
+    {Total descontado: 150 $\checkmark$};
+
+% ── Leyenda ───────────────────────────────────────────────────
+\fill[gray!65] (2.7, -0.75) rectangle (3.30, -0.40);
+\draw          (2.7, -0.75) rectangle (3.30, -0.40);
+\node[anchor=west, font=\scriptsize] at (3.40, -0.58) {Unidades descontadas};
+\fill[gray!15] (7.2, -0.75) rectangle (7.80, -0.40);
+\draw          (7.2, -0.75) rectangle (7.80, -0.40);
+\node[anchor=west, font=\scriptsize] at (7.90, -0.58) {Unidades restantes};
+
+\end{tikzpicture}
+\caption{Ejemplo de la política FEFO aplicada en el módulo de ventas: el sistema consume primero el lote con la caducidad más próxima; si sus existencias no alcanzan, continúa con el siguiente lote en orden}
+\label{fig:cap4-fefo}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 Junto con la lógica de ventas se implementó y verificó el módulo de devoluciones. Una devolución revierte el descuento de inventario aplicado al completar la venta, reintegrando las unidades a los mismos lotes de los que fueron descontadas. El estado de la venta se actualiza automáticamente a \textit{parcialmente devuelta} o \textit{devuelta} según la cantidad retornada, sin intervención manual.
 
@@ -108,3 +195,156 @@ Se actualizó la integración con la nueva versión del servicio \\
 \subsection{Resultados de la suite de pruebas}
 
 La suite de pruebas cubre los veinte módulos de la API con casos por operación: lectura, creación, actualización y eliminación, más los escenarios de rechazo para cada uno —solicitudes sin autenticación, identificadores inexistentes y datos con formato incorrecto. Todos los casos de prueba pasan de forma exitosa sobre la base de datos de producción en Railway, lo que confirma que el comportamiento del sistema es consistente con el diseño descrito en el capítulo anterior.
+
+% TODO: insertar captura de pantalla de la terminal mostrando los tests pasando (salida de pytest)
+% Guardar en: 0_imagenes/Cap4/PytestResultados.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/PytestResultados.png}}
+%    \caption{Resultado de la ejecución de la suite de pruebas automatizadas de la API}
+%    \label{fig:cap4-pytest}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+% =============================================
+% SECCIÓN 4.3: FRONTEND REACT
+% =============================================
+
+\clearpage
+\section{Objetivo Específico 3 — Pruebas de la interfaz web}
+
+La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo. De forma complementaria, se desarrolló un conjunto de pruebas automatizadas para los componentes individuales de mayor criticidad.
+
+% TODO: insertar captura de pantalla del dashboard con datos reales de la farmacia
+% Guardar en: 0_imagenes/Cap4/Dashboard.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/Dashboard.png}}
+%    \caption{Vista del tablero principal con indicadores reales de la farmacia}
+%    \label{fig:cap4-dashboard}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Módulo de autenticación y control de acceso}
+
+La integración del inicio de sesión con la API se completó en las primeras etapas del desarrollo del frontend. Durante las pruebas se identificó un comportamiento incorrecto en la visibilidad de los módulos de navegación: los elementos del menú que debían mostrarse exclusivamente al administrador aparecían para todos los usuarios, y los elementos generales quedaban ocultos. La causa era que la condición de verificación de permisos evaluaba el resultado de forma invertida —ocultaba cuando debía mostrar, y mostraba cuando debía ocultar. Una vez corregida la lógica, todos los roles visualizaron únicamente los módulos que les correspondían.
+
+Se identificó además que una actualización de la configuración interna de la aplicación dejaba en algunos navegadores una versión desactualizada de esa configuración en memoria, lo que generaba una pantalla en blanco al recargar. El problema se resolvió versionando la configuración: al detectar una versión anterior, la aplicación la reemplaza automáticamente por la nueva.
+
+\subsection{Módulo de productos e inventario}
+
+El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. Con la propuesta inicial se lograba mostrar el listado de productos; fue necesario añadir en iteraciones sucesivas la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados, y la vista de detalle con la información del lote asociado a cada producto.
+
+% TODO: insertar captura de pantalla del módulo de inventario/lotes con búsqueda activa
+% Guardar en: 0_imagenes/Cap4/ModuloInventario.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModuloInventario.png}}
+%    \caption{Módulo de inventario mostrando el listado de lotes con búsqueda y filtros activos}
+%    \label{fig:cap4-inventario}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+Un problema recurrente durante esta fase fue la desincronización entre los valores que la API enviaba y los que el frontend esperaba: cuando se modificaba un conjunto de opciones válidas en la API —por ejemplo, los estados posibles de un lote o los tipos de movimiento— la interfaz seguía usando los valores anteriores, generando errores en los formularios. Esto se corrigió estableciendo un proceso de revisión explícita de estos valores cada vez que se actualizaba la API.
+
+\subsection{Módulo de ventas y lector de código de barras}
+
+El módulo de ventas fue el de mayor complejidad en el frontend: el formulario de registro de venta pasó por once versiones a lo largo del desarrollo. Con la versión inicial se podía seleccionar productos y registrar el encabezado de la venta; en iteraciones posteriores se incorporó el seguimiento por lote, la sección de pagos con soporte para múltiples métodos, la creación de lotes directamente desde el formulario, y finalmente el modo lector de código de barras.
+
+El modo lector —que se activa con la tecla \textbf{F2} y redirige el foco al campo de escaneo— funcionó correctamente desde las primeras pruebas con productos reales de la farmacia. Los ajustes que requirió fueron de carácter visual: se añadió un banner animado en la parte superior del formulario para indicar que el modo está activo, y un indicador flotante que confirma visualmente si el código escaneado fue reconocido o no.
+
+Durante las pruebas del formulario de pago se identificó que al escribir el monto en el campo correspondiente, el número se concatenaba con el cero inicial del campo en lugar de reemplazarlo, generando valores incorrectos. El comportamiento se corrigió haciendo que el campo seleccione todo su contenido automáticamente al recibir el foco, de modo que el primer dígito tecleado sustituya el valor anterior.
+
+% TODO: insertar captura de pantalla del formulario de venta con el modo lector activo (banner F2)
+% Guardar en: 0_imagenes/Cap4/ModoLector.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModoLector.png}}
+%    \caption{Formulario de registro de venta con el modo lector de código de barras activo}
+%    \label{fig:cap4-modo-lector}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Tablero de indicadores y monitoreo del sensor}
+
+El tablero principal se construyó inicialmente con datos simulados para validar la disposición visual de los indicadores. Una vez que los módulos de ventas, inventario y sensor estuvieron operativos en la API, se realizó la conexión con datos reales: el tablero pasó a mostrar el total de ventas del día, el nivel de existencias, las alertas de lotes próximos a vencer y las lecturas actuales de temperatura y humedad del nodo sensor.
+
+Durante esta conexión se identificó que el tablero realizaba tres llamadas independientes a la API al cargar —una por cada grupo de indicadores— lo que generaba una demora visible al abrir la vista. Para resolver esto se consolidó la información en un único punto de la API que devuelve todos los indicadores en una sola respuesta, reduciendo el tiempo de carga del tablero de forma notoria.
+
+% TODO: insertar captura de pantalla del módulo de monitoreo del sensor con lecturas en tiempo real
+% Guardar en: 0_imagenes/Cap4/MonitorSensor.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.9\textwidth]{0_imagenes/Cap4/MonitorSensor.png}}
+%    \caption{Módulo de monitoreo ambiental mostrando lecturas de temperatura y humedad del nodo sensor}
+%    \label{fig:cap4-sensor-monitor}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Correcciones identificadas durante las pruebas}
+
+\begin{longtable}{|p{3.2cm}|p{4.0cm}|p{7.3cm}|}
+
+\caption{Correcciones realizadas a la interfaz web durante las pruebas} \label{tab:cap4-front-correcciones} \\
+
+\hline
+\rowcolor{gray!20}
+\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Visibilidad de módulos &
+La lógica de verificación de permisos estaba invertida: ocultaba lo que debía mostrarse y mostraba lo que debía ocultarse &
+Se corrigió la condición de verificación; cada rol visualiza únicamente los módulos que le corresponden \\
+\hline
+
+Pantalla en blanco &
+Una actualización de la configuración interna dejaba versiones desactualizadas en el navegador, causando pantalla en blanco al recargar &
+Se versionó la configuración para forzar su actualización automática al detectar una versión anterior \\
+\hline
+
+Enrutamiento en Vercel &
+Al acceder directamente a una ruta o recargar la página, Vercel devolvía un error 404 porque no encontraba el archivo correspondiente &
+Se añadió una regla de redirección que redirige cualquier URL al punto de entrada de la aplicación \\
+\hline
+
+Tipos de datos entre sistemas &
+Cuando la API modificaba sus conjuntos de valores válidos, la interfaz seguía usando los valores anteriores, generando errores en los formularios &
+Se estableció una revisión de estos valores en cada actualización de la API \\
+\hline
+
+Límite de solicitudes &
+El servidor rechazaba solicitudes frecuentes con un error de límite de tasa, y la interfaz no lo manejaba, dejando al usuario sin respuesta &
+Se añadió un reintento automático que respeta el tiempo de espera indicado por el servidor antes de reintentar \\
+\hline
+
+Formulario de pago &
+Al escribir el monto en el campo de pago, el número se concatenaba con el valor inicial del campo en lugar de reemplazarlo &
+Se configuró el campo para seleccionar su contenido al recibir el foco, de modo que el primer dígito sustituya el valor anterior \\
+
+\end{longtable}
+\vspace{0.1cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
+
+\subsection{Resultados}
+
+Al finalizar las pruebas, los dieciséis módulos de navegación de la interfaz operan de forma correcta contra la API de producción. El flujo completo de una venta —desde la apertura del formulario hasta la confirmación, incluyendo el escaneo de códigos de barras y el registro del pago— se completó de forma exitosa en las pruebas con productos reales de la farmacia. El tablero de indicadores muestra datos actualizados en tiempo real y las lecturas del nodo sensor se visualizan correctamente en el módulo de monitoreo.
