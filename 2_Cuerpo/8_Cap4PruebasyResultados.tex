@@ -48,40 +48,62 @@ Junto con la lógica de ventas se implementó y verificó el módulo de devoluci
 
 A lo largo del proceso de verificación se identificaron y corrigieron problemas en distintos módulos de la API. La tabla siguiente resume los más representativos:
 
-\begin{table}[H]
-\centering
-\caption{Correcciones realizadas a la API durante las pruebas}
-\label{tab:cap4-api-correcciones}
-\begin{spacing}{1.0}
-\renewcommand{\arraystretch}{1.4}
-\begin{tabularx}{\textwidth}{@{} p{3.0cm} p{4.0cm} X @{}}
-\toprule
+\begin{longtable}{|p{3.0cm}|p{4.2cm}|p{7.3cm}|}
+
+\caption{Correcciones realizadas a la API durante las pruebas} \label{tab:cap4-api-correcciones} \\
+
+\hline
+\rowcolor{gray!20}
 \textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
-\midrule
-Cálculos monetarios
-    & Los totales de ventas acumulaban errores de redondeo al operar con precios decimales
-    & Se cambió el tipo de dato de las columnas de monto a precisión decimal exacta, eliminando los errores de redondeo \\[4pt]
-Registros dados de baja
-    & Los registros eliminados seguían apareciendo en los listados de búsqueda y consulta
-    & Se añadió el filtro correspondiente en todas las consultas de lectura del sistema \\[4pt]
-Comunicación con el navegador
-    & Los errores internos del servidor llegaban al navegador como errores de red genéricos, sin mensaje descriptivo
-    & Se ajustó la configuración para que todos los tipos de respuesta, incluyendo los errores, incluyeran las cabeceras de acceso necesarias \\[4pt]
-Despliegue en Railway
-    & El servidor de producción no encontraba el módulo de la aplicación al iniciar, impidiendo el arranque
-    & Se corrigió la ruta de inicio en el archivo de configuración del servidor en Railway \\[4pt]
-Búsqueda de usuarios
-    & La búsqueda por tipo de documento no funcionaba porque el motor de base de datos no permite búsqueda parcial sobre campos de tipo enumerado
-    & Se modificó la consulta para convertir el campo a texto antes de aplicar el filtro de búsqueda \\[4pt]
-Recuperación de contraseña
-    & El servicio externo de envío de correo cambió su interfaz entre versiones, interrumpiendo el flujo de recuperación
-    & Se actualizó la integración con la nueva versión del servicio \\
-\bottomrule
-\end{tabularx}
-\end{spacing}
-\vspace{0.2cm}
-\footnotesize \textbf{Fuente:} Elaboración propia.
-\end{table}
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Cálculos monetarios &
+Los totales de ventas acumulaban errores de redondeo al operar con precios decimales &
+Se cambió el tipo de dato de las columnas de monto a precisión decimal exacta, eliminando los errores de redondeo \\
+\hline
+
+Registros dados de baja &
+Los registros eliminados seguían apareciendo en los listados de búsqueda y consulta &
+Se añadió el filtro correspondiente en todas las consultas de lectura del sistema \\
+\hline
+
+Comunicación con el navegador &
+Los errores internos del servidor llegaban al navegador como errores de red genéricos, sin mensaje descriptivo &
+Se ajustó la configuración para que todos los tipos de respuesta, incluyendo los errores, incluyeran las cabeceras de acceso necesarias \\
+\hline
+
+Despliegue en Railway &
+El servidor de producción no encontraba el módulo de la aplicación al iniciar, impidiendo el arranque &
+Se corrigió la ruta de inicio en el archivo de configuración del servidor en Railway \\
+\hline
+
+Búsqueda de usuarios &
+La búsqueda por tipo de documento no funcionaba porque el motor de base de datos no permite búsqueda parcial sobre campos de tipo enumerado &
+Se modificó la consulta para convertir el campo a texto antes de aplicar el filtro de búsqueda \\
+\hline
+
+Recuperación de contraseña &
+El servicio externo de envío de correo cambió su interfaz entre versiones, interrumpiendo el flujo de recuperación &
+Se actualizó la integración con la nueva versión del servicio \\
+
+\end{longtable}
+\vspace{0.1cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
 
 \subsection{Resultados de la suite de pruebas}
 
