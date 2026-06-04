@@ -15,7 +15,135 @@ En este capítulo se documentan las pruebas realizadas sobre cada componente del
 
 \section{Objetivo Específico 1 — Pruebas de la base de datos}
 
-% TODO
+La base de datos no se probó de forma aislada sino a través de la suite de pruebas automatizadas de la API: dado que cada prueba opera sobre una instancia real de PostgreSQL, cualquier restricción, índice o relación que no funcione correctamente provoca un fallo detectable en la prueba correspondiente. Este enfoque permitió validar el comportamiento de la base de datos en las mismas condiciones que en producción, sin necesidad de escribir pruebas separadas a nivel de base de datos.
+
+\subsection{Restricciones e integridad relacional}
+
+Las restricciones definidas en el esquema —claves foráneas, unicidad y valores no nulos— se verificaron a través de los casos de prueba negativos de la API: intentar crear un lote con un producto inexistente devuelve error, intentar registrar un usuario con un correo ya registrado devuelve error, e intentar completar una venta vacía es rechazado por el sistema. En todos los casos el motor de base de datos aplicó la restricción correspondiente y la API tradujo ese rechazo en un código de respuesta apropiado.
+
+Un caso de diseño particular que se verificó fue el de los lotes sin número de código asignado. El inventario permite que un lote no tenga código —situación que ocurre cuando el fabricante no imprime uno— pero si un código está presente, no puede repetirse para el mismo producto. Para implementar esto sin bloquear los lotes sin código se utilizó un índice parcial: la restricción de unicidad aplica únicamente cuando el campo tiene un valor, ignorando los registros en que está vacío. La figura siguiente ilustra cómo se comporta este índice en la práctica:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small,
+    row/.style={rectangle, draw, minimum width=3.8cm, minimum height=0.65cm,
+                align=center, font=\scriptsize},
+    ok/.style={row, fill=gray!10},
+    bad/.style={row, fill=gray!25}
+]
+
+% ── Columnas header ───────────────────────────────────────────
+\node[row, fill=gray!30, minimum width=3.0cm] (h1) at (0,    4.2) {\textbf{Producto}};
+\node[row, fill=gray!30, minimum width=3.8cm] (h2) at (4.0,  4.2) {\textbf{Código de lote}};
+\node[row, fill=gray!30, minimum width=2.8cm] (h3) at (8.0,  4.2) {\textbf{Resultado}};
+
+% ── Caso 1: lote con código único → aceptado ─────────────────
+\node[ok, minimum width=3.0cm] at (0,   3.2) {Paracetamol};
+\node[ok, minimum width=3.8cm] at (4.0, 3.2) {L-0124};
+\node[ok, minimum width=2.8cm, text=gray!60] at (8.0, 3.2) {\checkmark\ aceptado};
+
+% ── Caso 2: segundo lote del mismo producto, código diferente → aceptado
+\node[ok, minimum width=3.0cm] at (0,   2.4) {Paracetamol};
+\node[ok, minimum width=3.8cm] at (4.0, 2.4) {L-0284};
+\node[ok, minimum width=2.8cm, text=gray!60] at (8.0, 2.4) {\checkmark\ aceptado};
+
+% ── Caso 3: código duplicado para el mismo producto → rechazado
+\node[bad, minimum width=3.0cm] at (0,   1.6) {Paracetamol};
+\node[bad, minimum width=3.8cm] at (4.0, 1.6) {L-0124 \small(duplicado)};
+\node[bad, minimum width=2.8cm] at (8.0, 1.6) {$\times$\ rechazado};
+
+% ── Caso 4: lote sin código, mismo producto → aceptado (índice parcial)
+\node[ok, minimum width=3.0cm] at (0,   0.8) {Paracetamol};
+\node[ok, minimum width=3.8cm] at (4.0, 0.8) {— (sin código)};
+\node[ok, minimum width=2.8cm, text=gray!60] at (8.0, 0.8) {\checkmark\ aceptado};
+
+% ── Caso 5: segundo lote sin código, mismo producto → también aceptado
+\node[ok, minimum width=3.0cm] at (0,   0.0) {Paracetamol};
+\node[ok, minimum width=3.8cm] at (4.0, 0.0) {— (sin código)};
+\node[ok, minimum width=2.8cm, text=gray!60] at (8.0, 0.0) {\checkmark\ aceptado};
+
+% ── Nota explicativa ──────────────────────────────────────────
+\draw[dashed, gray!50] (-1.6, 0.35) -- (9.9, 0.35);
+\node[anchor=west, font=\tiny, text=gray!60] at (-1.6, -0.45)
+    {El índice parcial solo aplica cuando el código tiene valor: los registros sin código no compiten entre sí.};
+
+\end{tikzpicture}
+\caption{Comportamiento del índice parcial sobre el código de lote: los códigos duplicados son rechazados, pero múltiples lotes sin código del mismo producto son permitidos}
+\label{fig:cap4-lote-index}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\subsection{Ajustes al esquema durante el desarrollo}
+
+El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. Estos cambios se aplicaron mediante migraciones sucesivas que modifican la estructura de la base de datos de forma controlada, preservando los datos existentes. La tabla siguiente resume los ajustes más relevantes:
+
+\begin{longtable}{|p{4.0cm}|p{10.5cm}|}
+
+\caption{Ajustes al esquema de la base de datos durante el desarrollo} \label{tab:cap4-migraciones} \\
+
+\hline
+\rowcolor{gray!20}
+\textbf{Ajuste} & \textbf{Motivo} \\
+\hline
+\endfirsthead
+
+\hline
+\rowcolor{gray!20}
+\textbf{Ajuste} & \textbf{Motivo} \\
+\hline
+\endhead
+
+\hline
+\multicolumn{2}{|r|}{\small Continúa en la siguiente página} \\
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+
+Tipo de dato para montos monetarios &
+Las columnas de precio, subtotal y total se definieron inicialmente como números de punto flotante. Al realizar cálculos con precios decimales los totales acumulaban errores de redondeo. Se migró a tipo de dato de precisión decimal exacta, que garantiza resultados exactos independientemente del número de operaciones. \\
+\hline
+
+Borrado lógico en tablas clave &
+Se añadió una columna de fecha de baja a las tablas de usuarios, roles, sucursales y productos. Esto permite desactivar registros sin eliminarlos, preservando el historial de ventas y el vínculo con el usuario que realizó cada transacción. \\
+\hline
+
+Índice parcial sobre código de lote &
+Para permitir que un lote no tenga código asignado —situación habitual con algunos proveedores— sin perder la garantía de que los códigos presentes no se dupliquen, se reemplazó la restricción de unicidad simple por un índice que aplica únicamente cuando el campo tiene valor. \\
+\hline
+
+Tipos enumerados nativos de PostgreSQL &
+Los estados de ventas, pagos, género y tipo de documento se definieron inicialmente como texto libre. Al migrar a tipos enumerados nativos del motor de base de datos, el propio motor rechaza valores no permitidos y la búsqueda sobre esos campos se vuelve más eficiente. \\
+\hline
+
+Índices sobre claves foráneas &
+Se identificó durante las pruebas que las consultas con combinaciones de tablas —como obtener un lote con su producto asociado— resultaban lentas sin índices en las columnas de referencia. Se añadieron índices en las claves foráneas de las tablas de mayor uso. \\
+\hline
+
+Restricciones únicas en proveedor &
+Las restricciones de unicidad sobre el RFC y correo electrónico del proveedor impedían reutilizar esos datos al dar de baja y reactivar un proveedor. La validación se trasladó al código de la API, eliminando la restricción del esquema. \\
+
+\end{longtable}
+\vspace{0.1cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
+
+% TODO: insertar captura de pantalla del diagrama de la base de datos en DataGrip o similar
+% (el diagrama general del esquema con las 22 tablas y sus relaciones)
+% Guardar en: 0_imagenes/Cap4/EsquemaBD.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/EsquemaBD.png}}
+%    \caption{Esquema final de la base de datos con las 22 tablas y sus relaciones}
+%    \label{fig:cap4-esquema-bd}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Resultados}
+
+El esquema final de la base de datos opera de forma estable en el entorno de producción de Railway. Todas las restricciones verificadas —integridad referencial, unicidad condicional, borrado lógico y precisión monetaria— funcionan de forma correcta bajo la carga de las pruebas automatizadas. Los seis ajustes documentados en la tabla anterior resolvieron los comportamientos incorrectos identificados durante el desarrollo y no requirieron modificaciones adicionales tras su aplicación.
 
 % =============================================
 % SECCIÓN 4.2: API REST
