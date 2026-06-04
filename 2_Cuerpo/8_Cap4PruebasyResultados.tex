@@ -45,6 +45,62 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+
+% ── Etiquetas de fila ─────────────────────────────────────────
+\node[anchor=east, font=\small\bfseries] at (-0.3,  1.0) {Antes:};
+\node[anchor=east, font=\small\bfseries] at (-0.3, -0.6) {Después:};
+
+% ── ANTES: token único que expira y cierra la sesión ──────────
+\fill[gray!30] (0, 0.7) rectangle (4.0, 1.3);
+\draw[thick]   (0, 0.7) rectangle (4.0, 1.3);
+\node[font=\scriptsize] at (2.0, 1.0) {Token de acceso · 30 min};
+% marca de inicio
+\draw[thick] (0, 0.6) -- (0, 1.4);
+\node[anchor=north, font=\tiny, text=gray!60] at (0, 0.55) {inicio};
+% marca de expiración
+\draw[thick, gray!50] (4.0, 0.6) -- (4.0, 1.4);
+\draw[thick] (3.7, 0.7) -- (4.3, 1.3);
+\draw[thick] (4.3, 0.7) -- (3.7, 1.3);
+\node[anchor=north, font=\scriptsize, text=gray!70] at (4.0, 0.55)
+    {sesión cerrada};
+
+% ── DESPUÉS: access token + renovación silenciosa ─────────────
+% token 1
+\fill[gray!30] (0, -0.9) rectangle (3.0, -0.3);
+\draw[thick]   (0, -0.9) rectangle (3.0, -0.3);
+\node[font=\scriptsize] at (1.5, -0.6) {30 min};
+% renovación 1
+\fill[gray!10] (3.0, -0.9) rectangle (3.5, -0.3);
+\draw[thick, dashed] (3.0, -0.9) rectangle (3.5, -0.3);
+\node[anchor=south, font=\tiny, text=gray!55] at (3.25, -0.3)
+    {renova};
+% token 2
+\fill[gray!30] (3.5, -0.9) rectangle (6.5, -0.3);
+\draw[thick]   (3.5, -0.9) rectangle (6.5, -0.3);
+\node[font=\scriptsize] at (5.0, -0.6) {30 min};
+% renovación 2
+\fill[gray!10] (6.5, -0.9) rectangle (7.0, -0.3);
+\draw[thick, dashed] (6.5, -0.9) rectangle (7.0, -0.3);
+\node[anchor=south, font=\tiny, text=gray!55] at (6.75, -0.3)
+    {renova};
+% continúa
+\draw[->, thick, gray!50] (7.0, -0.6) -- (8.0, -0.6);
+\node[anchor=west, font=\scriptsize, text=gray!55] at (8.1, -0.6)
+    {hasta 30 días};
+% marca de inicio
+\draw[thick] (0, -1.0) -- (0, -0.2);
+\node[anchor=north, font=\tiny, text=gray!60] at (0, -1.05) {inicio};
+
+\end{tikzpicture}
+\caption{Evolución del sistema de sesión: la versión inicial cerraba la sesión al expirar el token de acceso; la versión final lo renueva de forma automática y transparente para el usuario}
+\label{fig:cap4-token-timeline}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
 Durante las pruebas también se identificó que el módulo de cambio de contraseña no verificaba que el usuario con sesión activa fuera el mismo que intentaba realizar el cambio, lo que representaba una vulnerabilidad: un usuario podría haber modificado la contraseña de otro. Esta situación se corrigió añadiendo una verificación de identidad antes de procesar la solicitud.
 
 \subsection{Módulo de ventas y control de inventario por lotes}
@@ -456,6 +512,74 @@ El firmware descarta automáticamente cualquier lectura que caiga fuera de los r
 
 Se verificó este comportamiento forzando manualmente valores fuera de rango en el entorno de pruebas: el firmware los identificó correctamente y los descartó sin enviarlos al servidor, registrando el descarte en la salida de diagnóstico.
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\scriptsize]
+
+% ── Temperatura ───────────────────────────────────────────────
+\node[anchor=east, font=\small] at (-0.4, 1.0) {Temperatura};
+
+% Barra completa: -10°C a 85°C = 95°C → escala 10cm/95°C ≈ 0.1053 cm/°C
+% Posiciones (x=0 → -10°C): 15°C→2.63, 30°C→4.21, 85°C→10.0
+\fill[gray!10]  (0,    0.65) rectangle (10.0, 1.35);  % rango firmware (fondo)
+\fill[gray!40]  (2.63, 0.65) rectangle (4.21, 1.35);  % rango NOM (15–30°C)
+\draw[thick]    (0,    0.65) rectangle (10.0, 1.35);
+
+% Etiquetas de límites
+\draw[thick] (0,    0.55) -- (0,    0.65);
+\draw[thick] (2.63, 0.55) -- (2.63, 0.65);
+\draw[thick] (4.21, 0.55) -- (4.21, 0.65);
+\draw[thick] (10.0, 0.55) -- (10.0, 0.65);
+\node[anchor=north] at (0,    0.50) {$-10\,^\circ$C};
+\node[anchor=north] at (2.63, 0.50) {$15\,^\circ$C};
+\node[anchor=north] at (4.21, 0.50) {$30\,^\circ$C};
+\node[anchor=north] at (10.0, 0.50) {$85\,^\circ$C};
+
+% Anotaciones internas
+\node[font=\tiny, text=gray!50] at (1.3,  1.0) {no habitual};
+\node[font=\tiny]               at (3.42, 1.0) {rango NOM};
+\node[font=\tiny, text=gray!50] at (7.1,  1.0) {alerta / descarte};
+
+% ── Humedad ───────────────────────────────────────────────────
+\node[anchor=east, font=\small] at (-0.4, -0.5) {Humedad relativa};
+
+% Barra: 0% a 100% → 10cm / 100% = 0.10 cm/%
+% 30%→3.0, 65%→6.5
+\fill[gray!10]  (0,   -0.85) rectangle (10.0, -0.15);
+\fill[gray!40]  (3.0, -0.85) rectangle (6.5,  -0.15);
+\draw[thick]    (0,   -0.85) rectangle (10.0, -0.15);
+
+\draw[thick] (0,   -0.95) -- (0,   -0.85);
+\draw[thick] (3.0, -0.95) -- (3.0, -0.85);
+\draw[thick] (6.5, -0.95) -- (6.5, -0.85);
+\draw[thick] (10.0,-0.95) -- (10.0,-0.85);
+\node[anchor=north] at (0,    -1.0) {$0\,\%$};
+\node[anchor=north] at (3.0,  -1.0) {$30\,\%$};
+\node[anchor=north] at (6.5,  -1.0) {$65\,\%$};
+\node[anchor=north] at (10.0, -1.0) {$100\,\%$};
+
+\node[font=\tiny, text=gray!50] at (1.5,  -0.5) {no habitual};
+\node[font=\tiny]               at (4.75, -0.5) {rango NOM};
+\node[font=\tiny, text=gray!50] at (8.25, -0.5) {alerta / descarte};
+
+% ── Leyenda ───────────────────────────────────────────────────
+\fill[gray!40] (1.5, -1.85) rectangle (2.2, -1.55);
+\draw          (1.5, -1.85) rectangle (2.2, -1.55);
+\node[anchor=west, font=\scriptsize] at (2.35, -1.70)
+    {Rango recomendado NOM-073-SSA1-2015};
+
+\fill[gray!10] (6.5, -1.85) rectangle (7.2, -1.55);
+\draw          (6.5, -1.85) rectangle (7.2, -1.55);
+\node[anchor=west, font=\scriptsize] at (7.35, -1.70)
+    {Rango de validación del firmware};
+
+\end{tikzpicture}
+\caption{Rangos de validación del firmware en comparación con los rangos recomendados por la NOM-073-SSA1-2015: el firmware descarta lecturas fuera de los límites del hardware; las alertas se generan al superar los umbrales de la norma}
+\label{fig:cap4-rangos}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
 \subsection{Resultados}
 
 Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó de forma estable durante las sesiones de prueba: las lecturas se transmitieron correctamente cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua en la farmacia quedan pendientes hasta que se concluya el rediseño del gabinete físico descrito en la sección siguiente.
@@ -484,6 +608,52 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+
+% ── PCB ───────────────────────────────────────────────────────
+\fill[gray!25] (0, 0) rectangle (9.0, 0.5);
+\draw[thick]   (0, 0) rectangle (9.0, 0.5);
+\node[font=\scriptsize\bfseries] at (4.5, 0.25) {Placa ESP32-C5};
+
+% ── Conector Dupont (sobresale de la placa) ───────────────────
+\fill[gray!55] (3.0, 0.5) rectangle (6.0, 1.7);
+\draw[thick]   (3.0, 0.5) rectangle (6.0, 1.7);
+\node[font=\scriptsize, text=white, align=center] at (4.5, 1.1)
+    {Conector\\Dupont};
+
+% ── Tapa del gabinete (altura diseñada — insuficiente) ────────
+\fill[gray!12] (0, 2.0) rectangle (9.0, 2.6);
+\draw[thick]   (0, 2.0) rectangle (9.0, 2.6);
+\node[font=\scriptsize] at (4.5, 2.3) {Tapa del gabinete (diseño original)};
+
+% ── Paredes laterales del gabinete ───────────────────────────
+\draw[thick] (0, 0) -- (0, 2.6);
+\draw[thick] (9.0, 0) -- (9.0, 2.6);
+
+% ── Flecha: altura real del conector ─────────────────────────
+\draw[<->, thick] (6.4, 0.5) -- (6.4, 1.7);
+\node[anchor=west, font=\scriptsize] at (6.6, 1.1)
+    {altura real del conector};
+
+% ── Flecha: espacio disponible (insuficiente) ─────────────────
+\draw[<->, thick] (2.4, 1.7) -- (2.4, 2.0);
+\node[anchor=east, font=\scriptsize, text=gray!60, align=right]
+    at (2.2, 1.85) {espacio\\insuficiente};
+
+% ── Flecha: altura interior total del gabinete ───────────────
+\draw[<->, thick, dashed] (9.7, 0) -- (9.7, 2.0);
+\node[anchor=west, font=\scriptsize, align=left] at (9.9, 1.0)
+    {altura interior\\del gabinete};
+
+\end{tikzpicture}
+\caption{Vista lateral esquemática del gabinete original: la altura del conector Dupont supera el espacio interior disponible, impidiendo cerrar la tapa sin comprimir los cables}
+\label{fig:cap4-gabinete-problema}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
 Para resolver esto fue necesario relevar manualmente las dimensiones reales del conjunto ensamblado —incluyendo los conectores y el radio de curvatura de los cables— y rediseñar el gabinete con esas medidas. El rediseño está actualmente en proceso; la nueva versión contempla una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
 
 % TODO: insertar imagen del modelo 3D del gabinete rediseñado (captura del software de modelado)
@@ -500,6 +670,17 @@ Para resolver esto fue necesario relevar manualmente las dimensiones reales del 
 \subsection{Lector de código de barras}
 
 El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante USB y fue reconocido automáticamente por el sistema operativo como un dispositivo de teclado estándar, sin requerir la instalación de controladores adicionales. Se realizaron pruebas de escaneo con productos reales del inventario de la farmacia: todos los códigos de barras presentes en los productos fueron leídos correctamente y el código obtenido coincidió con el registrado en el catálogo del sistema.
+
+% TODO: insertar fotografía del lector de código de barras escaneando un producto real de la farmacia
+% Guardar en: 0_imagenes/Cap4/LectorEnUso.jpg
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/LectorEnUso.jpg}}
+%    \caption{Lector de código de barras en uso con un producto real de la farmacia}
+%    \label{fig:cap4-lector-uso}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
 La integración del lector con el flujo de registro de ventas en la interfaz web —incluyendo la activación del modo de escaneo, la búsqueda en el catálogo local y la confirmación visual del resultado— se describió en la sección 4.3 de este capítulo.
 
@@ -558,5 +739,18 @@ Una vez verificados los componentes de forma individual, se realizó una prueba 
 \end{figure}
 
 La prueba confirmó que el flujo opera correctamente de extremo a extremo: el nodo sensor transmite las lecturas ambientales al servidor cada 30 segundos, la API las almacena en la base de datos y la interfaz web las muestra en el módulo de monitoreo sin intervención adicional. De forma simultánea, el registro de ventas con descuento de inventario por lote, la autenticación por roles y la navegación por módulos funcionaron de forma conjunta sin conflictos entre componentes.
+
+% TODO: insertar captura de pantalla del dashboard mostrando lecturas del sensor y datos de ventas
+%       simultáneamente — es la evidencia visual más directa de que el sistema integrado funciona
+% Guardar en: 0_imagenes/Cap4/SistemaIntegrado.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/SistemaIntegrado.png}}
+%    \caption{Tablero principal mostrando simultáneamente indicadores de ventas e inventario y
+%             lecturas en tiempo real del nodo sensor, evidencia de la operación integrada del sistema}
+%    \label{fig:cap4-sistema-integrado}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
 Los elementos pendientes de integración al momento de la redacción de este capítulo son las pantallas OLED del nodo sensor —en espera del rediseño del gabinete— y las pruebas de operación continua del sistema en las instalaciones de la farmacia, previstas para realizarse una vez que el gabinete esté concluido.
