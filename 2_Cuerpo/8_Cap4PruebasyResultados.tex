@@ -348,3 +348,215 @@ Se configuró el campo para seleccionar su contenido al recibir el foco, de modo
 \subsection{Resultados}
 
 Al finalizar las pruebas, los dieciséis módulos de navegación de la interfaz operan de forma correcta contra la API de producción. El flujo completo de una venta —desde la apertura del formulario hasta la confirmación, incluyendo el escaneo de códigos de barras y el registro del pago— se completó de forma exitosa en las pruebas con productos reales de la farmacia. El tablero de indicadores muestra datos actualizados en tiempo real y las lecturas del nodo sensor se visualizan correctamente en el módulo de monitoreo.
+
+% =============================================
+% SECCIÓN 4.4: NODO SENSOR ESP32
+% =============================================
+
+\clearpage
+\section{Objetivo Específico 4 — Pruebas del nodo sensor}
+
+Las pruebas del nodo sensor cubrieron tres aspectos: la correcta transmisión de las lecturas al servidor, el comportamiento del firmware ante valores fuera de rango, y la estabilidad de la conexión WiFi. Las pruebas se realizaron en el entorno de desarrollo mientras se finaliza el diseño del gabinete físico para la instalación en la farmacia.
+
+\subsection{Transmisión de datos al servidor}
+
+Con la versión inicial del firmware el nodo realizaba lecturas del sensor AHT10 cada 30 segundos y las enviaba al servidor de la API. Al revisar el tablero de la aplicación web se observó que no aparecían nuevas lecturas, a pesar de que el nodo indicaba en su salida de diagnóstico que las solicitudes se enviaban correctamente.
+
+La causa del problema fue una barra inclinada adicional al final de la dirección del servidor configurada en el firmware. Al recibir una solicitud con esa barra, el servidor respondía con un error de ruta no encontrada en lugar de procesar el dato. Una vez eliminada la barra de la dirección, las lecturas comenzaron a registrarse correctamente en la base de datos y a aparecer en el tablero en tiempo real.
+
+% TODO: insertar captura de pantalla de la salida serial del ESP32 mostrando lecturas enviadas correctamente
+% Guardar en: 0_imagenes/Cap4/SensorSerial.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/SensorSerial.png}}
+%    \caption{Salida de diagnóstico del nodo sensor mostrando lecturas enviadas al servidor}
+%    \label{fig:cap4-serial}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Incidente de hardware: conflicto de pines}
+
+Durante las pruebas de ensamble se intentó apagar el LED RGB integrado en la placa del ESP32-C5 para que no emitiera luz durante la operación normal del nodo. Al implementar el control del LED por software se comenzaron a registrar lecturas erráticas del sensor AHT10: valores de temperatura y humedad inconsistentes que el firmware descartaba por estar fuera del rango de validación.
+
+La investigación del problema reveló que el pin del microcontrolador asignado al LED RGB coincidía con el mismo pin utilizado como línea de datos del bus de comunicación con el sensor AHT10. Al intentar controlar el LED, el firmware generaba señales que interferían con la comunicación del sensor, corrompiendo las lecturas. La figura siguiente ilustra el conflicto:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+
+% Chip ESP32-C5
+\draw[thick, rounded corners=5pt, fill=gray!8]
+    (-1.8, -2.4) rectangle (1.8, 2.4);
+\node[font=\small\bfseries] at (0, 2.0) {ESP32-C5};
+
+% Pin GPIO 8 en el chip
+\draw[thick] (1.8, 0.4) -- (2.6, 0.4);
+\fill[gray!50] (2.3, 0.15) rectangle (2.6, 0.65);
+\node[anchor=east, font=\scriptsize] at (1.75, 0.4) {GPIO 8};
+
+% Bifurcación del pin
+\draw[thick] (2.6, 0.4) -- (3.4, 0.4);
+\draw[thick] (3.4, 0.4) -- (3.4,  1.6);
+\draw[thick] (3.4, 0.4) -- (3.4, -0.8);
+
+% Destino 1: AHT10 (uso correcto)
+\draw[-{Stealth}, thick] (3.4, 1.6) -- (5.0, 1.6);
+\draw[thick, rounded corners=3pt, fill=gray!10]
+    (5.0, 1.15) rectangle (9.2, 2.05);
+\node[anchor=west, font=\scriptsize] at (5.15, 1.72) {\textbf{Sensor AHT10}};
+\node[anchor=west, font=\scriptsize, text=gray!60] at (5.15, 1.32) {SDA — bus I\textsuperscript{2}C};
+
+% Destino 2: LED RGB (conflicto)
+\draw[-{Stealth}, thick, dashed] (3.4, -0.8) -- (5.0, -0.8);
+\draw[thick, rounded corners=3pt, fill=gray!10, dashed]
+    (5.0, -1.25) rectangle (9.2, -0.35);
+\node[anchor=west, font=\scriptsize] at (5.15, -0.52) {\textbf{LED RGB integrado}};
+\node[anchor=west, font=\scriptsize, text=gray!60] at (5.15, -0.92) {RGB\_PIN (placa)};
+
+% Símbolo de conflicto en la bifurcación
+\node[circle, draw, thick, fill=white, minimum size=0.7cm,
+      font=\small\bfseries] at (3.4, 0.4) {!};
+
+% Etiqueta de conflicto
+\node[font=\scriptsize, text=gray!70, align=center] at (3.4, -1.75)
+    {Mismo pin:\\dos funciones};
+
+% Resultado: interferencia
+\draw[-{Stealth}, thick, gray!50] (9.2, 1.6) -- (10.4, 1.6) -- (10.4, -0.1);
+\draw[-{Stealth}, thick, gray!50] (9.2, -0.8) -- (10.4, -0.8) -- (10.4, -0.1);
+\draw[thick, rounded corners=3pt, fill=gray!20]
+    (10.4, -0.55) rectangle (13.2, 0.35);
+\node[font=\scriptsize, align=center] at (11.8, -0.1)
+    {Interferencia:\\lecturas erróneas};
+
+\end{tikzpicture}
+\caption{Conflicto de pines detectado durante las pruebas: GPIO 8 estaba asignado simultáneamente a la línea de datos del sensor AHT10 y al control del LED RGB, causando interferencia en las lecturas}
+\label{fig:cap4-pin-conflicto}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Dado que la documentación técnica de esa revisión de la placa no especificaba el pin correcto del LED, no fue posible resolver el conflicto por software. La solución fue retirar físicamente el LED de la placa mediante soldadura y eliminar todo el código relacionado del firmware. Tras esta intervención el sensor recuperó su comportamiento normal y las lecturas se transmitieron sin interrupciones.
+
+% TODO: insertar fotografía del nodo sensor ensamblado (ESP32 + AHT10 + cables)
+% Guardar en: 0_imagenes/Cap4/NodoEnsamblado.jpg
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/NodoEnsamblado.jpg}}
+%    \caption{Nodo sensor ensamblado: ESP32-C5 con el sensor AHT10 conectado por bus I\textsuperscript{2}C}
+%    \label{fig:cap4-nodo}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Validación de lecturas fuera de rango}
+
+El firmware descarta automáticamente cualquier lectura que caiga fuera de los rangos físicamente plausibles definidos para el sensor: entre $-10\,^\circ\text{C}$ y $85\,^\circ\text{C}$ para temperatura, y entre $0\,\%$ y $100\,\%$ para humedad relativa. Estos límites son deliberadamente amplios respecto a las condiciones normales de una farmacia —donde los rangos de operación son mucho más estrechos— con el objetivo de filtrar únicamente lecturas claramente erróneas sin descartar valores extremos que pudieran ser reales en una situación de emergencia.
+
+Se verificó este comportamiento forzando manualmente valores fuera de rango en el entorno de pruebas: el firmware los identificó correctamente y los descartó sin enviarlos al servidor, registrando el descarte en la salida de diagnóstico.
+
+\subsection{Resultados}
+
+Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó de forma estable durante las sesiones de prueba: las lecturas se transmitieron correctamente cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua en la farmacia quedan pendientes hasta que se concluya el rediseño del gabinete físico descrito en la sección siguiente.
+
+% =============================================
+% SECCIÓN 4.5: GABINETE E INTEGRACIÓN
+% =============================================
+
+\clearpage
+\section{Objetivo Específico 5 — Pruebas del gabinete y lector de código de barras}
+
+\subsection{Gabinete impreso en 3D}
+
+Con el primer diseño del gabinete se utilizaron las dimensiones nominales de cada componente tal como las especifican los fabricantes: el largo, ancho y alto de la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
+
+Al intentar montar los componentes dentro del gabinete se identificó que no era posible alojarlos correctamente: los conectores Dupont —los terminales de los cables que unen el microcontrolador con el sensor— sobresalen varios milímetros por encima de la superficie de la placa, una dimensión que las especificaciones del fabricante no incluyen. Este sobredimensionamiento vertical impidió cerrar el gabinete sin ejercer presión sobre los cables, lo que representaba un riesgo para las conexiones.
+
+% TODO: insertar fotografía del primer gabinete impreso mostrando el problema de espacio
+% Guardar en: 0_imagenes/Cap4/GabineteV1.jpg
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/GabineteV1.jpg}}
+%    \caption{Primer diseño del gabinete: los conectores sobresalen e impiden el cierre correcto}
+%    \label{fig:cap4-gabinete-v1}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+Para resolver esto fue necesario relevar manualmente las dimensiones reales del conjunto ensamblado —incluyendo los conectores y el radio de curvatura de los cables— y rediseñar el gabinete con esas medidas. El rediseño está actualmente en proceso; la nueva versión contempla una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
+
+% TODO: insertar imagen del modelo 3D del gabinete rediseñado (captura del software de modelado)
+% Guardar en: 0_imagenes/Cap4/GabineteV2Modelo.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/GabineteV2Modelo.png}}
+%    \caption{Modelo del gabinete rediseñado con espacio adicional para conectores}
+%    \label{fig:cap4-gabinete-v2}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
+
+\subsection{Lector de código de barras}
+
+El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante USB y fue reconocido automáticamente por el sistema operativo como un dispositivo de teclado estándar, sin requerir la instalación de controladores adicionales. Se realizaron pruebas de escaneo con productos reales del inventario de la farmacia: todos los códigos de barras presentes en los productos fueron leídos correctamente y el código obtenido coincidió con el registrado en el catálogo del sistema.
+
+La integración del lector con el flujo de registro de ventas en la interfaz web —incluyendo la activación del modo de escaneo, la búsqueda en el catálogo local y la confirmación visual del resultado— se describió en la sección 4.3 de este capítulo.
+
+% =============================================
+% SECCIÓN 4.6: INTEGRACIÓN DEL SISTEMA
+% =============================================
+
+\clearpage
+\section{Prueba de integración del sistema}
+
+Una vez verificados los componentes de forma individual, se realizó una prueba de integración del sistema completo para confirmar que los cinco objetivos específicos operan de forma conjunta. El escenario de prueba cubrió el flujo de extremo a extremo más representativo del sistema: desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario, pasando por todas las capas del sistema.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small,
+    comp/.style={rectangle, draw, rounded corners=4pt,
+                 minimum width=3.0cm, minimum height=1.0cm,
+                 align=center, fill=gray!8},
+    arr/.style={-{Stealth}, thick}
+]
+
+% Componentes
+\node[comp] (sensor) at (0,    0) {\textbf{Nodo sensor}\\{\scriptsize ESP32 + AHT10}};
+\node[comp] (api)    at (5.2,  0) {\textbf{API REST}\\{\scriptsize Railway}};
+\node[comp] (db)     at (5.2, -2.2) {\textbf{Base de datos}\\{\scriptsize PostgreSQL}};
+\node[comp] (web)    at (10.4,  0) {\textbf{Interfaz web}\\{\scriptsize Vercel}};
+\node[comp] (user)   at (10.4, -2.2) {\textbf{Usuario}\\{\scriptsize navegador}};
+
+% Flujo sensor → API
+\draw[arr] (sensor.east) -- node[above, font=\scriptsize]{HTTPS POST} (api.west);
+
+% Flujo API ↔ DB
+\draw[arr] (api.south) -- node[right, font=\scriptsize]{guarda} (db.north);
+
+% Flujo web → API
+\draw[arr] (web.west) -- node[above, font=\scriptsize]{consultas} (api.east);
+
+% Flujo API → web (respuesta)
+\draw[arr] ([yshift=-0.25cm]api.east) --
+    node[below, font=\scriptsize]{datos} ([yshift=-0.25cm]web.west);
+
+% Flujo usuario ↔ web
+\draw[arr] (user.north) -- node[right, font=\scriptsize]{opera} (web.south);
+
+% Etiquetas de resultado
+\node[font=\scriptsize, text=gray!60, align=center] at (2.6, 0.55)
+    {lectura cada\\30 segundos};
+\node[font=\scriptsize, text=gray!60, align=center] at (7.8, 0.55)
+    {tablero, ventas,\\alertas};
+
+\end{tikzpicture}
+\caption{Flujo de integración del sistema completo: el nodo sensor envía lecturas a la API, que las almacena en la base de datos; la interfaz web consulta la API para mostrar los datos al usuario}
+\label{fig:cap4-integracion}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La prueba confirmó que el flujo opera correctamente de extremo a extremo: el nodo sensor transmite las lecturas ambientales al servidor cada 30 segundos, la API las almacena en la base de datos y la interfaz web las muestra en el módulo de monitoreo sin intervención adicional. De forma simultánea, el registro de ventas con descuento de inventario por lote, la autenticación por roles y la navegación por módulos funcionaron de forma conjunta sin conflictos entre componentes.
+
+Los elementos pendientes de integración al momento de la redacción de este capítulo son las pantallas OLED del nodo sensor —en espera del rediseño del gabinete— y las pruebas de operación continua del sistema en las instalaciones de la farmacia, previstas para realizarse una vez que el gabinete esté concluido.
