@@ -26,14 +26,13 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-La interfaz web es el punto de entrada para el personal de la farmacia. Las dos figuras siguientes muestran el flujo de navegación desde el inicio de sesión hasta el registro de una venta, y los módulos adicionales del sistema accesibles desde el menú lateral.
+La interfaz web es el punto de entrada para el personal de la farmacia. Las figuras siguientes muestran el flujo de navegación del sistema: inicio de sesión, panel principal con sus opciones de navegación, registro de una venta y los módulos adicionales.
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 1: FLUJO PRINCIPAL
-% Cada pantalla ocupa la mitad del ancho de la hoja (7.5 cm)
-%
-% Para insertar capturas reales, reemplaza el \parbox de cada nodo por:
-%   \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — HOJA 1: LOGIN + DASHBOARD
+% 2 pantallas por hoja. Cada screenshot: 7.3 cm × 10 cm (mitad de hoja)
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/NombreArchivo.png}
 % ═══════════════════════════════════════════════════════════════════════════
 \clearpage
 \begin{figure}[H]
@@ -53,73 +52,69 @@ La interfaz web es el punto de entrada para el personal de la farmacia. Las dos 
     minimum width=7.5cm, text width=7.3cm,
     align=center, inner sep=5pt
   },
+  menuItem/.style={
+    draw=gray!50, fill=gray!12, rounded corners=3pt,
+    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.1cm,
+    align=center
+  },
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!65, dashed},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
 
-% ── FILA 1 ──────────────────────────────────────────────────────────
-
-% 1. Inicio de sesión  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Login.png}
+% ── 1. Inicio de sesión ──────────────────────────────────────────────
+% TODO: \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/Login.png}
 \node[screenLg] (login) at (0, 0) {%
   \textbf{\small Inicio de sesión}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Login.png]}}%
+  \parbox[c][10cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Login.png]}}%
 };
 
-% 2. Dashboard  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Dashboard.png}
-\node[hubLg] (dashboard) at (8.55, 0) {%
+% ── 2. Dashboard ────────────────────────────────────────────────────
+% TODO: \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/Dashboard.png}
+\node[hubLg] (dashboard) at (10, 0) {%
   \textbf{\small Dashboard}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
+  \parbox[c][10cm][c]{7.3cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
 };
 
-% ── FILA 2 ──────────────────────────────────────────────────────────
-
-% 3. Nueva venta  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/NuevaVenta.png}
-\node[screenLg] (ventas) at (0, -10.5) {%
-  \textbf{\small Nueva venta}%
-  \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
-};
-
-% 4. Venta registrada  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/VentaDetalle.png}
-\node[screenLg] (ventaok) at (8.55, -10.5) {%
-  \textbf{\small Venta registrada}%
-  \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaDetalle.png]}}%
-};
-
-% ── FLECHAS ─────────────────────────────────────────────────────────
-
-% Login → Dashboard
+% ── Flecha Login → Dashboard ─────────────────────────────────────────
 \draw[mainArrow] (login.east) -- (dashboard.west)
   node[lbl, above, midway] {acceso exitoso};
 
-% Dashboard → Nueva venta (baja y cruza a la izquierda)
-\draw[mainArrow] (dashboard.south) -| (ventas.north)
-  node[lbl, right, pos=0.25] {registrar venta};
+% ── Menú lateral del Dashboard ───────────────────────────────────────
+% Bifurcación desde el borde inferior del Dashboard
+\coordinate (bifur) at ($(dashboard.south) + (0, -1.0)$);
+\draw[navArrow] (dashboard.south) -- (bifur);
 
-% Nueva venta → Venta registrada
-\draw[mainArrow] (ventas.east) -- (ventaok.west)
-  node[lbl, above, midway] {confirmar};
+% Etiqueta del menú
+\node[font=\footnotesize\itshape, text=gray!60] at ($(bifur) + (0, -0.4)$)
+  {menú lateral};
+
+% 5 opciones de navegación
+\node[menuItem] (mVentas)    at ( 6.2, -8.5) {Ventas};
+\node[menuItem] (mInventario) at ( 8.4, -8.5) {Inventario};
+\node[menuItem] (mCompras)   at (10.0, -8.5) {Compras};
+\node[menuItem] (mSensor)    at (11.6, -8.5) {Sensor};
+\node[menuItem] (mUsuarios)  at (13.4, -8.5) {Usuarios};
+
+\draw[navArrow] (bifur) -- (mVentas.north);
+\draw[navArrow] (bifur) -- (mInventario.north);
+\draw[navArrow] (bifur) -- (mCompras.north);
+\draw[navArrow] (bifur) -- (mSensor.north);
+\draw[navArrow] (bifur) -- (mUsuarios.north);
 
 \end{tikzpicture}
-\caption{Flujo de navegación principal: inicio de sesión, acceso al panel y registro de una venta (continúa en figura \ref{fig:cap3-wireflow-modulos})}
-\label{fig:cap3-wireflow-flujo}
+\caption{Inicio de sesión y panel principal: tras el acceso exitoso el sistema dirige al Dashboard, desde el cual el menú lateral permite navegar a los módulos del sistema}
+\label{fig:cap3-wireflow-login}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 2: MÓDULOS ADICIONALES
-% Accesibles desde el menú lateral del Dashboard en cualquier momento
-%
-% Para insertar capturas reales, reemplaza el \parbox de cada nodo por:
-%   \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — HOJA 2: NUEVA VENTA + VENTA REGISTRADA
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/NombreArchivo.png}
 % ═══════════════════════════════════════════════════════════════════════════
 \clearpage
 \begin{figure}[H]
@@ -132,52 +127,103 @@ La interfaz web es el punto de entrada para el personal de la farmacia. Las dos 
     minimum width=7.5cm, text width=7.3cm,
     align=center, inner sep=5pt
   },
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+
+% ── 3. Nueva venta ───────────────────────────────────────────────────
+% TODO: \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/NuevaVenta.png}
+\node[screenLg] (ventas) at (0, 0) {%
+  \textbf{\small Nueva venta}%
+  \nodepart{two}%
+  \parbox[c][10cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
+};
+
+% ── 4. Venta registrada ──────────────────────────────────────────────
+% TODO: \includegraphics[width=7.3cm,height=10cm]{0_imagenes/Cap3/VentaDetalle.png}
+\node[screenLg] (ventaok) at (10, 0) {%
+  \textbf{\small Venta registrada}%
+  \nodepart{two}%
+  \parbox[c][10cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaDetalle.png]}}%
+};
+
+% ── Flecha ───────────────────────────────────────────────────────────
+\draw[mainArrow] (ventas.east) -- (ventaok.west)
+  node[lbl, above, midway] {confirmar venta};
+
+% ── Nota de procedencia ──────────────────────────────────────────────
+\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
+  at (-3.75, 2.0) {$\leftarrow$ accedido desde Dashboard\,\textgreater\,Ventas (Fig.~\ref{fig:cap3-wireflow-login})};
+
+\end{tikzpicture}
+\caption{Registro de una venta: el formulario de nueva venta permite registrar productos escaneados y métodos de pago; al confirmar se genera el comprobante de la venta}
+\label{fig:cap3-wireflow-ventas}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — HOJA 3: MÓDULOS ADICIONALES (4 en rejilla 2×2)
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/NombreArchivo.png}
+% ═══════════════════════════════════════════════════════════════════════════
+\clearpage
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  screenMd/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=4pt,
+    minimum width=7.5cm, text width=7.3cm,
+    align=center, inner sep=5pt
+  },
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
 
 % ── Encabezado ───────────────────────────────────────────────────────
 \node[font=\small\itshape, text=gray!60, text width=16cm, align=center]
-  at (4.275, 1.2)
-  {Los módulos siguientes son accesibles desde el menú lateral del Dashboard (Fig.~\ref{fig:cap3-wireflow-flujo}) en cualquier momento:};
+  at (5.0, 1.3)
+  {Módulos accesibles desde el menú lateral del Dashboard (Fig.~\ref{fig:cap3-wireflow-login}):};
 
 % ── FILA 1 ──────────────────────────────────────────────────────────
 
-% 5. Inventario  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Inventario.png}
-\node[screenLg] (inventario) at (0, 0) {%
+% 5. Inventario
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}
+\node[screenMd] (inventario) at (0, 0) {%
   \textbf{\small Inventario}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Inventario.png]}}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Inventario.png]}}%
 };
 
-% 6. Compras  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Compras.png}
-\node[screenLg] (compras) at (8.55, 0) {%
+% 6. Compras
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}
+\node[screenMd] (compras) at (10, 0) {%
   \textbf{\small Compras}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Compras.png]}}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Compras.png]}}%
 };
 
 % ── FILA 2 ──────────────────────────────────────────────────────────
 
-% 7. Usuarios y roles  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Usuarios.png}
-\node[screenLg] (usuarios) at (0, -10.5) {%
+% 7. Usuarios y roles
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}
+\node[screenMd] (usuarios) at (0, -9.5) {%
   \textbf{\small Usuarios y roles}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Usuarios.png]}}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Usuarios.png]}}%
 };
 
-% 8. Sensor ambiental  [ancho: 7.3 cm — reemplazar parbox por includegraphics]
-% TODO: \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Sensor.png}
-\node[screenLg] (sensor) at (8.55, -10.5) {%
+% 8. Sensor ambiental
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}
+\node[screenMd] (sensor) at (10, -9.5) {%
   \textbf{\small Sensor ambiental}%
   \nodepart{two}%
-  \parbox[c][8cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Sensor.png]}}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Sensor.png]}}%
 };
 
 \end{tikzpicture}
-\caption{Módulos adicionales del sistema accesibles desde el menú lateral: inventario, compras, gestión de usuarios y monitoreo ambiental (continuación de Fig.~\ref{fig:cap3-wireflow-flujo})}
+\caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
 \label{fig:cap3-wireflow-modulos}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
