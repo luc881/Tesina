@@ -400,6 +400,135 @@ La suite de pruebas cubre los veinte módulos de la API con casos por operación
 
 La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo. De forma complementaria, se desarrolló un conjunto de pruebas automatizadas para los componentes individuales de mayor criticidad.
 
+La figura siguiente muestra el flujo general de navegación: desde el inicio de sesión hasta el registro de una venta, con los módulos adicionales accesibles desde el menú lateral de la aplicación.
+
+% ─────────────────────────────────────────────────────────────────────────
+% WIREFLOW DE NAVEGACIÓN
+% Cuando tengas capturas reales, en cada nodo reemplaza el \parbox por:
+%   \includegraphics[width=Xcm,height=2.4cm]{0_imagenes/Cap4/NombreArchivo.png}
+% ─────────────────────────────────────────────────────────────────────────
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  screen/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=3pt,
+    minimum width=4cm, text width=3.8cm,
+    align=center, inner sep=4pt
+  },
+  hub/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!60, gray!8},
+    draw=black!75, very thick, rounded corners=3pt,
+    minimum width=4.2cm, text width=4.0cm,
+    align=center, inner sep=4pt
+  },
+  mainArrow/.style={->, >=Stealth, line width=1.4pt, draw=black!65},
+  branchArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
+  lbl/.style={font=\tiny\sffamily, text=black!60, fill=white, inner sep=1.5pt}
+]
+
+% ── FILA PRINCIPAL (flujo de registro de venta) ──────────────────────
+
+% 1. Login
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/Login.png}
+\node[screen] (login) at (0, 0) {%
+  \textbf{\scriptsize Inicio de sesión}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [Login.png]}}%
+};
+
+% 2. Dashboard (nodo hub — punto de acceso a todos los módulos)
+% TODO: reemplazar parbox por \includegraphics[width=4.0cm,height=2.4cm]{0_imagenes/Cap4/Dashboard.png}
+\node[hub] (dashboard) at (5.5, 0) {%
+  \textbf{\scriptsize Dashboard}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{4.0cm}{\centering\textcolor{gray!55}{\small\itshape [Dashboard.png]}}%
+};
+
+% 3. Nueva venta
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/NuevaVenta.png}
+\node[screen] (ventas) at (11, 0) {%
+  \textbf{\scriptsize Nueva venta}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [NuevaVenta.png]}}%
+};
+
+% 4. Venta registrada
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/VentaDetalle.png}
+\node[screen] (ventaok) at (16.5, 0) {%
+  \textbf{\scriptsize Venta registrada}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [VentaDetalle.png]}}%
+};
+
+% ── MÓDULOS ADICIONALES (accesibles desde el menú lateral) ───────────
+
+% 5. Usuarios y roles
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/Usuarios.png}
+\node[screen] (usuarios) at (1.5, -7) {%
+  \textbf{\scriptsize Usuarios y roles}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [Usuarios.png]}}%
+};
+
+% 6. Inventario
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/Inventario.png}
+\node[screen] (inventario) at (6, -7) {%
+  \textbf{\scriptsize Inventario}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [Inventario.png]}}%
+};
+
+% 7. Compras
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/Compras.png}
+\node[screen] (compras) at (10.5, -7) {%
+  \textbf{\scriptsize Compras}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [Compras.png]}}%
+};
+
+% 8. Sensor ambiental
+% TODO: reemplazar parbox por \includegraphics[width=3.8cm,height=2.4cm]{0_imagenes/Cap4/Sensor.png}
+\node[screen] (sensor) at (15, -7) {%
+  \textbf{\scriptsize Sensor ambiental}%
+  \nodepart{two}%
+  \parbox[c][2.4cm][c]{3.8cm}{\centering\textcolor{gray!50}{\small\itshape [Sensor.png]}}%
+};
+
+% ── FLECHAS FLUJO PRINCIPAL ──────────────────────────────────────────
+
+\draw[mainArrow] (login.east) -- (dashboard.west)
+  node[lbl, above, midway] {acceso exitoso};
+
+\draw[mainArrow] (dashboard.east) -- (ventas.west)
+  node[lbl, above, midway] {registrar venta};
+
+\draw[mainArrow] (ventas.east) -- (ventaok.west)
+  node[lbl, above, midway] {confirmar};
+
+% ── FLECHAS RAMIFICACIONES (menú lateral) ────────────────────────────
+
+\coordinate (bifur) at ($(dashboard.south) + (0, -1.2)$);
+
+\draw[branchArrow] (dashboard.south) -- (bifur)
+  node[lbl, right, midway] {\itshape menú lateral};
+
+\draw[branchArrow] (bifur) -- (usuarios.north);
+\draw[branchArrow] (bifur) -- (inventario.north);
+\draw[branchArrow] (bifur) -- (compras.north);
+\draw[branchArrow] (bifur) -- (sensor.north);
+
+\end{tikzpicture}%
+}
+\caption{Flujo de navegación del usuario en la aplicación web: la fila superior muestra el recorrido principal de registro de venta; los módulos inferiores son accesibles desde el menú lateral en cualquier momento}
+\label{fig:cap4-wireflow}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
 % TODO: insertar captura de pantalla del dashboard con datos reales de la farmacia
 % Guardar en: 0_imagenes/Cap4/Dashboard.png
 %\begin{figure}[H]
