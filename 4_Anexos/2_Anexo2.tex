@@ -1,0 +1,33 @@
+\chapterstar{Anexo 2: Normativas}
+
+En este apartado se vera todo lo relacionado al mantenimiento de la integridad físico-química de los productos farmacéuticos que están intrínsecamente ligado al control estricto de las variables macroambientales en sus áreas de almacenamiento y distribución. 
+\section{Normas Oficiales Mexicanas (NOM)}
+
+Los medicamentos catalogados como sensibles a la humedad experimentan tasas de degradación acelerada ante desviaciones térmicas, lo que compromete su eficacia terapéutica y la seguridad del paciente. Almacenarlos fuera de estos rangos puede degradar su composición química y representar un riesgo para el paciente. En México, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) vigila el cumplimiento de un conjunto de Normas Oficiales Mexicanas (NOM) que dictan los criterios de ingeniería y control de calidad aplicables.
+
+\subsection{NOM-073-SSA1-2015: Estabilidad de Fármacos y Medicamentos}
+
+La NOM-073-SSA1-2015 \cite{nom073} establece las condiciones de temperatura y humedad relativa bajo las cuales deben conservarse los medicamentos para garantizar su estabilidad. Para México, que se clasifica en las Zonas Climáticas II y IVb, los rangos de referencia para almacenamiento son:
+
+\begin{itemize}
+    \item \textbf{Temperatura ambiente:} máximo $30~^{\circ}\text{C}$ con una humedad relativa máxima de $65\%$.
+    \item \textbf{Refrigeración:} entre $2~^{\circ}\text{C}$ y $8~^{\circ}\text{C}$, para medicamentos que requieren cadena de frío.
+\end{itemize}
+
+Estos rangos son los que el sistema utiliza como referencia para configurar los umbrales de alerta del nodo sensor: cuando la temperatura o la humedad supera los valores establecidos, el sistema notifica al administrador para que tome medidas correctivas.
+
+\subsection{NOM-059-SSA1-2015: Buenas Prácticas de Fabricación de Medicamentos}
+
+Esta norma técnico-sanitaria establece los requisitos mínimos para la fabricación y conservación de productos farmacéuticos. Desde la perspectiva de la ingeniería de sistemas y automatización, la NOM-059-SSA1-2015 introduce dos conceptos críticos:
+
+\begin{itemize}
+    \item Mapeo Térmico y de Humedad: Proceso analítico-experimental que exige determinar la distribución tridimensional de las variables ambientales dentro de un volumen de almacenamiento. El sistema automatizado de monitoreo debe desplegar sus sensores, específicamente en los "puntos críticos" (puntos más fríos, más cálidos y de mayor oscilación de humedad) identificados durante ese mapeo.
+
+
+    \item Validación de Sistemas Computarizados: Cualquier plataforma digital, firmware o software orientado al registro y control de variables que afecten la calidad del medicamento debe ser validado. El sistema de adquisición de datos debe garantizar la integridad, trazabilidad y seguridad de la información, impidiendo la manipulación o pérdida de registros históricos.
+
+\end{itemize}
+
+\subsection{Suplemento de la FEUM para Establecimientos de Venta y Suministro}
+
+Para los entornos de dispensación final (farmacias y almacenes de distribución), el Suplemento de la Farmacopea de los Estados Unidos Mexicanos (FEUM) vigente opera los límites de tolerancia ambiental. El sistema de instrumentación y monitoreo automatizado debe calibrarse y parametrizarse bajo los umbrales operativos. Los sensores de temperatura y humedad integrados en los nodos IoT deben contar con certificados de calibración trazables ante el Centro Nacional de Metrología (CENAM) u organismos acreditados bajo la norma ISO/IEC 17025, garantizando una incertidumbre expandida máxima de $\pm 0.5 \text{ }^{\circ}\text{C}$ y $\pm 3.0\% \text{ HR}$.

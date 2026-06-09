@@ -9,14 +9,265 @@
 
 En este capítulo se describe el proceso de diseño e implementación del sistema, desarrollando cada uno de los objetivos específicos del proyecto en el orden en que fueron planteados. Para cada objetivo se presentan las decisiones técnicas tomadas y la justificación que las respalda.
 
+% =============================================
+% SECCIÓN 3.1: DIAGRAMA DE BLOQUES
+% =============================================
 
+\section{Arquitectura general del sistema}
 
+El diagrama de bloques muestra los tres componentes principales del sistema y los canales de comunicación entre ellos: el nodo sensor instalado en la farmacia, el servidor y base de datos alojados en la nube, y la interfaz web accesible desde el navegador. Cada componente corresponde a uno de los objetivos específicos del proyecto y se describe en detalle en las secciones siguientes.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/DiagramaBloques/DiagramaBloques.png}}
+    \caption{Diagrama de bloques del sistema}
+    \label{fig:cap3-diagrama-bloques}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La interfaz web es el punto de entrada para el personal de la farmacia. Las figuras siguientes muestran el flujo de navegación completo: inicio de sesión, panel principal, historial de ventas, registro de una venta con lector de código de barras y los módulos adicionales del sistema.
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — HOJA 1: LOGIN + DASHBOARD
+% [p] = figura en página propia, sin \clearpage previo (evita hoja en blanco)
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[
+  screenFull/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=4pt,
+    minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt
+  },
+  hubFull/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!60, gray!8},
+    draw=black!75, very thick, rounded corners=4pt,
+    minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt
+  },
+  menuItem/.style={
+    draw=gray!55, fill=gray!12, rounded corners=3pt,
+    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm,
+    align=center
+  },
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+
+% ── 1. Inicio de sesión (ancho completo) ─────────────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}
+\node[screenFull] (login) at (0, 0) {%
+  \textbf{\small Inicio de sesión}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Login.png]}}%
+};
+
+% Flecha de transición hacia abajo
+\draw[mainArrow] (login.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {acceso exitoso};
+
+% ── 2. Dashboard (ancho completo, hub principal) ──────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}
+\node[hubFull] (dashboard) at (0, -10) {%
+  \textbf{\small Dashboard}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
+};
+
+% ── Menú lateral: flechas desde Dashboard hacia módulos ───────────────
+\coordinate (bifur) at ($(dashboard.south) + (0, -0.6)$);
+\draw[navArrow] (dashboard.south) -- (bifur);
+\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
+  at ($(bifur) + (0.3, -0.35)$) {menú lateral};
+
+\node[menuItem] (mVentas)     at (-6.5, -16.5) {Ventas};
+\node[menuItem] (mInventario) at (-3.25,-16.5) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -16.5) {Compras};
+\node[menuItem] (mSensor)     at ( 3.25,-16.5) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 6.5, -16.5) {Usuarios};
+
+\draw[navArrow] (bifur) -- (mVentas.north);
+\draw[navArrow] (bifur) -- (mInventario.north);
+\draw[navArrow] (bifur) -- (mCompras.north);
+\draw[navArrow] (bifur) -- (mSensor.north);
+\draw[navArrow] (bifur) -- (mUsuarios.north);
+
+\end{tikzpicture}
+\caption{Inicio de sesión y panel principal: el acceso exitoso dirige al Dashboard, desde cuyo menú lateral es posible navegar a cualquier módulo del sistema}
+\label{fig:cap3-wireflow-login}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — HOJA 2: LISTA DE VENTAS + NUEVA VENTA
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[
+  screenFull/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=4pt,
+    minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt
+  },
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\itshape, text=gray!55, align=center]
+  at (0, 1.2) {Dashboard\,→\,Ventas (Fig.~\ref{fig:cap3-wireflow-login})};
+
+% ── 3. Lista de ventas ───────────────────────────────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ListaVentas.png}
+\node[screenFull] (listaventas) at (0, 0) {%
+  \textbf{\small Historial de ventas}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ListaVentas.png]}}%
+};
+
+\draw[mainArrow] (listaventas.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {nueva venta};
+
+% ── 4. Formulario de nueva venta ─────────────────────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NuevaVenta.png}
+\node[screenFull] (ventas) at (0, -10) {%
+  \textbf{\small Formulario de nueva venta}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
+};
+
+\end{tikzpicture}
+\caption{Módulo de ventas: el historial muestra todas las transacciones registradas; desde ahí se accede al formulario de nueva venta donde se registran los productos y el método de pago}
+\label{fig:cap3-wireflow-ventas}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — HOJA 3: MODO LECTOR + VENTA REGISTRADA
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[
+  screenFull/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=4pt,
+    minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt
+  },
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+
+\node[font=\footnotesize\itshape, text=gray!55, align=center]
+  at (0, 1.2) {Nueva venta\,→\,tecla F2 activa el lector (Fig.~\ref{fig:cap3-wireflow-ventas})};
+
+% ── 5. Modo lector activo (F2) ───────────────────────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ModoLector.png}
+\node[screenFull] (lector) at (0, 0) {%
+  \textbf{\small Modo lector de código de barras (F2)}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ModoLector.png]}}%
+};
+
+\draw[mainArrow] (lector.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {confirmar venta};
+
+% ── 6. Venta registrada ──────────────────────────────────────────────
+% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/VentaDetalle.png}
+\node[screenFull] (ventaok) at (0, -10) {%
+  \textbf{\small Venta registrada}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaDetalle.png]}}%
+};
+
+\end{tikzpicture}
+\caption{Registro de venta con lector: la tecla F2 activa el modo escáner, que redirige el foco al campo de código de barras; al confirmar la venta el sistema genera el comprobante y descuenta el inventario automáticamente}
+\label{fig:cap3-wireflow-lector}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — HOJA 4: MÓDULOS ADICIONALES (4 en rejilla 2×2)
+% TODO: reemplazar cada \parbox por:
+%   \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/NombreArchivo.png}
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[p]
+\centering
+\begin{tikzpicture}[
+  screenMd/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white},
+    draw=gray!55, thick, rounded corners=4pt,
+    minimum width=7.5cm, text width=7.3cm,
+    align=center, inner sep=5pt
+  }
+]
+
+\node[font=\small\itshape, text=gray!60, text width=16cm, align=center]
+  at (5.0, 1.3)
+  {Módulos accesibles desde el menú lateral del Dashboard (Fig.~\ref{fig:cap3-wireflow-login}):};
+
+% 7. Inventario
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}
+\node[screenMd] at (0, 0) {%
+  \textbf{\small Inventario}%
+  \nodepart{two}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Inventario.png]}}%
+};
+
+% 8. Compras
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}
+\node[screenMd] at (10, 0) {%
+  \textbf{\small Compras}%
+  \nodepart{two}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Compras.png]}}%
+};
+
+% 9. Usuarios y roles
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}
+\node[screenMd] at (0, -9.5) {%
+  \textbf{\small Usuarios y roles}%
+  \nodepart{two}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Usuarios.png]}}%
+};
+
+% 10. Sensor ambiental
+% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}
+\node[screenMd] at (10, -9.5) {%
+  \textbf{\small Sensor ambiental}%
+  \nodepart{two}%
+  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Sensor.png]}}%
+};
+
+\end{tikzpicture}
+\caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
+\label{fig:cap3-wireflow-modulos}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+\clearpage
 
 % =============================================
 % OE 1: BASE DE DATOS
 % =============================================
 
-\section{Objetivo Específico 1 — Desarrollo de la base de datos en PostgreSQL}
+\section{Desarrollo de la base de datos en PostgreSQL}
 
 Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
@@ -180,7 +431,7 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 2 — Desarrollo de la API REST con FastAPI}
+\section{Desarrollo de la API REST con FastAPI}
 
 Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
 
@@ -337,7 +588,7 @@ La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tan
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 3 — Desarrollo de la interfaz web con React}
+\section{Desarrollo de la interfaz web con React}
 
 Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
 
@@ -443,26 +694,24 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-% TODO: agregar captura de pantalla real de la aplicación
-% Guardar imagen en 0_imagenes/Cap3/ScreenshotApp.png y descomentar:
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
-%    \caption{Captura de pantalla de la interfaz web — módulo de inventario}
-%    \label{fig:cap3-screenshot}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.9\textwidth]{0_imagenes/Cap3/ScreenshotApp.png}}
+    \caption{Captura de pantalla de la interfaz web — módulo de inventario}
+    \label{fig:cap3-screenshot}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Gestión de datos y formularios}
 
 El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} —usuario, rol y permisos— se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
-Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas —precio negativo, campo requerido vacío— el formulario lo indica visualmente sin generar una petición al servidor. Las reglas de validación se diseñaron para ser consistentes con los contratos de la API definidos en el OE2.
+Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas el formulario lo indica visualmente sin generar una petición al servidor.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos —gestión de usuarios, configuración de sucursales— se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
 
 \subsection{Despliegue en Vercel}
 
@@ -475,7 +724,7 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 4 — Desarrollo del nodo sensor con ESP32}
+\section{Desarrollo del nodo sensor con ESP32}
 
 Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
 
@@ -574,9 +823,9 @@ Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para qu
 % =============================================
 
 \clearpage
-\section{Objetivo Específico 5 — Integración física y lector de código de barras}
+\section{Integración física y lector de código de barras}
 
-El quinto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
+El sexto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
 
 \subsection{Gabinete impreso en 3D}
 

@@ -401,34 +401,3 @@ El uso de JWT ofrece diversas ventajas en sistemas distribuidos, entre las que d
 En el sistema desarrollado para la Farmacia Selene, JWT se utiliza para controlar el acceso a las diferentes funciones de la API. De esta manera, únicamente los usuarios autenticados pueden consultar información del inventario, registrar ventas o modificar datos dentro del sistema.
 
 \secbreak
-\section{Normas Oficiales Mexicanas (NOM)}
-
-El mantenimiento de la integridad físico-química de los productos farmacéuticos está intrínsecamente ligado al control estricto de las variables macroambientales en sus áreas de almacenamiento y distribución. Los medicamentos catalogados como sensibles a la humedad experimentan tasas de degradación acelerada ante desviaciones térmicas, lo que compromete su eficacia terapéutica y la seguridad del paciente. En el contexto nacional, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) vigila el cumplimiento de un conjunto de Normas Oficiales Mexicanas (NOM) que dictan los criterios de ingeniería y control de calidad aplicables.
-
-\subsection{NOM-059-SSA1-2015: Buenas Prácticas de Fabricación de Medicamentos}
-
-Esta norma técnico-sanitaria establece los requisitos mínimos para la fabricación y conservación de productos farmacéuticos. Desde la perspectiva de la ingeniería de sistemas y automatización, la NOM-059-SSA1-2015 introduce dos conceptos críticos:
-
-\begin{itemize}
-    \item Mapeo Térmico y de Humedad: Proceso analítico-experimental que exige determinar la distribución tridimensional de las variables ambientales dentro de un volumen de almacenamiento. El sistema automatizado de monitoreo debe desplegar sus sensores (nodos terminales) específicamente en los "puntos críticos" (puntos más fríos, más cálidos y de mayor oscilación de humedad) identificados durante dicho mapeo.
-
-
-    \item Validación de Sistemas Computarizados (Anexo 6): Cualquier plataforma digital, firmware o software orientado al registro y control de variables que afecten la calidad del medicamento debe ser validado. El sistema de adquisición de datos debe garantizar la integridad, trazabilidad y seguridad de la información, impidiendo la manipulación o pérdida de registros históricos (principios ALCOA+).
-\end{itemize}
-
-\subsection{NOM-073-SSA1-2015: Estudios de Estabilidad de Fármacos y Medicamentos}
-
-La NOM-073-SSA1-2015 define los lineamientos para evaluar la estabilidad de los compuestos bajo diferentes zonas climáticas mundiales. Para México (clasificado predominantemente en las Zonas Climáticas II y IVb), los estudios de estabilidad a largo plazo fijan condiciones estándar que el sistema de gestión debe supervisar de forma continua:
-\begin{itemize}
-    \item Condición General de Almacenamiento (Temperatura Ambiente): $30 \text{ }^{\circ}\text{C} \pm 2 \text{ }^{\circ}\text{C}$ con una Humedad Relativa (HR) de $65\% \pm 5\%$.
-    \item Condición de Red de Frío (Refrigeración): $5 \text{ }^{\circ}\text{C} \pm 3 \text{ }^{\circ}\text{C}$ (rango operativo estricto de $2 \text{ }^{\circ}\text{C}$ a $8 \text{ }^{\circ}\text{C}$).
-\end{itemize}
-
-
-
-
-
-
-
-
-
