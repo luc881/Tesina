@@ -26,6 +26,101 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
+El diagrama siguiente muestra quiénes pueden interactuar con el sistema y a qué funciones tiene acceso cada uno. Los actores son las personas o dispositivos que usan el sistema; los óvalos representan las funciones disponibles; y las líneas indican quién tiene acceso a qué.
+
+% ═══════════════════════════════════════════════════════════════════════════
+% DIAGRAMA DE CASOS DE USO (TikZ puro)
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  % Óvalo de cada función del sistema
+  uc/.style={
+    ellipse, draw=black!70, thick, fill=gray!8,
+    minimum width=5cm, text width=4.8cm,
+    align=center, font=\normalsize\sffamily, inner sep=6pt
+  },
+  % Línea de asociación actor–función
+  lnk/.style={-, draw=black!50, thick}
+]
+
+% ── Recuadro del sistema ─────────────────────────────────────────────────
+\draw[draw=black!80, very thick, rounded corners=8pt]
+  (-5.5, -11.2) rectangle (5.5, 1.8);
+\node[font=\large\sffamily\bfseries] at (0, 1.3) {PharmaTrack};
+
+% ── Funciones del sistema (casos de uso) ─────────────────────────────────
+\node[uc] (auth)       at ( 0,    0.2) {Autenticación};
+\node[uc] (ventas)     at (-2.8, -2.5) {Ventas y cobro};
+\node[uc] (inventario) at ( 2.8, -2.5) {Inventario y lotes};
+\node[uc] (compras)    at (-2.8, -5.5) {Compras a proveedores};
+\node[uc] (usuarios)   at ( 2.8, -5.5) {Usuarios y roles};
+\node[uc] (monitoreo)  at ( 0,   -9.0) {Monitoreo ambiental};
+
+% ── Actor: Administrador (acceso completo) ────────────────────────────────
+% Figura de persona: círculo (cabeza) + líneas (cuerpo, brazos, piernas)
+\begin{scope}[shift={(-9.0, -1.5)}, every path/.style={thick}]
+  \draw (0, 1.1) circle (0.35);          % cabeza
+  \draw (0, 0.75) -- (0, 0.0);           % cuerpo
+  \draw (-0.55, 0.55) -- (0.55, 0.55);  % brazos
+  \draw (0, 0.0) -- (-0.45, -0.85);     % pierna izquierda
+  \draw (0, 0.0) -- ( 0.45, -0.85);     % pierna derecha
+  \node[below, font=\normalsize\sffamily\bfseries, text width=2.5cm, align=center]
+    at (0, -0.9) {Administrador};
+\end{scope}
+\coordinate (admin) at (-9.0, -0.7);
+
+% ── Actor: Cajero (acceso al punto de venta) ──────────────────────────────
+\begin{scope}[shift={(-9.0, -8.0)}, every path/.style={thick}]
+  \draw (0, 1.1) circle (0.35);
+  \draw (0, 0.75) -- (0, 0.0);
+  \draw (-0.55, 0.55) -- (0.55, 0.55);
+  \draw (0, 0.0) -- (-0.45, -0.85);
+  \draw (0, 0.0) -- ( 0.45, -0.85);
+  \node[below, font=\normalsize\sffamily\bfseries, text width=2.5cm, align=center]
+    at (0, -0.9) {Cajero};
+\end{scope}
+\coordinate (cajero) at (-9.0, -7.3);
+
+% ── Actor: Sensor ESP32 (dispositivo externo que envía datos) ────────────
+\begin{scope}[shift={(9.0, -9.0)}, every path/.style={thick}]
+  \draw (0, 1.1) circle (0.35);
+  \draw (0, 0.75) -- (0, 0.0);
+  \draw (-0.55, 0.55) -- (0.55, 0.55);
+  \draw (0, 0.0) -- (-0.45, -0.85);
+  \draw (0, 0.0) -- ( 0.45, -0.85);
+  \node[below, font=\normalsize\sffamily\bfseries, text width=2.5cm, align=center]
+    at (0, -0.9) {Sensor ESP32};
+\end{scope}
+\coordinate (esp32) at (9.0, -8.3);
+
+% ── Líneas: Administrador → todas las funciones ───────────────────────────
+\draw[lnk] (admin) -- (auth);
+\draw[lnk] (admin) -- (ventas);
+\draw[lnk] (admin) -- (inventario);
+\draw[lnk] (admin) -- (compras);
+\draw[lnk] (admin) -- (usuarios);
+\draw[lnk] (admin) -- (monitoreo);
+
+% ── Líneas: Cajero → funciones del punto de venta ─────────────────────────
+\draw[lnk] (cajero) -- (auth);
+\draw[lnk] (cajero) -- (ventas);
+\draw[lnk] (cajero) -- (monitoreo);
+
+% ── Línea: Sensor ESP32 → monitoreo ambiental ────────────────────────────
+\draw[lnk] (esp32) -- (monitoreo);
+
+\end{tikzpicture}
+}
+\caption{Diagrama de casos de uso del sistema: actores y módulos funcionales a los que cada uno tiene acceso}
+\label{fig:cap3-casos-uso}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+El \textbf{Administrador} tiene acceso a todos los módulos: registrar ventas, gestionar el inventario y los lotes de medicamentos, registrar compras a proveedores, administrar usuarios y permisos, y consultar el monitoreo ambiental. El \textbf{Cajero} tiene acceso únicamente a las funciones del punto de venta: iniciar sesión, registrar y consultar ventas, y visualizar el estado del sensor. El \textbf{Sensor ESP32} no es un usuario sino un dispositivo externo que envía automáticamente lecturas de temperatura y humedad al sistema cada 30 segundos, sin intervención humana.
+
 La interfaz web es el punto de entrada para el personal de la farmacia. Las figuras siguientes muestran el flujo de navegación completo: inicio de sesión, panel principal, historial de ventas, registro de una venta con lector de código de barras y los módulos adicionales del sistema.
 
 % ═══════════════════════════════════════════════════════════════════════════
