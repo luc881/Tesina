@@ -26,6 +26,254 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
+El diagrama de casos de uso muestra quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Cada caja con encabezado oscuro representa un actor o una función del sistema; las \textbf{líneas sólidas} indican quién tiene acceso a qué; las \textbf{flechas punteadas «extend»} señalan funciones opcionales que amplían una función base; y la \textbf{flecha con triángulo} entre los actores humanos indica que el Administrador hereda todas las funciones del Cajero y añade las propias.
+
+% ═══════════════════════════════════════════════════════════════════════════
+% DIAGRAMA DE CASOS DE USO — cajas UML con encabezado
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[p]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  % Caja de caso de uso: encabezado gris claro + cuerpo blanco
+  uc/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!30, white},
+    draw=black!65, thick, rounded corners=3pt,
+    minimum width=4.5cm, text width=4.3cm,
+    align=center, font=\small\sffamily, inner sep=4pt
+  },
+  % Caja de actor: encabezado más oscuro
+  act/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!60, white},
+    draw=black!70, thick, rounded corners=3pt,
+    minimum width=3.2cm, text width=3.0cm,
+    align=center, font=\small\sffamily, inner sep=4pt
+  },
+  lnk/.style={-, draw=black!50, thick},
+  ext/.style={->, >=Stealth, dashed, draw=black!65, thick},
+  grp/.style={font=\footnotesize\sffamily\itshape, text=black!40}
+]
+
+% Borde del sistema
+\draw[black!70, very thick, rounded corners=6pt]
+  (-5.6, -15.5) rectangle (5.6, 3.8);
+\fill[gray!70] (-5.5, 2.9) rectangle (5.5, 3.75);
+\node[font=\scriptsize\sffamily, text=white] at (0, 3.62) {«system»};
+\node[font=\normalsize\sffamily\bfseries, text=white] at (0, 3.12) {PharmaTrack};
+\draw[black!60, thick] (-5.5, 2.9) -- (5.5, 2.9);
+
+\node[grp] at ( 0,    2.4) {Autenticación};
+\node[grp] at (-2.8, -2.0) {Ventas};
+\node[grp] at ( 2.8, -2.0) {Administración};
+\node[grp] at ( 0,  -12.4) {Monitoreo ambiental};
+
+% Autenticación
+\node[uc] (login) at (-2.0, 1.3) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Iniciar sesión};
+\node[uc] (logout) at (2.0, 1.3) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Cerrar sesión};
+\node[uc] (recovery) at (0.0, -0.5) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Recuperar contraseña};
+
+% Ventas
+\node[uc] (venta) at (-2.8, -3.0) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Registrar nueva venta};
+\node[uc] (historial) at (-2.8, -5.6) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Consultar historial de ventas};
+\node[uc] (scanner) at (-2.8, -8.2) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Escanear código de barras};
+\node[uc] (refund) at (-2.8, -10.8) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Aplicar devolución};
+
+% Administración
+\node[uc] (catalogo) at (2.8, -3.0) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Gestionar catálogo de productos};
+\node[uc] (lotes) at (2.8, -5.6) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Consultar existencias y lotes};
+\node[uc] (compras) at (2.8, -8.2) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Registrar compra a proveedor};
+\node[uc] (usuarios) at (2.8, -10.8) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Gestionar usuarios y roles};
+
+% Monitoreo ambiental
+\node[uc] (consulta) at (-1.8, -13.5) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Consultar monitoreo ambiental};
+\node[uc] (envio) at (1.8, -13.5) {%
+  \scriptsize\sffamily «use case»%
+  \nodepart{two}Enviar datos ambientales};
+
+% Relaciones «extend»
+\draw[ext] (recovery) -- (login)
+  node[midway, above left, font=\scriptsize\sffamily] {«extend»};
+\draw[ext] (scanner.west) to[out=180, in=180, looseness=1.8] (venta.west)
+  node[pos=0.5, left, font=\scriptsize\sffamily] {«extend»};
+\draw[ext] (refund.west) to[out=180, in=180, looseness=1.5] (historial.west)
+  node[pos=0.5, left, font=\scriptsize\sffamily] {«extend»};
+
+% Actores
+\node[act] (cajero) at (-9.2, -2.0) {%
+  \scriptsize\sffamily «actor»%
+  \nodepart{two}\textbf{Cajero}};
+\node[act] (admin) at (-9.2, -8.5) {%
+  \scriptsize\sffamily «actor»%
+  \nodepart{two}\textbf{Administrador}};
+\node[act] (esp32) at (9.2, -13.5) {%
+  \scriptsize\sffamily «actor»%
+  \nodepart{two}\textbf{Sensor ESP32}};
+
+% Generalización: Administrador hereda funciones del Cajero
+\draw[-{Triangle[open, length=8pt, width=10pt]}, thick]
+  (admin.north) -- (cajero.south);
+
+% Asociaciones
+\draw[lnk] (cajero) -- (login);
+\draw[lnk] (cajero) -- (logout);
+\draw[lnk] (cajero) -- (venta);
+\draw[lnk] (cajero) -- (historial);
+\draw[lnk] (cajero) -- (consulta);
+
+\draw[lnk] (admin) -- (catalogo);
+\draw[lnk] (admin) -- (lotes);
+\draw[lnk] (admin) -- (compras);
+\draw[lnk] (admin) -- (usuarios);
+
+\draw[lnk] (esp32) -- (envio);
+
+\end{tikzpicture}
+}%
+\caption{Diagrama de casos de uso del sistema PharmaTrack: tres actores, 13 funciones y relaciones «extend» entre funciones relacionadas}
+\label{fig:cap3-casos-uso}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+El \textbf{Cajero} opera el punto de venta: inicia y cierra sesión, registra ventas, consulta el historial y visualiza el sensor. El \textbf{Administrador} hereda todas las funciones del Cajero (flecha con triángulo) y añade las propias: gestión del catálogo, existencias y lotes, compras y usuarios. El \textbf{Sensor ESP32} envía datos de temperatura y humedad automáticamente cada 30 segundos. Las funciones «extend» son opcionales: el escáner puede activarse al registrar una venta; la recuperación de contraseña extiende el inicio de sesión; y la devolución se aplica desde el historial.
+
+% ═══════════════════════════════════════════════════════════════════════════
+% DIAGRAMA DE CLASES — entidades principales del sistema
+% ═══════════════════════════════════════════════════════════════════════════
+El diagrama de clases complementa el anterior mostrando cómo están organizados los datos. Cada caja es una tabla de la base de datos; los atributos son sus campos; y las líneas con números indican cómo se relacionan (\textbf{1} = uno, \textbf{*} = muchos).
+
+\begin{figure}[p]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  cls/.style={
+    rectangle split, rectangle split parts=3,
+    rectangle split part fill={gray!60, gray!20, white},
+    draw=black!70, thick,
+    minimum width=3.8cm, text width=3.6cm,
+    align=center, font=\scriptsize\sffamily, inner sep=4pt
+  },
+  rel/.style={-, draw=black!55, thick},
+  mul/.style={font=\scriptsize\sffamily, fill=white, inner sep=1pt}
+]
+
+% Fila 1
+\node[cls] (rol) at (-7, 0) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Rol}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ nombre: String};
+
+\node[cls] (usuario) at (-2.5, 0) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Usuario}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ nombre: String\\+ email: String\\+ rol\_id: FK};
+
+\node[cls] (lectura) at (5.5, 0) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{LecturaSensor}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ temperatura: Decimal\\+ humedad: Decimal\\+ timestamp: DateTime\\+ device\_id: String};
+
+% Fila 2
+\node[cls] (compra) at (-7, -7) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Compra}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ fecha: DateTime\\+ total: Decimal\\+ proveedor\_id: FK};
+
+\node[cls] (venta) at (-2.5, -7) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Venta}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ fecha: DateTime\\+ total: Decimal\\+ estado: Enum\\+ usuario\_id: FK};
+
+\node[cls] (producto) at (2.0, -7) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Producto}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ nombre: String\\+ precio\_venta: Decimal\\+ categoria\_id: FK};
+
+\node[cls] (lote) at (6.5, -7) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{LoteProducto}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ codigo\_lote: String\\+ fecha\_venc: Date\\+ cantidad: Integer\\+ producto\_id: FK};
+
+% Fila 3
+\node[cls] (proveedor) at (-7, -14) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{Proveedor}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ nombre: String\\+ rfc: String\\+ email: String};
+
+\node[cls] (detalle) at (-2.5, -14) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{DetalleVenta}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ cantidad: Integer\\+ precio\_unit: Decimal\\+ venta\_id: FK};
+
+\node[cls] (uso) at (2.0, -14) {%
+  \color{white}\textbf{«entity»}%
+  \nodepart{two}\textbf{UsoLoteVenta}%
+  \nodepart{three}\raggedright
+  + id: Integer\\+ cantidad\_usada: Integer\\+ detalle\_id: FK\\+ lote\_id: FK};
+
+% Relaciones
+\draw[rel] (rol) -- (usuario)
+  node[mul,near start,above]{1} node[mul,near end,above]{*};
+\draw[rel] (usuario) -- (venta)
+  node[mul,near start,right]{1} node[mul,near end,right]{*};
+\draw[rel] (venta) -- (detalle)
+  node[mul,near start,right]{1} node[mul,near end,right]{*};
+\draw[rel] (detalle) -- (uso)
+  node[mul,near start,right]{1} node[mul,near end,right]{*};
+\draw[rel] (lote) -- (uso)
+  node[mul,near start,below]{1} node[mul,near end,below]{*};
+\draw[rel] (producto) -- (lote)
+  node[mul,near start,above]{1} node[mul,near end,above]{*};
+\draw[rel] (proveedor) -- (compra)
+  node[mul,near start,right]{1} node[mul,near end,right]{*};
+\draw[rel] (compra.east) to[out=0,in=180] (lote.west)
+  node[mul,near start,above]{1} node[mul,near end,above]{*};
+
+\end{tikzpicture}
+}%
+\caption{Diagrama de clases del sistema PharmaTrack: 10 entidades principales. \textit{UsoLoteVenta} registra qué lote exacto se consumió por cada línea de venta, implementando el criterio FEFO (primero en vencer, primero en salir)}
+\label{fig:cap3-clases}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\textbf{Rol} y \textbf{Usuario} gestionan los accesos. \textbf{LecturaSensor} almacena cada medición del ESP32. El flujo principal de una venta va de \textbf{Venta} a \textbf{DetalleVenta} y de ahí a \textbf{UsoLoteVenta}, que registra qué lote específico se descontó del inventario — esto implementa el criterio FEFO. \textbf{Producto} y \textbf{LoteProducto} modelan el inventario; cada producto tiene múltiples lotes con distintas fechas de vencimiento. \textbf{Proveedor} y \textbf{Compra} registran las adquisiciones de mercancía.
+
 La interfaz web es el punto de entrada para el personal de la farmacia. Las figuras siguientes muestran el flujo de navegación completo: inicio de sesión, panel principal, historial de ventas, registro de una venta con lector de código de barras y los módulos adicionales del sistema.
 
 % ═══════════════════════════════════════════════════════════════════════════
