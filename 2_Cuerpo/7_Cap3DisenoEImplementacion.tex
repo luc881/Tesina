@@ -62,7 +62,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.75}{%
+\scalebox{0.99}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -74,7 +74,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (login) at (0, 0) {%
   \textbf{\small Inicio de sesión}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Login.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}%
 };
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
@@ -92,7 +92,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
-\scalebox{0.82}{%
+\scalebox{0.99}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -112,7 +112,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[hubFull] (dashboard) at (0, 0) {%
   \textbf{\small Dashboard}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}%
 };
 % Menú lateral
 \coordinate (bifur) at ($(dashboard.south) + (0, -0.5)$);
@@ -133,7 +133,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (historial) at (0, -13) {%
   \textbf{\small Historial de ventas}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ListaVentas.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ListaVentas.png}%
 };
 \draw[mainArrow] (mVentas.south) |- (historial.north);
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
@@ -152,7 +152,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
-\scalebox{0.85}{%
+\scalebox{0.99}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -164,14 +164,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventas) at (0, 0) {%
   \textbf{\small Formulario de nueva venta}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NuevaVenta.png}%
 };
 \draw[mainArrow] (ventas.south) -- ++(0,-0.7)
   node[lbl, right, midway] {tecla F2};
 \node[screenFull] (lector) at (0, -10) {%
   \textbf{\small Modo lector de código de barras (F2)}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ModoLector.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ModoLector.png}%
 };
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
@@ -189,7 +189,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
-\scalebox{0.85}{%
+\scalebox{0.99}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -201,14 +201,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventaok) at (0, 0) {%
   \textbf{\small Venta registrada}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaRegistrada.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/VentaRegistrada.png}%
 };
 \draw[mainArrow] (ventaok.south) -- ++(0,-0.7)
   node[lbl, right, midway] {ver detalle};
 \node[screenFull] (detalle) at (0, -10) {%
   \textbf{\small Detalle de la venta}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [DetalleVenta.png]}}%
+  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
 };
 \end{tikzpicture}%
 }
@@ -223,7 +223,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.88}{%
+\scalebox{0.99}{%
 \begin{tikzpicture}[
   screenMd/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -236,22 +236,22 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenMd] at (0, 0) {%
   \textbf{\small Inventario}%
   \nodepart{two}%
-  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Inventario.png]}}%
+  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}%
 };
 \node[screenMd] at (10, 0) {%
   \textbf{\small Compras}%
   \nodepart{two}%
-  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Compras.png]}}%
+  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}%
 };
 \node[screenMd] at (0, -9.5) {%
   \textbf{\small Usuarios y roles}%
   \nodepart{two}%
-  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Usuarios.png]}}%
+  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}%
 };
 \node[screenMd] at (10, -9.5) {%
   \textbf{\small Sensor ambiental}%
   \nodepart{two}%
-  \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Sensor.png]}}%
+  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}%
 };
 \end{tikzpicture}%
 }
