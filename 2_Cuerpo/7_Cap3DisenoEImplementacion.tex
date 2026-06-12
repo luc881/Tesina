@@ -53,20 +53,18 @@ El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y
 
 El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
 
-
- Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
+Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
 A continuación se presenta el wireflow para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
-\clearpage
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — HOJA 1: LOGIN + DASHBOARD
-% [p] = figura en página propia, sin \clearpage previo (evita hoja en blanco)
 % TODO: reemplazar cada \parbox por:
 %   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
 % ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[p]
+\begin{figure}[H]
 \centering
+\scalebox{0.68}{%
 \begin{tikzpicture}[
   screenFull/.style={
     rectangle split, rectangle split parts=2,
@@ -130,7 +128,8 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Inicio de sesión y panel principal: el acceso exitoso dirige al Dashboard, desde cuyo menú lateral es posible navegar a cualquier módulo del sistema}
 \label{fig:cap3-wireflow-login}
 \vspace{0.2cm}
