@@ -53,239 +53,208 @@ El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y
 
 El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
 
-
- Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
+Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
 A continuación se presenta el wireflow para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 1: LOGIN + DASHBOARD
-% [p] = figura en página propia, sin \clearpage previo (evita hoja en blanco)
-% TODO: reemplazar cada \parbox por:
-%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — FIGURA 1: INICIO DE SESIÓN
 % ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[p]
+\begin{figure}[H]
 \centering
+\scalebox{0.75}{%
 \begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
-  hubFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!60, gray!8},
-    draw=black!75, very thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
-  menuItem/.style={
-    draw=gray!55, fill=gray!12, rounded corners=3pt,
-    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm,
-    align=center
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
-  navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
-
-% ── 1. Inicio de sesión (ancho completo) ─────────────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}
 \node[screenFull] (login) at (0, 0) {%
   \textbf{\small Inicio de sesión}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Login.png]}}%
 };
-
-% Flecha de transición hacia abajo
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
-
-% ── 2. Dashboard (ancho completo, hub principal) ──────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}
-\node[hubFull] (dashboard) at (0, -10) {%
-  \textbf{\small Dashboard}%
-  \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
-};
-
-% ── Menú lateral: flechas desde Dashboard hacia módulos ───────────────
-\coordinate (bifur) at ($(dashboard.south) + (0, -0.6)$);
-\draw[navArrow] (dashboard.south) -- (bifur);
-\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
-  at ($(bifur) + (0.3, -0.35)$) {menú lateral};
-
-\node[menuItem] (mVentas)     at (-6.5, -16.5) {Ventas};
-\node[menuItem] (mInventario) at (-3.25,-16.5) {Inventario};
-\node[menuItem] (mCompras)    at ( 0.0, -16.5) {Compras};
-\node[menuItem] (mSensor)     at ( 3.25,-16.5) {Sensor};
-\node[menuItem] (mUsuarios)   at ( 6.5, -16.5) {Usuarios};
-
-\draw[navArrow] (bifur) -- (mVentas.north);
-\draw[navArrow] (bifur) -- (mInventario.north);
-\draw[navArrow] (bifur) -- (mCompras.north);
-\draw[navArrow] (bifur) -- (mSensor.north);
-\draw[navArrow] (bifur) -- (mUsuarios.north);
-
-\end{tikzpicture}
-\caption{Inicio de sesión y panel principal: el acceso exitoso dirige al Dashboard, desde cuyo menú lateral es posible navegar a cualquier módulo del sistema}
+\end{tikzpicture}%
+}
+\caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales y al acceder correctamente el sistema redirige al panel principal}
 \label{fig:cap3-wireflow-login}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 2: LISTA DE VENTAS + NUEVA VENTA
-% TODO: reemplazar cada \parbox por:
-%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — FIGURA 2: DASHBOARD + HISTORIAL DE VENTAS
 % ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[p]
+\begin{figure}[H]
 \centering
+\textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
+\scalebox{0.82}{%
 \begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  hubFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!60, gray!8}, draw=black!75, very thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  menuItem/.style={draw=gray!55, fill=gray!12, rounded corners=3pt,
+    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm, align=center},
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
-
-\node[font=\footnotesize\itshape, text=gray!55, align=center]
-  at (0, 1.2) {Dashboard\,→\,Ventas (Fig.~\ref{fig:cap3-wireflow-login})};
-
-% ── 3. Lista de ventas ───────────────────────────────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ListaVentas.png}
-\node[screenFull] (listaventas) at (0, 0) {%
+% Dashboard
+\node[hubFull] (dashboard) at (0, 0) {%
+  \textbf{\small Dashboard}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
+};
+% Menú lateral
+\coordinate (bifur) at ($(dashboard.south) + (0, -0.5)$);
+\draw[navArrow] (dashboard.south) -- (bifur);
+\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
+  at ($(bifur) + (0.3, -0.3)$) {menú lateral};
+\node[menuItem] (mVentas)     at (-6.5, -5.5) {Ventas};
+\node[menuItem] (mInventario) at (-3.25,-5.5) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -5.5) {Compras};
+\node[menuItem] (mSensor)     at ( 3.25,-5.5) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 6.5, -5.5) {Usuarios};
+\draw[navArrow] (bifur) -- (mVentas.north);
+\draw[navArrow] (bifur) -- (mInventario.north);
+\draw[navArrow] (bifur) -- (mCompras.north);
+\draw[navArrow] (bifur) -- (mSensor.north);
+\draw[navArrow] (bifur) -- (mUsuarios.north);
+% Transición al módulo Ventas
+\node[screenFull] (historial) at (0, -13) {%
   \textbf{\small Historial de ventas}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ListaVentas.png]}}%
 };
-
-\draw[mainArrow] (listaventas.south) -- ++(0,-0.7)
+\draw[mainArrow] (mVentas.south) |- (historial.north);
+\draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
+\end{tikzpicture}%
+}
+\caption{Panel principal y módulo de ventas: el Dashboard da acceso al sistema completo mediante el menú lateral; al seleccionar Ventas se muestra el historial de transacciones}
+\label{fig:cap3-wireflow-dashboard}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
-% ── 4. Formulario de nueva venta ─────────────────────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NuevaVenta.png}
-\node[screenFull] (ventas) at (0, -10) {%
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — FIGURA 3: FORMULARIO DE NUEVA VENTA + MODO LECTOR
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[H]
+\centering
+\textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
+\scalebox{0.85}{%
+\begin{tikzpicture}[
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+\node[screenFull] (ventas) at (0, 0) {%
   \textbf{\small Formulario de nueva venta}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
 };
-
-\end{tikzpicture}
-\caption{Módulo de ventas: el historial muestra todas las transacciones registradas; desde ahí se accede al formulario de nueva venta donde se registran los productos y el método de pago}
+\draw[mainArrow] (ventas.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {tecla F2};
+\node[screenFull] (lector) at (0, -10) {%
+  \textbf{\small Modo lector de código de barras (F2)}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ModoLector.png]}}%
+};
+\draw[mainArrow] (lector.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {confirmar venta};
+\end{tikzpicture}%
+}
+\caption{Registro de venta: el formulario permite agregar productos manualmente; la tecla F2 activa el modo lector que redirige el foco al escáner de código de barras}
 \label{fig:cap3-wireflow-ventas}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 3: MODO LECTOR + VENTA REGISTRADA
-% TODO: reemplazar cada \parbox por:
-%   \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — FIGURA 4: VENTA REGISTRADA + DETALLE DE LA VENTA
 % ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[p]
+\begin{figure}[H]
 \centering
+\textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
+\scalebox{0.85}{%
 \begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
-
-\node[font=\footnotesize\itshape, text=gray!55, align=center]
-  at (0, 1.2) {Nueva venta\,→\,tecla F2 activa el lector (Fig.~\ref{fig:cap3-wireflow-ventas})};
-
-% ── 5. Modo lector activo (F2) ───────────────────────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ModoLector.png}
-\node[screenFull] (lector) at (0, 0) {%
-  \textbf{\small Modo lector de código de barras (F2)}%
-  \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ModoLector.png]}}%
-};
-
-\draw[mainArrow] (lector.south) -- ++(0,-0.7)
-  node[lbl, right, midway] {confirmar venta};
-
-% ── 6. Venta registrada ──────────────────────────────────────────────
-% TODO: \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/VentaDetalle.png}
-\node[screenFull] (ventaok) at (0, -10) {%
+\node[screenFull] (ventaok) at (0, 0) {%
   \textbf{\small Venta registrada}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaDetalle.png]}}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaRegistrada.png]}}%
 };
-
-\end{tikzpicture}
-\caption{Registro de venta con lector: la tecla F2 activa el modo escáner, que redirige el foco al campo de código de barras; al confirmar la venta el sistema genera el comprobante y descuenta el inventario automáticamente}
-\label{fig:cap3-wireflow-lector}
+\draw[mainArrow] (ventaok.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {ver detalle};
+\node[screenFull] (detalle) at (0, -10) {%
+  \textbf{\small Detalle de la venta}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [DetalleVenta.png]}}%
+};
+\end{tikzpicture}%
+}
+\caption{Cierre de la transacción: al confirmar la venta el sistema descuenta el inventario y muestra la confirmación; desde el detalle es posible consultar los productos, montos y método de pago}
+\label{fig:cap3-wireflow-completar}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — HOJA 4: MÓDULOS ADICIONALES (4 en rejilla 2×2)
-% TODO: reemplazar cada \parbox por:
-%   \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/NombreArchivo.png}
+% WIREFLOW — FIGURA 5: MÓDULOS ADICIONALES (rejilla 2×2)
 % ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[p]
+\begin{figure}[H]
 \centering
+\scalebox{0.88}{%
 \begin{tikzpicture}[
-  screenMd/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=7.5cm, text width=7.3cm,
-    align=center, inner sep=5pt
-  }
+  screenMd/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=7.5cm, text width=7.3cm,
+    align=center, inner sep=5pt}
 ]
-
 \node[font=\small\itshape, text=gray!60, text width=16cm, align=center]
   at (5.0, 1.3)
-  {Módulos accesibles desde el menú lateral del Dashboard (Fig.~\ref{fig:cap3-wireflow-login}):};
-
-% 7. Inventario
-% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}
+  {Módulos accesibles desde el menú lateral del Dashboard (Fig.~\ref{fig:cap3-wireflow-dashboard}):};
 \node[screenMd] at (0, 0) {%
   \textbf{\small Inventario}%
   \nodepart{two}%
   \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Inventario.png]}}%
 };
-
-% 8. Compras
-% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}
 \node[screenMd] at (10, 0) {%
   \textbf{\small Compras}%
   \nodepart{two}%
   \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Compras.png]}}%
 };
-
-% 9. Usuarios y roles
-% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}
 \node[screenMd] at (0, -9.5) {%
   \textbf{\small Usuarios y roles}%
   \nodepart{two}%
   \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Usuarios.png]}}%
 };
-
-% 10. Sensor ambiental
-% TODO: \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}
 \node[screenMd] at (10, -9.5) {%
   \textbf{\small Sensor ambiental}%
   \nodepart{two}%
   \parbox[c][7cm][c]{7.3cm}{\centering\textcolor{gray!50}{\normalsize\itshape [Sensor.png]}}%
 };
-
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
 \label{fig:cap3-wireflow-modulos}
 \vspace{0.2cm}
