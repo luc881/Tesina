@@ -58,6 +58,79 @@ Un wireflow es una representación que combina el boceto de las pantallas del si
 A continuación se presenta el wireflow para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
 % ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — MAPA GENERAL DE NAVEGACIÓN
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[H]
+\centering
+\scalebox{0.70}{%
+\begin{tikzpicture}[
+  screen/.style={draw=gray!60, fill=gray!10, rounded corners=4pt,
+    minimum width=3.8cm, minimum height=0.75cm,
+    font=\small\sffamily, align=center, inner sep=4pt},
+  hub/.style={draw=black!75, fill=gray!30, very thick, rounded corners=4pt,
+    minimum width=3.8cm, minimum height=0.75cm,
+    font=\small\sffamily\bfseries, align=center, inner sep=4pt},
+  menuItem/.style={draw=gray!55, fill=gray!12, rounded corners=3pt,
+    font=\footnotesize\sffamily, inner sep=4pt,
+    minimum width=2.2cm, align=center},
+  mainArrow/.style={->, >=Stealth, line width=1.2pt, draw=black!70},
+  navArrow/.style={->, >=Stealth, line width=0.8pt, draw=gray!55, dashed},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=1.5pt}
+]
+% Inicio de sesión y Dashboard
+\node[screen] (login) at (0, 0) {Inicio de sesión};
+\node[hub] (dashboard) at (0, -2) {Dashboard};
+\draw[mainArrow] (login.south) -- (dashboard.north)
+  node[lbl, right, midway]{acceso exitoso};
+% Bifurcación del menú lateral
+\coordinate (bifur) at ($(dashboard.south)+(0,-0.5)$);
+\draw[navArrow] (dashboard.south) -- (bifur);
+\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
+  at ($(bifur)+(0.2,-0.25)$) {menú lateral};
+% Ítems del menú
+\node[menuItem] (mVentas)     at (-9.0, -5.0) {Ventas};
+\node[menuItem] (mInventario) at (-4.5, -5.0) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -5.0) {Compras};
+\node[menuItem] (mSensor)     at ( 4.5, -5.0) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 9.0, -5.0) {Usuarios};
+\draw[navArrow] (bifur) -- (mVentas.north);
+\draw[navArrow] (bifur) -- (mInventario.north);
+\draw[navArrow] (bifur) -- (mCompras.north);
+\draw[navArrow] (bifur) -- (mSensor.north);
+\draw[navArrow] (bifur) -- (mUsuarios.north);
+% Pantallas de módulos adicionales
+\node[screen] (invScreen)    at (-4.5, -7.5) {Inventario};
+\node[screen] (compScreen)   at ( 0.0, -7.5) {Compras};
+\node[screen] (sensorScreen) at ( 4.5, -7.5) {Sensor ambiental};
+\node[screen] (usuScreen)    at ( 9.0, -7.5) {Usuarios y roles};
+\draw[mainArrow] (mInventario.south) -- (invScreen.north);
+\draw[mainArrow] (mCompras.south)    -- (compScreen.north);
+\draw[mainArrow] (mSensor.south)     -- (sensorScreen.north);
+\draw[mainArrow] (mUsuarios.south)   -- (usuScreen.north);
+% Flujo de ventas (columna izquierda)
+\node[screen] (historial)  at (-9.0,  -7.5) {Historial de ventas};
+\node[screen] (nuevaVenta) at (-9.0, -10.5) {Nueva venta};
+\node[screen] (modoLector) at (-9.0, -13.5) {Modo lector (F2)};
+\node[screen] (ventaOk)    at (-9.0, -16.5) {Venta registrada};
+\node[screen] (detalle)    at (-9.0, -19.5) {Detalle de venta};
+\draw[mainArrow] (mVentas.south) -- (historial.north);
+\draw[mainArrow] (historial.south)  -- (nuevaVenta.north)
+  node[lbl, right, midway]{nueva venta};
+\draw[mainArrow] (nuevaVenta.south) -- (modoLector.north)
+  node[lbl, right, midway]{tecla F2};
+\draw[mainArrow] (modoLector.south) -- (ventaOk.north)
+  node[lbl, right, midway]{confirmar};
+\draw[mainArrow] (ventaOk.south) -- (detalle.north)
+  node[lbl, right, midway]{ver detalle};
+\end{tikzpicture}%
+}
+\caption{Mapa general de navegación: el Dashboard es el nodo central desde el que se accede a todos los módulos; la columna izquierda detalla el flujo completo del registro de una venta}
+\label{fig:cap3-wireflow-general}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 1: INICIO DE SESIÓN
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
