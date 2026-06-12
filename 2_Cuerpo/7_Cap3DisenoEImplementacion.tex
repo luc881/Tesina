@@ -74,7 +74,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (login) at (0, 0) {%
   \textbf{\small Inicio de sesión}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/Login.png}%
 };
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
@@ -92,7 +92,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
-\scalebox{0.99}{%
+\scalebox{0.93}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -112,30 +112,30 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[hubFull] (dashboard) at (0, 0) {%
   \textbf{\small Dashboard}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/Dashboard.png}%
 };
 % Menú lateral
 \coordinate (bifur) at ($(dashboard.south) + (0, -0.5)$);
 \draw[navArrow] (dashboard.south) -- (bifur);
 \node[font=\footnotesize\itshape, text=gray!55, anchor=west]
   at ($(bifur) + (0.3, -0.3)$) {menú lateral};
-\node[menuItem] (mVentas)     at (-6.5, -5.5) {Ventas};
-\node[menuItem] (mInventario) at (-3.25,-5.5) {Inventario};
-\node[menuItem] (mCompras)    at ( 0.0, -5.5) {Compras};
-\node[menuItem] (mSensor)     at ( 3.25,-5.5) {Sensor};
-\node[menuItem] (mUsuarios)   at ( 6.5, -5.5) {Usuarios};
+\node[menuItem] (mVentas)     at (-6.5, -6.0) {Ventas};
+\node[menuItem] (mInventario) at (-3.25,-6.0) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -6.0) {Compras};
+\node[menuItem] (mSensor)     at ( 3.25,-6.0) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 6.5, -6.0) {Usuarios};
 \draw[navArrow] (bifur) -- (mVentas.north);
 \draw[navArrow] (bifur) -- (mInventario.north);
 \draw[navArrow] (bifur) -- (mCompras.north);
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
 % Transición al módulo Ventas
-\node[screenFull] (historial) at (0, -13) {%
+\node[screenFull] (historial) at (0, -14) {%
   \textbf{\small Historial de ventas}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ListaVentas.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/ListaVentas.png}%
 };
-\draw[mainArrow] (mVentas.south) |- (historial.north);
+\draw[mainArrow, rounded corners=10pt] (mVentas.south) |- (historial.north);
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
@@ -164,14 +164,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventas) at (0, 0) {%
   \textbf{\small Formulario de nueva venta}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NuevaVenta.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/NuevaVenta.png}%
 };
 \draw[mainArrow] (ventas.south) -- ++(0,-0.7)
   node[lbl, right, midway] {tecla F2};
-\node[screenFull] (lector) at (0, -10) {%
+\node[screenFull] (lector) at (0, -11.5) {%
   \textbf{\small Modo lector de código de barras (F2)}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ModoLector.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/ModoLector.png}%
 };
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
@@ -201,14 +201,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventaok) at (0, 0) {%
   \textbf{\small Venta registrada}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/VentaRegistrada.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/VentaRegistrada.png}%
 };
 \draw[mainArrow] (ventaok.south) -- ++(0,-0.7)
   node[lbl, right, midway] {ver detalle};
-\node[screenFull] (detalle) at (0, -10) {%
+\node[screenFull] (detalle) at (0, -11.5) {%
   \textbf{\small Detalle de la venta}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
 };
 \end{tikzpicture}%
 }
@@ -223,7 +223,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.99}{%
+\scalebox{0.88}{%
 \begin{tikzpicture}[
   screenMd/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -236,22 +236,22 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenMd] at (0, 0) {%
   \textbf{\small Inventario}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Inventario.png}%
 };
 \node[screenMd] at (10, 0) {%
   \textbf{\small Compras}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Compras.png}%
 };
-\node[screenMd] at (0, -9.5) {%
+\node[screenMd] at (0, -11) {%
   \textbf{\small Usuarios y roles}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Usuarios.png}%
 };
-\node[screenMd] at (10, -9.5) {%
+\node[screenMd] at (10, -11) {%
   \textbf{\small Sensor ambiental}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Sensor.png}%
 };
 \end{tikzpicture}%
 }
