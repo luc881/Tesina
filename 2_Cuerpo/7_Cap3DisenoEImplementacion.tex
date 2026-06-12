@@ -59,19 +59,15 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 1: INICIO DE SESIÓN
-% TODO: reemplazar \parbox por \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
 \scalebox{0.75}{%
 \begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
@@ -84,156 +80,155 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
   node[lbl, right, midway] {acceso exitoso};
 \end{tikzpicture}%
 }
-\caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales; al acceder correctamente el sistema redirige al panel principal}
+\caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales y al acceder correctamente el sistema redirige al panel principal}
 \label{fig:cap3-wireflow-login}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — FIGURA 2: DASHBOARD + MENÚ LATERAL
-% TODO: reemplazar \parbox por \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}
+% WIREFLOW — FIGURA 2: DASHBOARD + HISTORIAL DE VENTAS
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
-\scalebox{0.75}{%
+\scalebox{0.82}{%
 \begin{tikzpicture}[
-  hubFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!60, gray!8},
-    draw=black!75, very thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
-  menuItem/.style={
-    draw=gray!55, fill=gray!12, rounded corners=3pt,
-    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm,
-    align=center
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  hubFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!60, gray!8}, draw=black!75, very thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  menuItem/.style={draw=gray!55, fill=gray!12, rounded corners=3pt,
+    font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm, align=center},
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
   navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
+% Dashboard
 \node[hubFull] (dashboard) at (0, 0) {%
   \textbf{\small Dashboard}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!55}{\normalsize\itshape [Dashboard.png]}}%
 };
-\coordinate (bifur) at ($(dashboard.south) + (0, -0.6)$);
+% Menú lateral
+\coordinate (bifur) at ($(dashboard.south) + (0, -0.5)$);
 \draw[navArrow] (dashboard.south) -- (bifur);
 \node[font=\footnotesize\itshape, text=gray!55, anchor=west]
-  at ($(bifur) + (0.3, -0.35)$) {menú lateral};
-\node[menuItem] (mVentas)     at (-6.5, -6.5) {Ventas};
-\node[menuItem] (mInventario) at (-3.25,-6.5) {Inventario};
-\node[menuItem] (mCompras)    at ( 0.0, -6.5) {Compras};
-\node[menuItem] (mSensor)     at ( 3.25,-6.5) {Sensor};
-\node[menuItem] (mUsuarios)   at ( 6.5, -6.5) {Usuarios};
+  at ($(bifur) + (0.3, -0.3)$) {menú lateral};
+\node[menuItem] (mVentas)     at (-6.5, -5.5) {Ventas};
+\node[menuItem] (mInventario) at (-3.25,-5.5) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -5.5) {Compras};
+\node[menuItem] (mSensor)     at ( 3.25,-5.5) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 6.5, -5.5) {Usuarios};
 \draw[navArrow] (bifur) -- (mVentas.north);
 \draw[navArrow] (bifur) -- (mInventario.north);
 \draw[navArrow] (bifur) -- (mCompras.north);
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
+% Transición al módulo Ventas
+\node[screenFull] (historial) at (0, -13) {%
+  \textbf{\small Historial de ventas}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ListaVentas.png]}}%
+};
+\draw[mainArrow] (mVentas.south) |- (historial.north);
+\draw[mainArrow] (historial.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
 }
-\caption{Panel principal (Dashboard): desde el menú lateral el usuario accede a cualquier módulo del sistema}
+\caption{Panel principal y módulo de ventas: el Dashboard da acceso al sistema completo mediante el menú lateral; al seleccionar Ventas se muestra el historial de transacciones}
 \label{fig:cap3-wireflow-dashboard}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — FIGURA 3: HISTORIAL DE VENTAS + FORMULARIO DE NUEVA VENTA
-% TODO: reemplazar cada \parbox por \includegraphics[width=15.8cm,height=7.5cm]{...}
+% WIREFLOW — FIGURA 3: FORMULARIO DE NUEVA VENTA + MODO LECTOR
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\textcolor{gray!60}{\footnotesize\itshape Dashboard\,→\,Ventas (Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
-\scalebox{0.75}{%
+\textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
+\scalebox{0.85}{%
 \begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
 ]
-\node[screenFull] (listaventas) at (0, 0) {%
-  \textbf{\small Historial de ventas}%
-  \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ListaVentas.png]}}%
-};
-\draw[mainArrow] (listaventas.south) -- ++(0,-0.7)
-  node[lbl, right, midway] {nueva venta};
-\node[screenFull] (ventas) at (0, -10) {%
+\node[screenFull] (ventas) at (0, 0) {%
   \textbf{\small Formulario de nueva venta}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [NuevaVenta.png]}}%
 };
-\end{tikzpicture}%
-}
-\caption{Módulo de ventas: el historial muestra todas las transacciones registradas; desde ahí se accede al formulario de nueva venta donde se registran los productos y el método de pago}
-\label{fig:cap3-wireflow-ventas}
-\vspace{0.2cm}
-\footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
-
-% ═══════════════════════════════════════════════════════════════════════════
-% WIREFLOW — FIGURA 4: MODO LECTOR + VENTA REGISTRADA
-% TODO: reemplazar cada \parbox por \includegraphics[width=15.8cm,height=7.5cm]{...}
-% ═══════════════════════════════════════════════════════════════════════════
-\begin{figure}[H]
-\centering
-\textcolor{gray!60}{\footnotesize\itshape Nueva venta\,→\,tecla F2 activa el lector (Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
-\scalebox{0.75}{%
-\begin{tikzpicture}[
-  screenFull/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=16cm, text width=15.8cm,
-    align=center, inner sep=5pt
-  },
-  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
-  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
-]
-\node[screenFull] (lector) at (0, 0) {%
+\draw[mainArrow] (ventas.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {tecla F2};
+\node[screenFull] (lector) at (0, -10) {%
   \textbf{\small Modo lector de código de barras (F2)}%
   \nodepart{two}%
   \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [ModoLector.png]}}%
 };
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
-\node[screenFull] (ventaok) at (0, -10) {%
+\end{tikzpicture}%
+}
+\caption{Registro de venta: el formulario permite agregar productos manualmente; la tecla F2 activa el modo lector que redirige el foco al escáner de código de barras}
+\label{fig:cap3-wireflow-ventas}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+% ═══════════════════════════════════════════════════════════════════════════
+% WIREFLOW — FIGURA 4: VENTA REGISTRADA + DETALLE DE LA VENTA
+% ═══════════════════════════════════════════════════════════════════════════
+\begin{figure}[H]
+\centering
+\textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
+\scalebox{0.85}{%
+\begin{tikzpicture}[
+  screenFull/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=16cm, text width=15.8cm,
+    align=center, inner sep=5pt},
+  mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
+]
+\node[screenFull] (ventaok) at (0, 0) {%
   \textbf{\small Venta registrada}%
   \nodepart{two}%
-  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaDetalle.png]}}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [VentaRegistrada.png]}}%
+};
+\draw[mainArrow] (ventaok.south) -- ++(0,-0.7)
+  node[lbl, right, midway] {ver detalle};
+\node[screenFull] (detalle) at (0, -10) {%
+  \textbf{\small Detalle de la venta}%
+  \nodepart{two}%
+  \parbox[c][7.5cm][c]{15.8cm}{\centering\textcolor{gray!50}{\normalsize\itshape [DetalleVenta.png]}}%
 };
 \end{tikzpicture}%
 }
-\caption{Registro de venta con lector: la tecla F2 activa el modo escáner; al confirmar la venta el sistema genera el comprobante y descuenta el inventario automáticamente}
-\label{fig:cap3-wireflow-lector}
+\caption{Cierre de la transacción: al confirmar la venta el sistema descuenta el inventario y muestra la confirmación; desde el detalle es posible consultar los productos, montos y método de pago}
+\label{fig:cap3-wireflow-completar}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 5: MÓDULOS ADICIONALES (rejilla 2×2)
-% TODO: reemplazar cada \parbox por \includegraphics[width=7.3cm,height=7cm]{...}
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.75}{%
+\scalebox{0.88}{%
 \begin{tikzpicture}[
-  screenMd/.style={
-    rectangle split, rectangle split parts=2,
-    rectangle split part fill={gray!25, white},
-    draw=gray!55, thick, rounded corners=4pt,
-    minimum width=7.5cm, text width=7.3cm,
-    align=center, inner sep=5pt
-  }
+  screenMd/.style={rectangle split, rectangle split parts=2,
+    rectangle split part fill={gray!25, white}, draw=gray!55, thick,
+    rounded corners=4pt, minimum width=7.5cm, text width=7.3cm,
+    align=center, inner sep=5pt}
 ]
 \node[font=\small\itshape, text=gray!60, text width=16cm, align=center]
   at (5.0, 1.3)
