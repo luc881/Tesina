@@ -54,7 +54,7 @@ El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y
 El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
 
 
-La interfaz web es el punto de entrada para el personal de la farmacia. Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
+ Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
 A continuación se presenta el wireflow para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
@@ -85,7 +85,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
     draw=gray!55, fill=gray!12, rounded corners=3pt,
     font=\footnotesize\sffamily, inner sep=4pt, minimum width=2.2cm,
     align=center
-  },
+  },_
   mainArrow/.style={->, >=Stealth, line width=1.5pt, draw=black!65},
   navArrow/.style={->, >=Stealth, line width=0.9pt, draw=gray!60, dashed},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=2pt}
