@@ -92,7 +92,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
-\scalebox{0.93}{%
+\scalebox{0.84}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -130,12 +130,17 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
 % Transición al módulo Ventas
-\node[screenFull] (historial) at (0, -14) {%
+\node[screenFull] (historial) at (0, -13) {%
   \textbf{\small Historial de ventas}%
   \nodepart{two}%
   \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/ListaVentas.png}%
 };
-\draw[mainArrow, rounded corners=10pt] (mVentas.south) |- (historial.north);
+\draw[mainArrow, rounded corners=8pt]
+  (mVentas.south)
+  -- ($(mVentas.south)+(0,-1.0)$)
+  -- ($(mVentas.south)+(3.25,-1.0)$)
+  -- ($(historial.north)+(-3.25,0)$)
+  -- (historial.north);
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
