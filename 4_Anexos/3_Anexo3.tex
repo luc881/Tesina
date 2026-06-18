@@ -1,1 +1,65 @@
 \chapterstar{Anexo 3: Hojas Técnicas}
+
+\renewcommand{\thesection}{A3.\arabic{section}}
+\setcounter{section}{0}
+
+En esta sección encontrara los datos técnicos mas importantes sobre los componentes electrónicos utilizados en la elaboración de este proyecto, como lo es el microcontrolador ESP32-C5, sensor de temperatura y humedad AHT10 y la pantalla OLED SSD1306 de 128 x 64 pixeles. 
+
+\section{Microcontrolador ESP32-C5}
+El ESP32-C5, desarrollado por Espressif Systems, es un Sistema en Chip (SoC) de alta integración diseñado para el ecosistema de Internet de las Cosas (IoT). Su arquitectura representa un hito al integrar conectividad inalámbrica de doble banda nativa en una arquitectura de código abierto. El núcleo del dispositivo opera de manera eficiente gestionando tareas de cómputo y conectividad en paralelo, respaldado por mecanismos de seguridad basados en hardware como el arranque seguro (Secure Boot) y el cifrado de memoria flash por hardware.
+
+\begin{itemize}
+    \item Arquitectura de Procesamiento Dual: Cuenta con un procesador RISC-V de 32 bits de alto rendimiento (HP) que opera hasta a 240 MHz, y un procesador RISC-V de ultra bajo consumo (LP) a 48 MHz para tareas en modo de suspensión.
+
+    \item Memoria Interna: 320 KB de ROM, 384 KB de SRAM (HP), 16 KB de SRAM (LP) y soporte directo para PSRAM y memoria Flash externa.
+
+    \item Conectividad de Red: Wi-Fi 6 (802.11ax) de doble banda (2.4 GHz y 5 GHz) y Bluetooth 5 certificado con soporte para redes Mesh.
+
+    \item Protocolos IoT Avanzados: Soporte de hardware para el estándar IEEE 802.15.4, habilitando redes Zigbee 3.0 y Thread, lo que permite compatibilidad total con Matter.
+
+    \item Periféricos e Interfaces: Hasta 29 pines GPIO con soporte para ADC de 12 bits, SDIO 2.0 esclavo, SPI, UART, I2C, I2S y control de motores mediante PWM.
+
+    \item Condiciones Ambientales Operativas: Soporta un rango de temperatura industrial de -40 °C a 85 °C.
+\end{itemize}
+
+\section{Sensor de temperatura y humedad AHT10}
+
+Es un dispositivo digital de medición ambiental de nueva generación que establece un nuevo estándar en rendimiento y confiabilidad gracias a sus elementos de sensores capacitivos semiconductores mejorados y un chip ASIC integrado. Viene rigurosamente calibrado de fábrica y destaca por su alta estabilidad a largo plazo, entregando lecturas lineales listas para procesar a través de un bus de comunicación estándar, eliminando la necesidad de calibración externa en la etapa de ensamblaje.
+\begin{itemize}
+    \item Interfaz de Comunicación: Protocolo I2C exclusivo (dirección estándar 0x38).
+
+    \item Rango Eléctrico: Rango de alimentación estricto de 1.8 V a 3.6 V DC (con 3.3 V recomendado).
+
+    \item Rendimiento Térmico: Rango de -40 °C a 85 °C con una precisión típica de ±0.3 °C y una resolución de 0.01 °C.
+
+    \item Rendimiento de Humedad: Mide de 0% a 100% RH con una precisión de ±2% RH y una resolución de 0.024% RH.
+
+    \item Metrología Avanzada: Histéresis térmica de apenas ±0.1 °C, histéresis de humedad de ±1% RH, y una repetibilidad excelente (±0.1% RH).
+
+    \item Deriva a Largo Plazo (Drift): Degradación mínima del sensor en el tiempo, siendo menor a 0.5% RH/año y 0.04 °C/año en condiciones normales.
+
+    \item Empaquetado Físico: Formato de montaje superficial (SMD) sin cables, con dimensiones ultra reducidas de 4 x 5 x 1.6 mm.
+
+    \item Consumo de Corriente: Ultra bajo, demandando 23 µA en medición activa y solo 0.25 µA en modo de espera (Sleep Mode).
+\end{itemize}
+
+
+
+\section{Pantalla OLED SSD1306}
+Es un controlador CMOS diseñado para gobernar pantallas gráficas de matriz de puntos del tipo OLED (Diodos Orgánicos Emisores de Luz). Al no requerir retroiluminación trasera (cada píxel genera su propia iluminación de forma independiente), permite un diseño de hardware extremadamente delgado. Este controlador es ampliamente utilizado en la industria del prototipado por su eficiencia energética y su capacidad de mostrar gráficos nítidos en sistemas embebidos.
+
+\begin{itemize}
+    \item Resolución y Geometría: Matriz activa de 128 x 64 píxeles en un área visible diagonal de 0.96 pulgadas.
+
+    \item Rendimiento Óptico: Relación de contraste excepcional de 10,000:1 y un ángulo de visión garantizado superior a los 160 grados.
+
+    \item Tamaño del Píxel: Dimensión del punto (Dot Size) de típicamente 0.15 x 0.15 mm con una separación (Dot Pitch) de 0.17 x 0.17 mm, garantizando una alta densidad y nitidez.
+
+    \item Búfer de Memoria: Incorpora una Memoria de Datos de Visualización Gráfica (GDDRAM) interna de 1 KB (128 x 64 bits), liberando recursos computacionales del microcontrolador anfitrión.
+
+    \item Flexibilidad de Alimentación: El controlador nativo opera a bajas tensiones, pero el módulo comercial completo admite niveles lógicos e integración desde 3.3 V hasta 5 V DC.
+
+    \item Velocidad de Interfaz: Soporta protocolos I2C (operando en Fast Mode a 400 kHz) y SPI (operando a velocidades de hasta 10 MHz para actualizaciones gráficas ultrarrápidas).
+
+    \item Rango de Temperatura Operativa: Funcional en entornos extremos desde -40 °C hasta 80 °C sin pérdida de contraste.
+\end{itemize}
