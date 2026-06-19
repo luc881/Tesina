@@ -33,94 +33,172 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
 
 Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas. A diferencia de un diagrama de flujo —que describe pasos y decisiones de un proceso— el diagrama de navegación describe la \textbf{estructura de la aplicación}: qué pantallas existen, cómo se llega a cada una y desde dónde se puede salir. Cada nodo representa una pantalla; las flechas indican una transición posible y se etiquetan con la acción que la provoca.
 
-La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación completo del sistema. El Dashboard actúa como nodo central desde el que se ramifican los cinco módulos del menú lateral; la columna izquierda detalla el flujo del registro de una venta, que es el flujo principal del sistema.
+La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación completo del sistema. El Dashboard es el punto de entrada a todas las secciones; el menú lateral agrupa las pantallas en cuatro áreas: General, Punto de venta, Operaciones y Sistema.
 
 \begin{figure}[H]
 \centering
-\scalebox{0.70}{%
+\scalebox{0.65}{%
 \begin{tikzpicture}[
-  screen/.style={draw=gray!60, fill=gray!10, rounded corners=4pt,
-    minimum width=3.8cm, minimum height=0.75cm,
-    font=\small\sffamily, align=center, inner sep=4pt},
-  hub/.style={draw=black!75, fill=gray!30, very thick, rounded corners=4pt,
-    minimum width=3.8cm, minimum height=0.75cm,
+  hub/.style={draw=black!75, fill=gray!35, very thick, rounded corners=4pt,
+    minimum width=3.8cm, minimum height=0.72cm,
     font=\small\sffamily\bfseries, align=center, inner sep=4pt},
-  menuItem/.style={draw=gray!55, fill=gray!12, rounded corners=3pt,
-    font=\footnotesize\sffamily, inner sep=4pt,
-    minimum width=2.2cm, align=center},
+  modNode/.style={draw=gray!70, fill=gray!18, rounded corners=3pt,
+    minimum width=3.0cm, minimum height=0.62cm,
+    font=\small\sffamily\bfseries, align=center, inner sep=3pt},
+  subNode/.style={draw=gray!45, fill=white, rounded corners=2pt,
+    minimum width=2.6cm, minimum height=0.52cm,
+    font=\footnotesize\sffamily, align=center, inner sep=2pt},
+  secLbl/.style={font=\footnotesize\sffamily\bfseries, text=gray!60, align=center},
   mainArrow/.style={->, >=Stealth, line width=1.2pt, draw=black!70},
-  navArrow/.style={->, >=Stealth, line width=0.8pt, draw=gray!55, dashed},
+  treeEdge/.style={-, line width=0.7pt, draw=gray!65},
   lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=1.5pt}
 ]
-% Inicio de sesión y Dashboard
-\node[screen] (login) at (0, 0) {Inicio de sesión};
-\node[hub] (dashboard) at (0, -2) {Dashboard};
+
+%%── Login y Dashboard ──────────────────────────────────────────────────────
+\node[hub] (login)     at (0,  0.0) {Inicio de sesión};
+\node[hub] (dashboard) at (0, -1.8) {Dashboard};
 \draw[mainArrow] (login.south) -- (dashboard.north)
   node[lbl, right, midway]{acceso exitoso};
-% Bifurcación del menú lateral
-\coordinate (bifur) at ($(dashboard.south)+(0,-0.5)$);
-\draw[navArrow] (dashboard.south) -- (bifur);
-\node[font=\footnotesize\itshape, text=gray!55, anchor=west]
-  at ($(bifur)+(0.2,-0.25)$) {menú lateral};
-% Ítems del menú
-\node[menuItem] (mVentas)     at (-9.0, -5.0) {Ventas};
-\node[menuItem] (mInventario) at (-4.5, -5.0) {Inventario};
-\node[menuItem] (mCompras)    at ( 0.0, -5.0) {Compras};
-\node[menuItem] (mSensor)     at ( 4.5, -5.0) {Sensor};
-\node[menuItem] (mUsuarios)   at ( 9.0, -5.0) {Usuarios};
-\draw[navArrow] (bifur) -- (mVentas.north);
-\draw[navArrow] (bifur) -- (mInventario.north);
-\draw[navArrow] (bifur) -- (mCompras.north);
-\draw[navArrow] (bifur) -- (mSensor.north);
-\draw[navArrow] (bifur) -- (mUsuarios.north);
-% Pantallas de módulos (primer nivel)
-\node[screen] (invScreen)    at (-4.5, -7.5) {Inventario};
-\node[screen] (compScreen)   at ( 0.0, -7.5) {Compras};
-\node[screen] (sensorScreen) at ( 4.5, -7.5) {Sensor ambiental};
-\node[screen] (usuScreen)    at ( 9.0, -7.5) {Usuarios};
-\draw[mainArrow] (mInventario.south) -- (invScreen.north);
-\draw[mainArrow] (mCompras.south)    -- (compScreen.north);
-\draw[mainArrow] (mSensor.south)     -- (sensorScreen.north);
-\draw[mainArrow] (mUsuarios.south)   -- (usuScreen.north);
-% Sub-pantallas: Inventario
-\node[screen] (invNuevo) at (-4.5, -10.5) {Nuevo producto};
-\node[screen] (invLotes) at (-4.5, -13.5) {Lotes};
-\draw[mainArrow] (invScreen.south) -- (invNuevo.north)
-  node[lbl, right, midway]{crear};
-\draw[mainArrow] (invNuevo.south)  -- (invLotes.north)
-  node[lbl, right, midway]{ver lotes};
-% Sub-pantallas: Compras
-\node[screen] (compNueva)   at ( 0.0, -10.5) {Nueva compra};
-\node[screen] (compDetalle) at ( 0.0, -13.5) {Detalle de compra};
-\draw[mainArrow] (compScreen.south) -- (compNueva.north)
-  node[lbl, right, midway]{nueva};
-\draw[mainArrow] (compNueva.south)  -- (compDetalle.north)
-  node[lbl, right, midway]{registrar};
-% Sub-pantallas: Usuarios
-\node[screen] (usuNuevo) at ( 9.0, -10.5) {Nuevo usuario};
-\node[screen] (usuRoles) at ( 9.0, -13.5) {Roles y permisos};
-\draw[mainArrow] (usuScreen.south) -- (usuNuevo.north)
-  node[lbl, right, midway]{nuevo};
-\draw[mainArrow] (usuNuevo.south)  -- (usuRoles.north)
-  node[lbl, right, midway]{gestionar};
-% Flujo de ventas (columna izquierda)
-\node[screen] (historial)  at (-9.0,  -7.5) {Historial de ventas};
-\node[screen] (nuevaVenta) at (-9.0, -10.5) {Nueva venta};
-\node[screen] (modoLector) at (-9.0, -13.5) {Modo lector (F2)};
-\node[screen] (ventaOk)    at (-9.0, -16.5) {Venta registrada};
-\node[screen] (detalle)    at (-9.0, -19.5) {Detalle de venta};
-\draw[mainArrow] (mVentas.south) -- (historial.north);
-\draw[mainArrow] (historial.south)  -- (nuevaVenta.north)
-  node[lbl, right, midway]{nueva venta};
-\draw[mainArrow] (nuevaVenta.south) -- (modoLector.north)
-  node[lbl, right, midway]{tecla F2};
-\draw[mainArrow] (modoLector.south) -- (ventaOk.north)
-  node[lbl, right, midway]{confirmar};
-\draw[mainArrow] (ventaOk.south) -- (detalle.north)
-  node[lbl, right, midway]{ver detalle};
+
+%%── Barra horizontal desde Dashboard ──────────────────────────────────────
+\draw[treeEdge] (dashboard.south) -- (0, -2.9);
+\draw[treeEdge] (-9, -2.9) -- (9, -2.9);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 1 — GENERAL  (x = -9)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (-9, -2.9) -- (-9, -3.9) -- (-10.8, -3.9);
+\node[secLbl] at (-9, -3.45) {GENERAL};
+\draw[treeEdge] (-10.8, -3.9) -- (-10.8, -5.71);
+\node[modNode] (inicio) at (-9, -4.4)  {Inicio};
+\node[modNode] (estad)  at (-9, -5.4)  {Estadísticas};
+\draw[treeEdge] (-10.8, -4.4) -- (inicio.west);
+\draw[treeEdge] (-10.8, -5.4) -- (estad.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 2 — PUNTO DE VENTA  (x = -3)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (-3, -2.9) -- (-3, -3.9) -- (-4.8, -3.9);
+\node[secLbl] at (-3, -3.45) {PUNTO DE VENTA};
+\draw[treeEdge] (-4.8, -3.9) -- (-4.8, -13.98);
+
+%% Módulo: Productos
+\node[modNode] (productos) at (-3, -4.4) {Productos};
+\draw[treeEdge] (-4.8, -4.4) -- (productos.west);
+\draw[treeEdge] (productos.south) -- (-3, -5.05) -- (-4.3, -5.05);
+\draw[treeEdge] (-4.3, -5.05) -- (-4.3, -10.19);
+\node[subNode] (pLista)    at (-2.6, -5.43)  {Lista};
+\node[subNode] (pNuevo)    at (-2.6, -6.18)  {Nuevo};
+\node[subNode] (pCateg)    at (-2.6, -6.93)  {Categorías};
+\node[subNode] (pMarcas)   at (-2.6, -7.68)  {Marcas};
+\node[subNode] (pLotes)    at (-2.6, -8.43)  {Lotes y Stock};
+\node[subNode] (pFormulas) at (-2.6, -9.18)  {Fórmulas gen.};
+\node[subNode] (pSust)     at (-2.6, -9.93)  {Sustancias};
+\draw[treeEdge] (-4.3, -5.43)  -- (pLista.west);
+\draw[treeEdge] (-4.3, -6.18)  -- (pNuevo.west);
+\draw[treeEdge] (-4.3, -6.93)  -- (pCateg.west);
+\draw[treeEdge] (-4.3, -7.68)  -- (pMarcas.west);
+\draw[treeEdge] (-4.3, -8.43)  -- (pLotes.west);
+\draw[treeEdge] (-4.3, -9.18)  -- (pFormulas.west);
+\draw[treeEdge] (-4.3, -9.93)  -- (pSust.west);
+
+%% Módulo: Ventas
+\node[modNode] (ventas) at (-3, -11.0) {Ventas};
+\draw[treeEdge] (-4.8, -11.0) -- (ventas.west);
+\draw[treeEdge] (ventas.south) -- (-3, -11.57) -- (-4.3, -11.57);
+\draw[treeEdge] (-4.3, -11.57) -- (-4.3, -12.86);
+\node[subNode] (vLista) at (-2.6, -11.85) {Lista};
+\node[subNode] (vNueva) at (-2.6, -12.6)  {Nueva};
+\draw[treeEdge] (-4.3, -11.85) -- (vLista.west);
+\draw[treeEdge] (-4.3, -12.6)  -- (vNueva.west);
+
+%% Módulo: Calendario
+\node[modNode] (calendario) at (-3, -13.67) {Calendario};
+\draw[treeEdge] (-4.8, -13.67) -- (calendario.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 3 — OPERACIONES  (x = 3)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (3, -2.9) -- (3, -3.9) -- (1.2, -3.9);
+\node[secLbl] at (3, -3.45) {OPERACIONES};
+\draw[treeEdge] (1.2, -3.9) -- (1.2, -11.74);
+
+%% Módulo: Devoluciones
+\node[modNode] (devoluciones) at (3, -4.4) {Devoluciones};
+\draw[treeEdge] (1.2, -4.4) -- (devoluciones.west);
+\draw[treeEdge] (devoluciones.south) -- (3, -5.03) -- (1.9, -5.03);
+\draw[treeEdge] (1.9, -5.03) -- (1.9, -6.44);
+\node[subNode] (dLista) at (3.4, -5.43) {Lista};
+\node[subNode] (dNueva) at (3.4, -6.18) {Nueva};
+\draw[treeEdge] (1.9, -5.43) -- (dLista.west);
+\draw[treeEdge] (1.9, -6.18) -- (dNueva.west);
+
+%% Módulo: Proveedores
+\node[modNode] (proveedores) at (3, -7.25) {Proveedores};
+\draw[treeEdge] (1.2, -7.25) -- (proveedores.west);
+\draw[treeEdge] (proveedores.south) -- (3, -7.88) -- (1.9, -7.88);
+\draw[treeEdge] (1.9, -7.88) -- (1.9, -9.09);
+\node[subNode] (prLista) at (3.4, -8.08) {Lista};
+\node[subNode] (prNuevo) at (3.4, -8.83) {Nuevo};
+\draw[treeEdge] (1.9, -8.08) -- (prLista.west);
+\draw[treeEdge] (1.9, -8.83) -- (prNuevo.west);
+
+%% Módulo: Compras
+\node[modNode] (compras) at (3, -9.9) {Compras};
+\draw[treeEdge] (1.2, -9.9) -- (compras.west);
+\draw[treeEdge] (compras.south) -- (3, -10.53) -- (1.9, -10.53);
+\draw[treeEdge] (1.9, -10.53) -- (1.9, -11.74);
+\node[subNode] (cLista) at (3.4, -10.73) {Lista};
+\node[subNode] (cNueva) at (3.4, -11.48) {Nueva};
+\draw[treeEdge] (1.9, -10.73) -- (cLista.west);
+\draw[treeEdge] (1.9, -11.48) -- (cNueva.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 4 — SISTEMA  (x = 9)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (9, -2.9) -- (9, -3.9) -- (7.2, -3.9);
+\node[secLbl] at (9, -3.45) {SISTEMA};
+\draw[treeEdge] (7.2, -3.9) -- (7.2, -13.61);
+
+%% Módulo: Usuarios
+\node[modNode] (usuarios) at (9, -4.4) {Usuarios};
+\draw[treeEdge] (7.2, -4.4) -- (usuarios.west);
+\draw[treeEdge] (usuarios.south) -- (9, -5.03) -- (7.9, -5.03);
+\draw[treeEdge] (7.9, -5.03) -- (7.9, -7.19);
+\node[subNode] (uLista)  at (9.4, -5.43) {Lista};
+\node[subNode] (uNuevo)  at (9.4, -6.18) {Nuevo};
+\node[subNode] (uCuenta) at (9.4, -6.93) {Mi cuenta};
+\draw[treeEdge] (7.9, -5.43) -- (uLista.west);
+\draw[treeEdge] (7.9, -6.18) -- (uNuevo.west);
+\draw[treeEdge] (7.9, -6.93) -- (uCuenta.west);
+
+%% Módulo: Roles
+\node[modNode] (roles) at (9, -8.0) {Roles};
+\draw[treeEdge] (7.2, -8.0) -- (roles.west);
+\draw[treeEdge] (roles.south) -- (9, -8.63) -- (7.9, -8.63);
+\draw[treeEdge] (7.9, -8.63) -- (7.9, -9.84);
+\node[subNode] (rLista) at (9.4, -8.83) {Lista};
+\node[subNode] (rNuevo) at (9.4, -9.58) {Nuevo};
+\draw[treeEdge] (7.9, -8.83) -- (rLista.west);
+\draw[treeEdge] (7.9, -9.58) -- (rNuevo.west);
+
+%% Módulo: Sucursales
+\node[modNode] (sucursales) at (9, -10.65) {Sucursales};
+\draw[treeEdge] (7.2, -10.65) -- (sucursales.west);
+\draw[treeEdge] (sucursales.south) -- (9, -11.28) -- (7.9, -11.28);
+\draw[treeEdge] (7.9, -11.28) -- (7.9, -12.49);
+\node[subNode] (sLista) at (9.4, -11.48) {Lista};
+\node[subNode] (sNueva) at (9.4, -12.23) {Nueva};
+\draw[treeEdge] (7.9, -11.48) -- (sLista.west);
+\draw[treeEdge] (7.9, -12.23) -- (sNueva.west);
+
+%% Módulo: Sensor ambiental
+\node[modNode] (sensor) at (9, -13.3) {Sensor ambiental};
+\draw[treeEdge] (7.2, -13.3) -- (sensor.west);
+
 \end{tikzpicture}%
 }
-\caption{Diagrama de navegación del sistema: el Dashboard es el nodo central; cada módulo expande sus pantallas principales de gestión}
+\caption{Diagrama de navegación del sistema: estructura de pantallas organizadas por sección del menú lateral}
 \label{fig:cap3-wireflow-general}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
