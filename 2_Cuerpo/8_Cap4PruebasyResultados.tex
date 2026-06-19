@@ -680,17 +680,6 @@ Con la versión inicial del firmware el nodo realizaba lecturas del sensor AHT10
 
 La causa del problema fue una barra inclinada adicional al final de la dirección del servidor configurada en el firmware. Al recibir una solicitud con esa barra, el servidor respondía con un error de ruta no encontrada en lugar de procesar el dato. Una vez eliminada la barra de la dirección, las lecturas comenzaron a registrarse correctamente en la base de datos y a aparecer en el tablero en tiempo real.
 
-% TODO: insertar captura de pantalla de la salida serial del ESP32 mostrando lecturas enviadas correctamente
-% Guardar en: 0_imagenes/Cap4/SensorSerial.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/SensorSerial.png}}
-%    \caption{Salida de diagnóstico del nodo sensor mostrando lecturas enviadas al servidor}
-%    \label{fig:cap4-serial}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
-
 \subsection{Incidente de hardware: conflicto de pines}
 
 Durante las pruebas de ensamble se intentó apagar el LED RGB integrado en la placa del ESP32-C5 para que no emitiera luz durante la operación normal del nodo. Al implementar el control del LED por software se comenzaron a registrar lecturas erráticas del sensor AHT10: valores de temperatura y humedad inconsistentes que el firmware descartaba por estar fuera del rango de validación.
@@ -912,15 +901,17 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Para resolver esto fue necesario relevar manualmente las dimensiones reales del conjunto ensamblado —incluyendo los conectores y el radio de curvatura de los cables— y rediseñar el gabinete con esas medidas. El rediseño está actualmente en proceso; la nueva versión contempla una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
+Para resolver esto fue necesario relevar manualmente las dimensiones reales del conjunto ensamblado —incluyendo los conectores y el radio de curvatura de los cables— y rediseñar el gabinete con esas medidas. La nueva versión incorpora una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
 
-% TODO: insertar imagen del modelo 3D del gabinete rediseñado (captura del software de modelado)
-% Guardar en: 0_imagenes/Cap4/GabineteV2Modelo.png
+Con el segundo diseño fabricado se montaron todos los componentes y se incorporaron al firmware las tres pantallas OLED. Como los tres modelos de pantalla son idénticos y utilizan la misma dirección de comunicación, no es posible conectarlas al mismo canal sin que colisionen entre sí: el microcontrolador no podría distinguir a cuál le está enviando instrucciones. La solución fue asignar a cada pantalla su propio par de pines, de modo que opera en un canal de comunicación completamente independiente. La pantalla de temperatura muestra el valor actual en caracteres grandes; la de humedad hace lo mismo con la lectura de humedad relativa; la tercera indica el estado de la conexión WiFi y de la comunicación con la API. Al encender el nodo, las tres pantallas muestran el nombre del sistema de forma simultánea hasta que la primera lectura esté disponible.
+
+% TODO: insertar fotografía del gabinete final ensamblado con los componentes montados y las pantallas activas
+% Guardar en: 0_imagenes/Cap4/GabineteFinal.jpg
 %\begin{figure}[H]
 %    \centering
-%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/GabineteV2Modelo.png}}
-%    \caption{Modelo del gabinete rediseñado con espacio adicional para conectores}
-%    \label{fig:cap4-gabinete-v2}
+%    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap4/GabineteFinal.jpg}}
+%    \caption{Nodo sensor ensamblado en el gabinete final: ESP32-C5, sensor AHT10 y las tres pantallas OLED en operación}
+%    \label{fig:cap4-gabinete-final}
 %    \vspace{0.2cm}
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
