@@ -400,7 +400,7 @@ La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de 
 \clearpage
 \section{Pruebas de la interfaz web}
 
-La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo. De forma complementaria, se desarrolló un conjunto de pruebas automatizadas para los componentes individuales de mayor criticidad.
+La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo.
 
 La figura siguiente muestra el flujo general de navegación: desde el inicio de sesión hasta el registro de una venta, con los módulos adicionales accesibles desde el menú lateral de la aplicación.
 
@@ -660,9 +660,20 @@ Se configuró el campo para seleccionar su contenido al recibir el foco, de modo
 \vspace{0.1cm}
 {\footnotesize \textbf{Fuente:} Elaboración propia.}
 
-\subsection{Resultados}
+\subsection{Despliegue en Vercel}
 
-Al finalizar las pruebas, los dieciséis módulos de navegación de la interfaz operan de forma correcta contra la API de producción. El flujo completo de una venta —desde la apertura del formulario hasta la confirmación, incluyendo el escaneo de códigos de barras y el registro del pago— se completó de forma exitosa en las pruebas con productos reales de la farmacia. El tablero de indicadores muestra datos actualizados en tiempo real y las lecturas del nodo sensor se visualizan correctamente en el módulo de monitoreo.
+Con los ajustes realizados, la interfaz web quedó desplegada de forma permanente en la plataforma Vercel. Cada actualización de código genera un nuevo despliegue automático, y la plataforma registra el historial de versiones junto con el estado de cada una. La figura~\ref{fig:cap4-vercel} muestra el panel de Vercel con el proyecto activo y el último despliegue exitoso.
+
+% TODO: insertar captura de pantalla del dashboard de Vercel mostrando el proyecto activo
+% Guardar en: 0_imagenes/Cap4/VercelDashboard.png
+%\begin{figure}[H]
+%    \centering
+%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/VercelDashboard.png}}
+%    \caption{Panel de Vercel con el proyecto de la interfaz web en estado activo}
+%    \label{fig:cap4-vercel}
+%    \vspace{0.2cm}
+%    \footnotesize \textbf{Fuente:} Elaboración propia.
+%\end{figure}
 
 % =============================================
 % SECCIÓN 4.4: NODO SENSOR ESP32
