@@ -844,16 +844,14 @@ Con el primer diseño del gabinete se utilizaron las dimensiones nominales de ca
 
 Al intentar montar los componentes dentro del gabinete se identificó que no era posible alojarlos correctamente: los conectores Dupont —los terminales de los cables que unen el microcontrolador con el sensor— sobresalen varios milímetros por encima de la superficie de la placa, una dimensión que las especificaciones del fabricante no incluyen. Este sobredimensionamiento vertical impidió cerrar el gabinete sin ejercer presión sobre los cables, lo que representaba un riesgo para las conexiones.
 
-% TODO: insertar fotografía del primer gabinete impreso mostrando el problema de espacio
-% Guardar en: 0_imagenes/Cap4/GabineteV1.jpg
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.70\textwidth]{0_imagenes/Cap4/GabineteV1.jpg}}
-%    \caption{Primer diseño del gabinete: los conectores sobresalen e impiden el cierre correcto}
-%    \label{fig:cap4-gabinete-v1}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[angle=90, width=0.70\textwidth]{0_imagenes/Cap4/GabineteV1.jpeg}}
+    \caption{Primer diseño del gabinete: los conectores sobresalen e impiden el cierre correcto}
+    \label{fig:cap4-gabinete-v1}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \begin{figure}[H]
 \centering
@@ -905,16 +903,14 @@ Para resolver esto fue necesario relevar manualmente las dimensiones reales del 
 
 Con el segundo diseño fabricado se montaron todos los componentes y se incorporaron al firmware las tres pantallas OLED. Como los tres modelos de pantalla son idénticos y utilizan la misma dirección de comunicación, no es posible conectarlas al mismo canal sin que colisionen entre sí: el microcontrolador no podría distinguir a cuál le está enviando instrucciones. La solución fue asignar a cada pantalla su propio par de pines, de modo que opera en un canal de comunicación completamente independiente. La pantalla de temperatura muestra el valor actual en caracteres grandes; la de humedad hace lo mismo con la lectura de humedad relativa; la tercera indica el estado de la conexión WiFi y de la comunicación con la API. Al encender el nodo, las tres pantallas muestran el nombre del sistema de forma simultánea hasta que la primera lectura esté disponible.
 
-% TODO: insertar fotografía del gabinete final ensamblado con los componentes montados y las pantallas activas
-% Guardar en: 0_imagenes/Cap4/GabineteFinal.jpg
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap4/GabineteFinal.jpg}}
-%    \caption{Nodo sensor ensamblado en el gabinete final: ESP32-C5, sensor AHT10 y las tres pantallas OLED en operación}
-%    \label{fig:cap4-gabinete-final}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap4/GabineteFinal.jpeg}}
+    \caption{Nodo sensor ensamblado en el gabinete final: ESP32-C5, sensor AHT10 y las tres pantallas OLED en operación}
+    \label{fig:cap4-gabinete-final}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \clearpage
 \section{Pruebas del lector de código de barras}
