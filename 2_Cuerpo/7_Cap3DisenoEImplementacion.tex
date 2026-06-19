@@ -25,12 +25,192 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las \textbf{líneas sólidas} indican quién tiene acceso a qué función; las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base. 
-
+\newpage
 % ═══════════════════════════════════════════════════════════════════════════
-% DIAGRAMAS DE CASOS DE USO — imágenes exportadas desde draw.io
+% 3.1.1 DIAGRAMA DE NAVEGACIÓN
 % ═══════════════════════════════════════════════════════════════════════════
+\subsection{Diagrama de navegación}
+
+Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas. A diferencia de un diagrama de flujo —que describe pasos y decisiones de un proceso— el diagrama de navegación describe la \textbf{estructura de la aplicación}: qué pantallas existen, cómo se llega a cada una y desde dónde se puede salir. Cada nodo representa una pantalla; las flechas indican una transición posible y se etiquetan con la acción que la provoca.
+
+La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación completo del sistema. El Dashboard es el punto de entrada a todas las secciones; el menú lateral agrupa las pantallas en cuatro áreas: General, Punto de venta, Operaciones y Sistema.
+
+\begin{figure}[H]
+\centering
+\scalebox{0.65}{%
+\begin{tikzpicture}[
+  hub/.style={draw=black!75, fill=gray!35, very thick, rounded corners=4pt,
+    minimum width=3.8cm, minimum height=0.72cm,
+    font=\small\sffamily\bfseries, align=center, inner sep=4pt},
+  modNode/.style={draw=gray!70, fill=gray!18, rounded corners=3pt,
+    minimum width=3.0cm, minimum height=0.62cm,
+    font=\small\sffamily\bfseries, align=center, inner sep=3pt},
+  subNode/.style={draw=gray!45, fill=white, rounded corners=2pt,
+    minimum width=2.6cm, minimum height=0.52cm,
+    font=\footnotesize\sffamily, align=center, inner sep=2pt},
+  secLbl/.style={font=\footnotesize\sffamily\bfseries, text=gray!60, align=center},
+  mainArrow/.style={->, >=Stealth, line width=1.2pt, draw=black!70},
+  treeEdge/.style={-, line width=0.7pt, draw=gray!65},
+  lbl/.style={font=\footnotesize\sffamily, text=black!60, fill=white, inner sep=1.5pt}
+]
+
+%%── Login y Dashboard ──────────────────────────────────────────────────────
+\node[hub] (login)     at (0,  0.0) {Inicio de sesión};
+\node[hub] (dashboard) at (0, -1.8) {Dashboard};
+\draw[mainArrow] (login.south) -- (dashboard.north)
+  node[lbl, right, midway]{acceso exitoso};
+
+%%── Barra horizontal desde Dashboard ──────────────────────────────────────
+\draw[treeEdge] (dashboard.south) -- (0, -2.9);
+\draw[treeEdge] (-9, -2.9) -- (9, -2.9);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 1 — GENERAL  (x = -9)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (-9, -2.9) -- (-9, -3.9) -- (-10.8, -3.9);
+\node[secLbl] at (-9, -3.45) {GENERAL};
+\draw[treeEdge] (-10.8, -3.9) -- (-10.8, -5.71);
+\node[modNode] (inicio) at (-9, -4.4)  {Inicio};
+\node[modNode] (estad)  at (-9, -5.4)  {Estadísticas};
+\draw[treeEdge] (-10.8, -4.4) -- (inicio.west);
+\draw[treeEdge] (-10.8, -5.4) -- (estad.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 2 — PUNTO DE VENTA  (x = -3)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (-3, -2.9) -- (-3, -3.9) -- (-4.8, -3.9);
+\node[secLbl] at (-3, -3.45) {PUNTO DE VENTA};
+\draw[treeEdge] (-4.8, -3.9) -- (-4.8, -13.98);
+
+%% Módulo: Productos
+\node[modNode] (productos) at (-3, -4.4) {Productos};
+\draw[treeEdge] (-4.8, -4.4) -- (productos.west);
+\draw[treeEdge] (productos.south) -- (-3, -5.05) -- (-4.3, -5.05);
+\draw[treeEdge] (-4.3, -5.05) -- (-4.3, -10.19);
+\node[subNode] (pLista)    at (-2.6, -5.43)  {Lista};
+\node[subNode] (pNuevo)    at (-2.6, -6.18)  {Nuevo};
+\node[subNode] (pCateg)    at (-2.6, -6.93)  {Categorías};
+\node[subNode] (pMarcas)   at (-2.6, -7.68)  {Marcas};
+\node[subNode] (pLotes)    at (-2.6, -8.43)  {Lotes y Stock};
+\node[subNode] (pFormulas) at (-2.6, -9.18)  {Fórmulas gen.};
+\node[subNode] (pSust)     at (-2.6, -9.93)  {Sustancias};
+\draw[treeEdge] (-4.3, -5.43)  -- (pLista.west);
+\draw[treeEdge] (-4.3, -6.18)  -- (pNuevo.west);
+\draw[treeEdge] (-4.3, -6.93)  -- (pCateg.west);
+\draw[treeEdge] (-4.3, -7.68)  -- (pMarcas.west);
+\draw[treeEdge] (-4.3, -8.43)  -- (pLotes.west);
+\draw[treeEdge] (-4.3, -9.18)  -- (pFormulas.west);
+\draw[treeEdge] (-4.3, -9.93)  -- (pSust.west);
+
+%% Módulo: Ventas
+\node[modNode] (ventas) at (-3, -11.0) {Ventas};
+\draw[treeEdge] (-4.8, -11.0) -- (ventas.west);
+\draw[treeEdge] (ventas.south) -- (-3, -11.57) -- (-4.3, -11.57);
+\draw[treeEdge] (-4.3, -11.57) -- (-4.3, -12.86);
+\node[subNode] (vLista) at (-2.6, -11.85) {Lista};
+\node[subNode] (vNueva) at (-2.6, -12.6)  {Nueva};
+\draw[treeEdge] (-4.3, -11.85) -- (vLista.west);
+\draw[treeEdge] (-4.3, -12.6)  -- (vNueva.west);
+
+%% Módulo: Calendario
+\node[modNode] (calendario) at (-3, -13.67) {Calendario};
+\draw[treeEdge] (-4.8, -13.67) -- (calendario.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 3 — OPERACIONES  (x = 3)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (3, -2.9) -- (3, -3.9) -- (1.2, -3.9);
+\node[secLbl] at (3, -3.45) {OPERACIONES};
+\draw[treeEdge] (1.2, -3.9) -- (1.2, -11.74);
+
+%% Módulo: Devoluciones
+\node[modNode] (devoluciones) at (3, -4.4) {Devoluciones};
+\draw[treeEdge] (1.2, -4.4) -- (devoluciones.west);
+\draw[treeEdge] (devoluciones.south) -- (3, -5.03) -- (1.9, -5.03);
+\draw[treeEdge] (1.9, -5.03) -- (1.9, -6.44);
+\node[subNode] (dLista) at (3.4, -5.43) {Lista};
+\node[subNode] (dNueva) at (3.4, -6.18) {Nueva};
+\draw[treeEdge] (1.9, -5.43) -- (dLista.west);
+\draw[treeEdge] (1.9, -6.18) -- (dNueva.west);
+
+%% Módulo: Proveedores
+\node[modNode] (proveedores) at (3, -7.25) {Proveedores};
+\draw[treeEdge] (1.2, -7.25) -- (proveedores.west);
+\draw[treeEdge] (proveedores.south) -- (3, -7.88) -- (1.9, -7.88);
+\draw[treeEdge] (1.9, -7.88) -- (1.9, -9.09);
+\node[subNode] (prLista) at (3.4, -8.08) {Lista};
+\node[subNode] (prNuevo) at (3.4, -8.83) {Nuevo};
+\draw[treeEdge] (1.9, -8.08) -- (prLista.west);
+\draw[treeEdge] (1.9, -8.83) -- (prNuevo.west);
+
+%% Módulo: Compras
+\node[modNode] (compras) at (3, -9.9) {Compras};
+\draw[treeEdge] (1.2, -9.9) -- (compras.west);
+\draw[treeEdge] (compras.south) -- (3, -10.53) -- (1.9, -10.53);
+\draw[treeEdge] (1.9, -10.53) -- (1.9, -11.74);
+\node[subNode] (cLista) at (3.4, -10.73) {Lista};
+\node[subNode] (cNueva) at (3.4, -11.48) {Nueva};
+\draw[treeEdge] (1.9, -10.73) -- (cLista.west);
+\draw[treeEdge] (1.9, -11.48) -- (cNueva.west);
+
+%%════════════════════════════════════════════════════════════════
+%% COLUMNA 4 — SISTEMA  (x = 9)
+%%════════════════════════════════════════════════════════════════
+\draw[treeEdge] (9, -2.9) -- (9, -3.9) -- (7.2, -3.9);
+\node[secLbl] at (9, -3.45) {SISTEMA};
+\draw[treeEdge] (7.2, -3.9) -- (7.2, -13.61);
+
+%% Módulo: Usuarios
+\node[modNode] (usuarios) at (9, -4.4) {Usuarios};
+\draw[treeEdge] (7.2, -4.4) -- (usuarios.west);
+\draw[treeEdge] (usuarios.south) -- (9, -5.03) -- (7.9, -5.03);
+\draw[treeEdge] (7.9, -5.03) -- (7.9, -7.19);
+\node[subNode] (uLista)  at (9.4, -5.43) {Lista};
+\node[subNode] (uNuevo)  at (9.4, -6.18) {Nuevo};
+\node[subNode] (uCuenta) at (9.4, -6.93) {Mi cuenta};
+\draw[treeEdge] (7.9, -5.43) -- (uLista.west);
+\draw[treeEdge] (7.9, -6.18) -- (uNuevo.west);
+\draw[treeEdge] (7.9, -6.93) -- (uCuenta.west);
+
+%% Módulo: Roles
+\node[modNode] (roles) at (9, -8.0) {Roles};
+\draw[treeEdge] (7.2, -8.0) -- (roles.west);
+\draw[treeEdge] (roles.south) -- (9, -8.63) -- (7.9, -8.63);
+\draw[treeEdge] (7.9, -8.63) -- (7.9, -9.84);
+\node[subNode] (rLista) at (9.4, -8.83) {Lista};
+\node[subNode] (rNuevo) at (9.4, -9.58) {Nuevo};
+\draw[treeEdge] (7.9, -8.83) -- (rLista.west);
+\draw[treeEdge] (7.9, -9.58) -- (rNuevo.west);
+
+%% Módulo: Sucursales
+\node[modNode] (sucursales) at (9, -10.65) {Sucursales};
+\draw[treeEdge] (7.2, -10.65) -- (sucursales.west);
+\draw[treeEdge] (sucursales.south) -- (9, -11.28) -- (7.9, -11.28);
+\draw[treeEdge] (7.9, -11.28) -- (7.9, -12.49);
+\node[subNode] (sLista) at (9.4, -11.48) {Lista};
+\node[subNode] (sNueva) at (9.4, -12.23) {Nueva};
+\draw[treeEdge] (7.9, -11.48) -- (sLista.west);
+\draw[treeEdge] (7.9, -12.23) -- (sNueva.west);
+
+%% Módulo: Sensor ambiental
+\node[modNode] (sensor) at (9, -13.3) {Sensor ambiental};
+\draw[treeEdge] (7.2, -13.3) -- (sensor.west);
+
+\end{tikzpicture}%
+}
+\caption{Diagrama de navegación del sistema: estructura de pantallas organizadas por sección del menú lateral}
+\label{fig:cap3-wireflow-general}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+\newpage
+% ═══════════════════════════════════════════════════════════════════════════
+% 3.1.2 DIAGRAMA DE CASOS DE USO
+% ═══════════════════════════════════════════════════════════════════════════
+\subsection{Diagrama de casos de uso}
+
+Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las \textbf{líneas sólidas} indican quién tiene acceso a qué función; las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base.
+
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/DiagramaUC1_Operaciones.pdf}}
@@ -50,8 +230,13 @@ El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
+\newpage
 El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
+\newpage
+% ═══════════════════════════════════════════════════════════════════════════
+% 3.1.3 WIREFLOW
+% ═══════════════════════════════════════════════════════════════════════════
+\subsection{Wireflow}
 
 Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
@@ -62,7 +247,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.99}{%
+\scalebox{0.75}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -74,7 +259,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (login) at (0, 0) {%
   \textbf{\small Inicio de sesión}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Login.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/Login.png}%
 };
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
@@ -92,7 +277,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
-\scalebox{0.99}{%
+\scalebox{0.84}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -112,30 +297,34 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[hubFull] (dashboard) at (0, 0) {%
   \textbf{\small Dashboard}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/Dashboard.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/Dashboard.png}%
 };
 % Menú lateral
 \coordinate (bifur) at ($(dashboard.south) + (0, -0.5)$);
 \draw[navArrow] (dashboard.south) -- (bifur);
 \node[font=\footnotesize\itshape, text=gray!55, anchor=west]
   at ($(bifur) + (0.3, -0.3)$) {menú lateral};
-\node[menuItem] (mVentas)     at (-6.5, -5.5) {Ventas};
-\node[menuItem] (mInventario) at (-3.25,-5.5) {Inventario};
-\node[menuItem] (mCompras)    at ( 0.0, -5.5) {Compras};
-\node[menuItem] (mSensor)     at ( 3.25,-5.5) {Sensor};
-\node[menuItem] (mUsuarios)   at ( 6.5, -5.5) {Usuarios};
+\node[menuItem] (mVentas)     at (-6.5, -6.0) {Ventas};
+\node[menuItem] (mInventario) at (-3.25,-6.0) {Inventario};
+\node[menuItem] (mCompras)    at ( 0.0, -6.0) {Compras};
+\node[menuItem] (mSensor)     at ( 3.25,-6.0) {Sensor};
+\node[menuItem] (mUsuarios)   at ( 6.5, -6.0) {Usuarios};
 \draw[navArrow] (bifur) -- (mVentas.north);
 \draw[navArrow] (bifur) -- (mInventario.north);
 \draw[navArrow] (bifur) -- (mCompras.north);
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
 % Transición al módulo Ventas
-\node[screenFull] (historial) at (0, -13) {%
+\node[screenFull] (historial) at (0, -14) {%
   \textbf{\small Historial de ventas}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ListaVentas.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/ListaVentas.png}%
 };
-\draw[mainArrow] (mVentas.south) |- (historial.north);
+\draw[mainArrow, rounded corners=8pt]
+  (mVentas.south)
+  -- ($(mVentas.south)+(0,-1.2)$)
+  -- ($(mVentas.south)+(6.5,-1.2)$)
+  -- (historial.north);
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
@@ -152,7 +341,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
-\scalebox{0.99}{%
+\scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -164,14 +353,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventas) at (0, 0) {%
   \textbf{\small Formulario de nueva venta}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/NuevaVenta.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/NuevaVenta.png}%
 };
 \draw[mainArrow] (ventas.south) -- ++(0,-0.7)
   node[lbl, right, midway] {tecla F2};
-\node[screenFull] (lector) at (0, -10) {%
+\node[screenFull] (lector) at (0, -11.5) {%
   \textbf{\small Modo lector de código de barras (F2)}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/ModoLector.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/ModoLector.png}%
 };
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
@@ -189,7 +378,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
-\scalebox{0.99}{%
+\scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -201,14 +390,14 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenFull] (ventaok) at (0, 0) {%
   \textbf{\small Venta registrada}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/VentaRegistrada.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/VentaRegistrada.png}%
 };
 \draw[mainArrow] (ventaok.south) -- ++(0,-0.7)
   node[lbl, right, midway] {ver detalle};
-\node[screenFull] (detalle) at (0, -10) {%
+\node[screenFull] (detalle) at (0, -11.5) {%
   \textbf{\small Detalle de la venta}%
   \nodepart{two}%
-  \includegraphics[width=15.8cm,height=7.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
+  \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
 };
 \end{tikzpicture}%
 }
@@ -223,7 +412,7 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
-\scalebox{0.99}{%
+\scalebox{0.88}{%
 \begin{tikzpicture}[
   screenMd/.style={rectangle split, rectangle split parts=2,
     rectangle split part fill={gray!25, white}, draw=gray!55, thick,
@@ -236,22 +425,22 @@ A continuación se presenta el wireflow para el caso de uso de registro de una v
 \node[screenMd] at (0, 0) {%
   \textbf{\small Inventario}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Inventario.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Inventario.png}%
 };
 \node[screenMd] at (10, 0) {%
   \textbf{\small Compras}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Compras.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Compras.png}%
 };
-\node[screenMd] at (0, -9.5) {%
+\node[screenMd] at (0, -11) {%
   \textbf{\small Usuarios y roles}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Usuarios.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Usuarios.png}%
 };
-\node[screenMd] at (10, -9.5) {%
+\node[screenMd] at (10, -11) {%
   \textbf{\small Sensor ambiental}%
   \nodepart{two}%
-  \includegraphics[width=7.3cm,height=7cm]{0_imagenes/Cap3/Sensor.png}%
+  \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Sensor.png}%
 };
 \end{tikzpicture}%
 }
