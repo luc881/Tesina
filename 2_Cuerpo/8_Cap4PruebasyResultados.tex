@@ -152,9 +152,7 @@ El esquema final de la base de datos opera de forma estable en el entorno de pro
 \clearpage
 \section{Pruebas de la API REST}
 
-Para verificar el funcionamiento de la API se desarrolló una suite de pruebas automatizadas que cubre la totalidad de los módulos del sistema. Cada prueba opera sobre una base de datos PostgreSQL real en lugar de datos simulados, lo que garantiza que el comportamiento verificado sea idéntico al que se ejecuta en producción: una prueba sobre datos simulados puede pasar aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias. La suite abarca escenarios positivos —operaciones que deben completarse con éxito— y negativos —operaciones que el sistema debe rechazar—, y cubre los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
-
-Las pruebas se ejecutaron primero en el entorno local de desarrollo y posteriormente en un entorno de integración continua que las corre de forma automática con cada actualización del código.
+Para verificar el funcionamiento de la API se probó cada uno de sus módulos contra la base de datos real del sistema, en lugar de datos simulados. Este enfoque garantiza que el comportamiento verificado sea idéntico al que se ejecuta en producción: una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias. Se cubrieron escenarios positivos —operaciones que deben completarse con éxito— y negativos —operaciones que el sistema debe rechazar—, en los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
 
 \subsection{Módulo de autenticación}
 
