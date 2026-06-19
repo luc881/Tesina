@@ -234,13 +234,13 @@ El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y
 El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
 \newpage
 % ═══════════════════════════════════════════════════════════════════════════
-% 3.1.3 WIREFLOW
+% 3.1.3 FLUJO DE PANTALLAS
 % ═══════════════════════════════════════════════════════════════════════════
-\subsection{Wireflow}
+\subsection{Flujo de pantallas}
 
-Un wireflow es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el wireflow incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
+Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el flujo de pantallas incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
-A continuación se presenta el wireflow para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
+A continuación se presenta el flujo de pantallas para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 1: INICIO DE SESIÓN
@@ -1007,17 +1007,13 @@ Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para qu
 
 
 % =============================================
-% OE 5: GABINETE FÍSICO E INTEGRACIÓN
+% OE 5: GABINETE FÍSICO
 % =============================================
 
 \clearpage
-\section{Integración física y lector de código de barras}
+\section{Diseño e impresión del gabinete físico}
 
-El sexto objetivo específico comprende dos componentes de integración: el diseño e impresión del gabinete físico que aloja el nodo sensor, y la incorporación de un lector de código de barras al flujo de registro de ventas en la aplicación web.
-
-\subsection{Gabinete impreso en 3D}
-
-Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
+El quinto objetivo específico consistió en diseñar y fabricar el gabinete que aloja el nodo sensor. Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
 
 El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
@@ -1033,9 +1029,14 @@ Las decisiones de diseño respondieron a restricciones concretas. El ensamble a 
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
-\subsection{Integración del lector de código de barras}
+% =============================================
+% OE 6: LECTOR DE CÓDIGO DE BARRAS
+% =============================================
 
-Para agilizar el registro de ventas se incorporó un lector de código de barras USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
+\clearpage
+\section{Integración del lector de código de barras}
+
+El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. El dispositivo elegido es un lector USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
 
 El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
 

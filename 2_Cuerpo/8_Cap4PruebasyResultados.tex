@@ -164,14 +164,14 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 
 % TODO: insertar captura de pantalla de la pantalla de inicio de sesión mostrando la opción "Recordarme"
 % Guardar en: 0_imagenes/Cap4/LoginRecordarme.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.65\textwidth]{0_imagenes/Cap4/LoginRecordarme.png}}
-%    \caption{Pantalla de inicio de sesión con la opción de sesión prolongada}
-%    \label{fig:cap4-login}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+   \centering
+   \fbox{\includegraphics[width=0.65\textwidth]{0_imagenes/Cap4/LoginRecordarme.png}}
+   \caption{Pantalla de inicio de sesión con la opción de sesión prolongada}
+   \label{fig:cap4-login}
+   \vspace{0.2cm}
+   \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \begin{figure}[H]
 \centering
@@ -376,20 +376,22 @@ Se actualizó la integración con la nueva versión del servicio \\
 \vspace{0.1cm}
 {\footnotesize \textbf{Fuente:} Elaboración propia.}
 
-\subsection{Resultados de la suite de pruebas}
+\subsection{Despliegue en Railway}
 
-La suite de pruebas cubre los veinte módulos de la API con casos por operación: lectura, creación, actualización y eliminación, más los escenarios de rechazo para cada uno —solicitudes sin autenticación, identificadores inexistentes y datos con formato incorrecto. Todos los casos de prueba pasan de forma exitosa sobre la base de datos de producción en Railway, lo que confirma que el comportamiento del sistema es consistente con el diseño descrito en el capítulo anterior.
+Con los ajustes realizados, la API quedó desplegada de forma permanente en la plataforma Railway. Desde ahí, el servicio se mantiene en operación continua y recibe las solicitudes de la interfaz web y del nodo sensor. La plataforma registra cada actualización de código como un nuevo despliegue y muestra el estado del servicio en tiempo real, lo que permite verificar que la aplicación esté activa sin necesidad de acceder al servidor directamente.
 
-% TODO: insertar captura de pantalla de la terminal mostrando los tests pasando (salida de pytest)
-% Guardar en: 0_imagenes/Cap4/PytestResultados.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/PytestResultados.png}}
-%    \caption{Resultado de la ejecución de la suite de pruebas automatizadas de la API}
-%    \label{fig:cap4-pytest}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de la API en estado activo.
+
+% TODO: insertar captura de pantalla del dashboard de Railway mostrando el servicio activo
+% Guardar en: 0_imagenes/Cap4/RailwayDashboard.png
+\begin{figure}[H]
+   \centering
+   \fbox{\includegraphics[width=0.65\textwidth]{0_imagenes/Cap4/RailwayDashboard.png}}
+   \caption{Panel de Railway con el servicio de la API en estado activo}
+   \label{fig:cap4-railway}
+   \vspace{0.2cm}
+   \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 % =============================================
 % SECCIÓN 4.3: FRONTEND REACT
@@ -846,9 +848,7 @@ Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo o
 % =============================================
 
 \clearpage
-\section{Pruebas del gabinete y lector de código de barras}
-
-\subsection{Gabinete impreso en 3D}
+\section{Pruebas del gabinete impreso en 3D}
 
 Con el primer diseño del gabinete se utilizaron las dimensiones nominales de cada componente tal como las especifican los fabricantes: el largo, ancho y alto de la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
 
@@ -924,7 +924,8 @@ Para resolver esto fue necesario relevar manualmente las dimensiones reales del 
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
-\subsection{Lector de código de barras}
+\clearpage
+\section{Pruebas del lector de código de barras}
 
 El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante USB y fue reconocido automáticamente por el sistema operativo como un dispositivo de teclado estándar, sin requerir la instalación de controladores adicionales. Se realizaron pruebas de escaneo con productos reales del inventario de la farmacia: todos los códigos de barras presentes en los productos fueron leídos correctamente y el código obtenido coincidió con el registrado en el catálogo del sistema.
 
@@ -942,7 +943,7 @@ El lector de código de barras se conectó al equipo de cómputo de la farmacia 
 La integración del lector con el flujo de registro de ventas en la interfaz web —incluyendo la activación del modo de escaneo, la búsqueda en el catálogo local y la confirmación visual del resultado— se describió en la sección 4.3 de este capítulo.
 
 % =============================================
-% SECCIÓN 4.6: INTEGRACIÓN DEL SISTEMA
+% SECCIÓN 4.7: INTEGRACIÓN DEL SISTEMA
 % =============================================
 
 \clearpage

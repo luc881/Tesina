@@ -1,16 +1,39 @@
 \chapterstar{Conclusiones}
-
+El desarrollo e implementación de la plataforma cloud de gestión de inventario y monitoreo ambiental para Farmacia Selene culminó con el cumplimiento íntegro del objetivo general y de los objetivos específicos planteados. Se logró diseñar una solución tecnológica que unifica la administración operativa y la supervisión física del entorno, resolviendo la desorganización y la falta de información actualizada que caracterizaban a los procesos manuales previos. 
+\begin{itemize}
+    \item La base de datos estructurada en PostgreSQL cumplió el objetivo de centralizar la información de productos, lotes, ventas y parámetros ambientales. Su diseño modular garantizó la integridad referencial y permitió implementar reglas de negocio complejas, como el uso de índices parciales para gestionar medicamentos sin código de lote asignado.  
+    \item El servidor desarrollado con Python y FastAPI procesó eficientemente las solicitudes del sistema y fue desplegado con éxito en la plataforma Railway.  La lógica del servidor automatizó exitosamente la política FEFO (Primeras Entradas, Primeras Salidas), asegurando que el sistema descuente el inventario priorizando los lotes con la caducidad más próxima.  
+    \item La interfaz de usuario, desarrollada con React y Material-UI, cumplió el objetivo de proporcionar un entorno visual accesible y responsivo desplegado en Vercel.  Esta capa de la aplicación permitió al personal interactuar de forma fluida con los módulos de inventario, ventas y el tablero de monitoreo sin necesidad de instalar software local.  
+    \item La capa física, gobernada por el microcontrolador ESP32-C5, cumplió su función de capturar y transmitir datos ambientales al servidor mediante solicitudes HTTP cada 30 segundos.  El sensor AHT10 demostró ser preciso para validar las condiciones del entorno y generar alertas cuando los valores superaron los umbrales de la normatividad.
+    \item La integración del lector de códigos de barras se resolvió exitosamente mediante la implementación de un "modo lector" activado con la tecla F2.  Este desarrollo agilizó el registro de productos durante las transacciones y minimizó el margen de error humano en el punto de venta.  A pesar de los retos técnicos encontrados durante la integración física, como el conflicto de pines con el LED RGB y las limitaciones de altura del conector Dupont en el gabinete impreso en 3D, los problemas fueron diagnosticados y resueltos o se plantearon rutas de rediseño efectivas. 
+\end{itemize}
+ 
 
 \thispagestyle{empty}
 
 
 \chapterstar{Recomendaciones}
-
+Para asegurar el máximo aprovechamiento, durabilidad y correcta utilización del sistema por parte del personal operativo y administrativo de Farmacia Selene, se recomiendan las siguientes directrices de uso:
+  \begin{itemize}
+      \item Mantener una red Wi-Fi estable y de uso preferentemente dedicado para las operaciones del negocio.  La comunicación continua entre el nodo sensor ESP32, la API alojada en Railway y la interfaz web depende en su totalidad de una conectividad a internet ininterrumpida.  
+      \item Establecer un protocolo administrativo para la revisión diaria del tablero de indicadores (Dashboard).  
+      \item Es fundamental que el administrador atienda de inmediato las alertas visuales relacionadas con lotes próximos a vencer y variaciones anómalas de temperatura o humedad registradas por el sensor AHT10.
+      \item Capacitar de forma continua a los cajeros y almacenistas sobre la importancia de utilizar el lector de código de barras mediante el atajo de la tecla F2.  La captura automatizada debe priorizarse sobre la entrada manual para preservar la sincronía exacta entre el inventario físico y los registros de la base de datos PostgreSQL.  
+      \item Asegurar que el gabinete impreso en 3D que aloja el hardware permanezca en una ubicación estratégica dentro del almacén.  Se debe evitar obstruir la ranura inferior de ventilación del gabinete para garantizar que el flujo de aire alcance el sensor AHT10 y las lecturas reflejen las verdaderas condiciones de los medicamentos.
+      \item Registrar rigurosamente el número de lote y la fecha de caducidad al momento de dar de alta nuevas compras a proveedores.  El motor de la API que automatiza las salidas por el método FEFO requiere que estos campos contengan información precisa para realizar los descuentos de inventario correctamente.
+  \end{itemize}
 
 \thispagestyle{empty}
 
 
 \chapterstar{Mejoras}
-
+A partir del trabajo desarrollado y de los resultados obtenidos durante la fase de pruebas, se proponen las siguientes líneas de investigación y mejoras tecnológicas para incrementar la robustez y funcionalidad del sistema en el futuro:
+\begin{itemize}
+    \item Sustituir el uso de cables Dupont internos por el diseño e implementación de una Placa de Circuito Impreso (PCB) personalizada para el nodo sensor.  El desarrollo de una PCB eliminaría los problemas de dimensionamiento vertical en el gabinete impreso en 3D y aumentaría la tolerancia del hardware ante vibraciones y desgaste mecánico.  
+    \item Implementar un sistema de respaldo de energía ininterrumpida (UPS o módulos de baterías de litio) dedicado exclusivamente al microcontrolador ESP32 y al módem de la farmacia.  Este respaldo de hardware aseguraría que el monitoreo de temperatura y humedad no sufra tiempos de inactividad durante cortes en el suministro eléctrico local.  
+    \item Integrar un servicio de notificaciones externas, como el envío automático de correos electrónicos, mensajes SMS o alertas a aplicaciones de mensajería desde el servidor FastAPI.  Esta vía de comunicación proactiva garantizaría que el administrador reciba advertencias críticas sobre parámetros fuera de la norma, incluso cuando no esté visualizando activamente la interfaz web.
+    \item Desarrollar algoritmos de análisis de datos y proyecciones basados en el historial de transacciones almacenado en PostgreSQL.
+    \item Ampliar la arquitectura lógica de la base de datos y la API para escalar el sistema a un entorno multi-sucursal.  Esta línea de investigación permitiría a la plataforma gestionar el traslado de lotes de medicamentos entre diferentes farmacias y consolidar reportes financieros desde un único panel de super-administrador.
+\end{itemize}
 
 \thispagestyle{empty}
