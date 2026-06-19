@@ -386,7 +386,7 @@ La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de 
 % Guardar en: 0_imagenes/Cap4/RailwayDashboard.png
 \begin{figure}[H]
    \centering
-   \fbox{\includegraphics[width=0.65\textwidth]{0_imagenes/Cap4/RailwayDashboard.png}}
+   \fbox{\includegraphics[width=0.55\textwidth]{0_imagenes/Cap4/RailwayDashboard.png}}
    \caption{Panel de Railway con el servicio de la API en estado activo}
    \label{fig:cap4-railway}
    \vspace{0.2cm}
@@ -531,16 +531,14 @@ La figura siguiente muestra el flujo general de navegación: desde el inicio de 
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-% TODO: insertar captura de pantalla del dashboard con datos reales de la farmacia
-% Guardar en: 0_imagenes/Cap4/Dashboard.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/Dashboard.png}}
-%    \caption{Vista del tablero principal con indicadores reales de la farmacia}
-%    \label{fig:cap4-dashboard}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/Dashboard.png}}
+    \caption{Vista del tablero principal con indicadores reales de la farmacia}
+    \label{fig:cap4-dashboard}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Módulo de autenticación y control de acceso}
 
@@ -552,16 +550,14 @@ Se identificó además que una actualización de la configuración interna de la
 
 El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. Con la propuesta inicial se lograba mostrar el listado de productos; fue necesario añadir en iteraciones sucesivas la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados, y la vista de detalle con la información del lote asociado a cada producto.
 
-% TODO: insertar captura de pantalla del módulo de inventario/lotes con búsqueda activa
-% Guardar en: 0_imagenes/Cap4/ModuloInventario.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModuloInventario.png}}
-%    \caption{Módulo de inventario mostrando el listado de lotes con búsqueda y filtros activos}
-%    \label{fig:cap4-inventario}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModuloInventario.png}}
+    \caption{Módulo de inventario mostrando el listado de lotes con búsqueda y filtros activos}
+    \label{fig:cap4-inventario}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 Un problema recurrente durante esta fase fue la desincronización entre los valores que la API enviaba y los que el frontend esperaba: cuando se modificaba un conjunto de opciones válidas en la API —por ejemplo, los estados posibles de un lote o los tipos de movimiento— la interfaz seguía usando los valores anteriores, generando errores en los formularios. Esto se corrigió estableciendo un proceso de revisión explícita de estos valores cada vez que se actualizaba la API.
 
@@ -573,16 +569,14 @@ El modo lector —que se activa con la tecla \textbf{F2} y redirige el foco al c
 
 Durante las pruebas del formulario de pago se identificó que al escribir el monto en el campo correspondiente, el número se concatenaba con el cero inicial del campo en lugar de reemplazarlo, generando valores incorrectos. El comportamiento se corrigió haciendo que el campo seleccione todo su contenido automáticamente al recibir el foco, de modo que el primer dígito tecleado sustituya el valor anterior.
 
-% TODO: insertar captura de pantalla del formulario de venta con el modo lector activo (banner F2)
-% Guardar en: 0_imagenes/Cap4/ModoLector.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModoLector.png}}
-%    \caption{Formulario de registro de venta con el modo lector de código de barras activo}
-%    \label{fig:cap4-modo-lector}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.8\textwidth]{0_imagenes/Cap4/ModoLector.png}}
+    \caption{Formulario de registro de venta con el modo lector de código de barras activo}
+    \label{fig:cap4-modo-lector}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Tablero de indicadores y monitoreo del sensor}
 
@@ -590,16 +584,14 @@ El tablero principal se construyó inicialmente con datos simulados para validar
 
 Durante esta conexión se identificó que el tablero realizaba tres llamadas independientes a la API al cargar —una por cada grupo de indicadores— lo que generaba una demora visible al abrir la vista. Para resolver esto se consolidó la información en un único punto de la API que devuelve todos los indicadores en una sola respuesta, reduciendo el tiempo de carga del tablero de forma notoria.
 
-% TODO: insertar captura de pantalla del módulo de monitoreo del sensor con lecturas en tiempo real
-% Guardar en: 0_imagenes/Cap4/MonitorSensor.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.9\textwidth]{0_imagenes/Cap4/MonitorSensor.png}}
-%    \caption{Módulo de monitoreo ambiental mostrando lecturas de temperatura y humedad del nodo sensor}
-%    \label{fig:cap4-sensor-monitor}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.4\textwidth]{0_imagenes/Cap4/MonitorSensor.png}}
+    \caption{Módulo de monitoreo ambiental mostrando lecturas de temperatura y humedad del nodo sensor}
+    \label{fig:cap4-sensor-monitor}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Correcciones identificadas durante las pruebas}
 
@@ -664,16 +656,14 @@ Se configuró el campo para seleccionar su contenido al recibir el foco, de modo
 
 Con los ajustes realizados, la interfaz web quedó desplegada de forma permanente en la plataforma Vercel. Cada actualización de código genera un nuevo despliegue automático, y la plataforma registra el historial de versiones junto con el estado de cada una. La figura~\ref{fig:cap4-vercel} muestra el panel de Vercel con el proyecto activo y el último despliegue exitoso.
 
-% TODO: insertar captura de pantalla del dashboard de Vercel mostrando el proyecto activo
-% Guardar en: 0_imagenes/Cap4/VercelDashboard.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap4/VercelDashboard.png}}
-%    \caption{Panel de Vercel con el proyecto de la interfaz web en estado activo}
-%    \label{fig:cap4-vercel}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.95\textwidth]{0_imagenes/Cap4/VercelDashboard.png}}
+    \caption{Panel de Vercel con el proyecto de la interfaz web en estado activo}
+    \label{fig:cap4-vercel}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 % =============================================
 % SECCIÓN 4.4: NODO SENSOR ESP32
