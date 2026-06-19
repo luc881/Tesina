@@ -73,15 +73,36 @@ La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación compl
 \draw[navArrow] (bifur) -- (mCompras.north);
 \draw[navArrow] (bifur) -- (mSensor.north);
 \draw[navArrow] (bifur) -- (mUsuarios.north);
-% Pantallas de módulos adicionales
+% Pantallas de módulos (primer nivel)
 \node[screen] (invScreen)    at (-4.5, -7.5) {Inventario};
 \node[screen] (compScreen)   at ( 0.0, -7.5) {Compras};
 \node[screen] (sensorScreen) at ( 4.5, -7.5) {Sensor ambiental};
-\node[screen] (usuScreen)    at ( 9.0, -7.5) {Usuarios y roles};
+\node[screen] (usuScreen)    at ( 9.0, -7.5) {Usuarios};
 \draw[mainArrow] (mInventario.south) -- (invScreen.north);
 \draw[mainArrow] (mCompras.south)    -- (compScreen.north);
 \draw[mainArrow] (mSensor.south)     -- (sensorScreen.north);
 \draw[mainArrow] (mUsuarios.south)   -- (usuScreen.north);
+% Sub-pantallas: Inventario
+\node[screen] (invNuevo) at (-4.5, -10.5) {Nuevo producto};
+\node[screen] (invLotes) at (-4.5, -13.5) {Lotes};
+\draw[mainArrow] (invScreen.south) -- (invNuevo.north)
+  node[lbl, right, midway]{crear};
+\draw[mainArrow] (invNuevo.south)  -- (invLotes.north)
+  node[lbl, right, midway]{ver lotes};
+% Sub-pantallas: Compras
+\node[screen] (compNueva)   at ( 0.0, -10.5) {Nueva compra};
+\node[screen] (compDetalle) at ( 0.0, -13.5) {Detalle de compra};
+\draw[mainArrow] (compScreen.south) -- (compNueva.north)
+  node[lbl, right, midway]{nueva};
+\draw[mainArrow] (compNueva.south)  -- (compDetalle.north)
+  node[lbl, right, midway]{registrar};
+% Sub-pantallas: Usuarios
+\node[screen] (usuNuevo) at ( 9.0, -10.5) {Nuevo usuario};
+\node[screen] (usuRoles) at ( 9.0, -13.5) {Roles y permisos};
+\draw[mainArrow] (usuScreen.south) -- (usuNuevo.north)
+  node[lbl, right, midway]{nuevo};
+\draw[mainArrow] (usuNuevo.south)  -- (usuRoles.north)
+  node[lbl, right, midway]{gestionar};
 % Flujo de ventas (columna izquierda)
 \node[screen] (historial)  at (-9.0,  -7.5) {Historial de ventas};
 \node[screen] (nuevaVenta) at (-9.0, -10.5) {Nueva venta};
@@ -99,7 +120,7 @@ La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación compl
   node[lbl, right, midway]{ver detalle};
 \end{tikzpicture}%
 }
-\caption{Diagrama de navegación del sistema: el Dashboard es el nodo central desde el que se accede a todos los módulos; la columna izquierda detalla el flujo completo del registro de una venta}
+\caption{Diagrama de navegación del sistema: el Dashboard es el nodo central; cada módulo expande sus pantallas principales de gestión}
 \label{fig:cap3-wireflow-general}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
