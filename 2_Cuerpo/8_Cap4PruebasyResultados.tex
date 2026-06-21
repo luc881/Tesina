@@ -25,6 +25,7 @@ Un caso de diseño particular que se verificó fue el de los lotes sin número d
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small,
     row/.style={rectangle, draw, minimum width=3.8cm, minimum height=0.65cm,
                 align=center, font=\scriptsize},
@@ -67,7 +68,8 @@ Un caso de diseño particular que se verificó fue el de los lotes sin número d
 \node[anchor=west, font=\tiny, text=gray!60] at (-1.6, -0.45)
     {El índice parcial solo aplica cuando el código tiene valor: los registros sin código no compiten entre sí.};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Comportamiento del índice parcial sobre el código de lote: los códigos duplicados son rechazados, pero múltiples lotes sin código del mismo producto son permitidos}
 \label{fig:cap4-lote-index}
 \vspace{0.2cm}
@@ -173,6 +175,7 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % ── Etiquetas de fila ─────────────────────────────────────────
@@ -220,7 +223,8 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 \draw[thick] (0, -1.0) -- (0, -0.2);
 \node[anchor=north, font=\tiny, text=gray!60] at (0, -1.05) {inicio};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Evolución del sistema de sesión: la versión inicial cerraba la sesión al expirar el token de acceso; la versión final lo renueva de forma automática y transparente para el usuario}
 \label{fig:cap4-token-timeline}
 \vspace{0.2cm}
@@ -237,6 +241,7 @@ Para cubrir este comportamiento fue necesario desarrollar un módulo adicional q
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % ── Encabezado ────────────────────────────────────────────────
@@ -304,7 +309,8 @@ Para cubrir este comportamiento fue necesario desarrollar un módulo adicional q
 \draw          (7.2, -0.75) rectangle (7.80, -0.40);
 \node[anchor=west, font=\scriptsize] at (7.90, -0.58) {Unidades restantes};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Ejemplo de la política FEFO aplicada en el módulo de ventas: el sistema consume primero el lote con la caducidad más próxima; si sus existencias no alcanzan, continúa con el siguiente lote en orden}
 \label{fig:cap4-fefo}
 \vspace{0.2cm}
@@ -313,7 +319,7 @@ Para cubrir este comportamiento fue necesario desarrollar un módulo adicional q
 
 Junto con la lógica de ventas se implementó y verificó el módulo de devoluciones. Una devolución revierte el descuento de inventario aplicado al completar la venta, reintegrando las unidades a los mismos lotes de los que fueron descontadas. El estado de la venta se actualiza automáticamente a \textit{parcialmente devuelta} o \textit{devuelta} según la cantidad retornada, sin intervención manual.
 
-\subsection{Correcciones identificadas durante las pruebas}
+\subsection{Ajustes realizados a la API}
 
 A lo largo del proceso de verificación se identificaron y corrigieron problemas en distintos módulos de la API. La tabla siguiente resume los más representativos:
 
@@ -409,6 +415,7 @@ La figura siguiente muestra el flujo general de navegación: desde el inicio de 
 % ─────────────────────────────────────────────────────────────────────────
 \begin{figure}[H]
 \centering
+\fbox{%
 \resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
   screen/.style={
@@ -522,6 +529,7 @@ La figura siguiente muestra el flujo general de navegación: desde el inicio de 
 \draw[branchArrow] (bifur) -- (sensor.north);
 
 \end{tikzpicture}%
+}%
 }
 \caption{Flujo de navegación del usuario en la aplicación web: la fila superior muestra el recorrido principal de registro de venta; los módulos inferiores son accesibles desde el menú lateral en cualquier momento}
 \label{fig:cap4-wireflow}
@@ -591,7 +599,7 @@ Durante esta conexión se identificó que el tablero realizaba tres llamadas ind
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Correcciones identificadas durante las pruebas}
+\subsection{Ajustes realizados a la interfaz web}
 
 \begin{longtable}{|p{3.2cm}|p{4.0cm}|p{7.3cm}|}
 
@@ -686,6 +694,7 @@ La investigación del problema reveló que el pin del microcontrolador asignado 
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % Chip ESP32-C5
@@ -733,7 +742,8 @@ La investigación del problema reveló que el pin del microcontrolador asignado 
 \node[font=\scriptsize, align=center] at (11.8, -0.1)
     {Interferencia:\\lecturas erróneas};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Conflicto de pines detectado durante las pruebas: GPIO 8 estaba asignado simultáneamente a la línea de datos del sensor AHT10 y al control del LED RGB, causando interferencia en las lecturas}
 \label{fig:cap4-pin-conflicto}
 \vspace{0.2cm}
@@ -761,6 +771,7 @@ Se verificó este comportamiento forzando manualmente valores fuera de rango en 
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\scriptsize]
 
 % ── Temperatura ───────────────────────────────────────────────
@@ -820,7 +831,8 @@ Se verificó este comportamiento forzando manualmente valores fuera de rango en 
 \node[anchor=west, font=\scriptsize] at (7.35, -1.70)
     {Rango de validación del firmware};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Rangos de validación del firmware en comparación con los rangos recomendados por la NOM-073-SSA1-2015: el firmware descarta lecturas fuera de los límites del hardware; las alertas se generan al superar los umbrales de la norma}
 \label{fig:cap4-rangos}
 \vspace{0.2cm}
@@ -937,6 +949,7 @@ Una vez verificados los componentes de forma individual, se realizó una prueba 
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small,
     comp/.style={rectangle, draw, rounded corners=4pt,
                  minimum width=3.0cm, minimum height=1.0cm,
@@ -973,7 +986,8 @@ Una vez verificados los componentes de forma individual, se realizó una prueba 
 \node[font=\scriptsize, text=gray!60, align=center] at (7.8, 0.55)
     {tablero, ventas,\\alertas};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Flujo de integración del sistema completo: el nodo sensor envía lecturas a la API, que las almacena en la base de datos; la interfaz web consulta la API para mostrar los datos al usuario}
 \label{fig:cap4-integracion}
 \vspace{0.2cm}
