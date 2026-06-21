@@ -32,6 +32,18 @@ Autenticación &
 Proceso mediante el cual el sistema verifica la identidad de un usuario antes de concederle acceso. En este proyecto se implementa mediante JSON Web Tokens (JWT), que aseguran que solo usuarios registrados puedan interactuar con la API. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
+Borrado lógico &
+Técnica de eliminación de registros en la que el elemento no se suprime físicamente de la base de datos, sino que se marca con una fecha de baja. Permite conservar el historial de operaciones vinculadas al registro y reactivarlo en el futuro sin pérdida de información. En este proyecto se aplica a usuarios, roles, sucursales y productos. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Endpoint &
+Dirección específica dentro de una API a la que se envían solicitudes para realizar una operación determinada, como consultar el inventario o registrar una venta. Funciona de forma similar a un número de extensión: cada operación disponible en el servidor tiene su propia dirección única. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Framework &
+Estructura de software prediseñada que proporciona las herramientas, convenciones y componentes base para desarrollar una aplicación. En lugar de construir todo desde cero, el desarrollador utiliza el framework como punto de partida y añade la lógica específica del proyecto. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
 Humedad relativa &
 Porcentaje de vapor de agua presente en el aire respecto al máximo que el aire puede contener a una temperatura determinada. Es una variable crítica para el almacenamiento de medicamentos, ya que valores fuera del rango recomendado degradan su composición química. \\
 \specialrule{0.3pt}{0pt}{0pt}
@@ -48,8 +60,16 @@ Latencia &
 Tiempo que transcurre entre el momento en que un sistema envía una solicitud y el momento en que recibe una respuesta. En sistemas de monitoreo ambiental, una latencia baja es deseable para que las alertas lleguen al administrador con la menor demora posible. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
+Lote &
+Conjunto de unidades de un mismo medicamento fabricadas en una misma producción, identificadas con un código y una fecha de caducidad comunes. El inventario del sistema se gestiona por lote para rastrear qué unidades específicas se vendieron y cuáles deben despacharse primero según su vencimiento. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
 Microcontrolador &
 Circuito integrado que combina en un solo chip un procesador, memoria y periféricos de entrada/salida programables. Se utiliza para controlar dispositivos electrónicos y ejecutar tareas específicas de forma autónoma. En este proyecto se emplea el ESP32-C5 para la gestión de sensores y la comunicación con el servidor. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Migración de base de datos &
+Procedimiento controlado que modifica la estructura de una base de datos —añadiendo columnas, cambiando tipos de datos o creando índices— sin eliminar los datos existentes. Permite evolucionar el esquema a medida que el sistema crece, conservando la información ya registrada. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Módulo &
@@ -58,6 +78,10 @@ Unidad funcional independiente dentro de un sistema de software o hardware que a
 
 ORM &
 Object-Relational Mapper — Mapeador Objeto-Relacional. Herramienta que permite interactuar con una base de datos relacional utilizando objetos del lenguaje de programación, sin necesidad de escribir instrucciones SQL directamente. En este proyecto se utiliza SQLAlchemy como ORM. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Principio activo &
+Sustancia química responsable del efecto terapéutico de un medicamento. Por ejemplo, el principio activo del Paracetamol 500\,mg es el paracetamol; distintas presentaciones comerciales pueden compartir el mismo principio activo con diferente marca o presentación. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Repositorio &
