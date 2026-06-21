@@ -865,6 +865,7 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % ── PCB ───────────────────────────────────────────────────────
@@ -902,7 +903,8 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 \node[anchor=west, font=\scriptsize, align=left] at (9.9, 1.0)
     {altura interior\\del gabinete};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Vista lateral esquemática del gabinete original: la altura del conector Dupont supera el espacio interior disponible, impidiendo cerrar la tapa sin comprimir los cables}
 \label{fig:cap4-gabinete-problema}
 \vspace{0.2cm}

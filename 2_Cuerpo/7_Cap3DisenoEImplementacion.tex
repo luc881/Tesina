@@ -247,6 +247,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
+\fbox{%
 \scalebox{0.75}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -264,6 +265,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
 \end{tikzpicture}%
+}%
 }
 \caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales y al acceder correctamente el sistema redirige al panel principal}
 \label{fig:cap3-wireflow-login}
@@ -277,6 +279,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
+\fbox{%
 \scalebox{0.84}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -328,6 +331,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
+}%
 }
 \caption{Panel principal y módulo de ventas: el Dashboard da acceso al sistema completo mediante el menú lateral; al seleccionar Ventas se muestra el historial de transacciones}
 \label{fig:cap3-wireflow-dashboard}
@@ -341,6 +345,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
+\fbox{%
 \scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -365,6 +370,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
 \end{tikzpicture}%
+}%
 }
 \caption{Registro de venta: el formulario permite agregar productos manualmente; la tecla F2 activa el modo lector que redirige el foco al escáner de código de barras}
 \label{fig:cap3-wireflow-ventas}
@@ -378,6 +384,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
+\fbox{%
 \scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -400,6 +407,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
   \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
 };
 \end{tikzpicture}%
+}%
 }
 \caption{Cierre de la transacción: al confirmar la venta el sistema descuenta el inventario y muestra la confirmación; desde el detalle es posible consultar los productos, montos y método de pago}
 \label{fig:cap3-wireflow-completar}
@@ -412,6 +420,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
+\fbox{%
 \scalebox{0.88}{%
 \begin{tikzpicture}[
   screenMd/.style={rectangle split, rectangle split parts=2,
@@ -443,6 +452,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
   \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Sensor.png}%
 };
 \end{tikzpicture}%
+}%
 }
 \caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
 \label{fig:cap3-wireflow-modulos}
