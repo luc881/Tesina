@@ -81,13 +81,13 @@ Section headers are forced with `\renewcommand{\bibname}{...}` before each `theb
 |---|---|---|
 | API | https://github.com/luc881/pharmatrack-api | FastAPI + SQLAlchemy + Alembic + Poetry |
 | Frontend | https://github.com/luc881/pharmatrack-frontend | React 19 + Vite 7 + MUI 7 + SWR 2 |
-| Sensor | https://github.com/luc881/pharmatrack-sensor | ESP32 C++ (.ino), no OLEDs in final code |
+| Sensor | https://github.com/luc881/pharmatrack-sensor | ESP32 C++ (.ino), 3 OLEDs on separate I²C buses |
 
 ## Tech Stack (confirmed from repos)
 
 - **API:** FastAPI, SQLAlchemy ORM, Alembic migrations, Pydantic v2, JWT (python-jose + bcrypt), SlowAPI rate limiting, Uvicorn, Poetry
 - **Frontend:** React 19, Vite 7, MUI 7, React Router 7, SWR 2, Axios (JWT interceptors), Framer Motion
-- **Sensor:** ESP32 firmware in C++, AHT10 over I²C (SDA GPIO 8, SCL GPIO 9), WiFiManager, ArduinoJson, Adafruit AHTX0. Reads every 30 s. No OLEDs in deployed code (serial output only).
+- **Sensor:** ESP32 firmware in C++, AHT10 over I²C (SDA GPIO 8, SCL GPIO 9), WiFiManager, ArduinoJson, Adafruit AHTX0. Reads every 30 s. 3 OLED SSD1306 screens (temp/humidity/connection), each on its own I²C bus.
 
 ## Test Suite (API — pytest)
 
@@ -98,9 +98,9 @@ Section headers are forced with `\renewcommand{\bibname}{...}` before each `theb
 - `test_users.py` — CRUD, search/filter, password change, duplicate email
 - + 16 more files covering: roles, permissions, branches, products, categories, brands, ingredients, suppliers, purchases, purchase details, refunds, sale details, sale payments, sale batch usage
 
-## Known Discrepancy: OLEDs
+## OLEDs (resolved — now implemented)
 
-Chapter 3 describes 3 OLED SSD1306 screens on the sensor node. The final deployed firmware (`ProyectoTesinaESP32.ino`) has **no OLED code** — it uses Serial output only. Reason: the first 3D enclosure design did not fit all components (Dupont connectors not accounted for), so the enclosure is being redesigned and OLED code is on hold. For Chapter 4, treat the system as complete without OLEDs.
+The 3 OLED SSD1306 screens ARE implemented in the current firmware (`pharmatrack-sensor.ino`): dispTemp, dispHum, dispConex, each on its own I²C bus (SDA/SCL pins 25/26, 2/3, 4/5; AHT10 on 8/9). The second 3D enclosure design fixed the Dupont connector height problem and houses all components. Chapters 3 and 4 describe the OLEDs as implemented. Only pending: continuous-operation tests at the pharmacy once the enclosure is delivered/installed.
 
 ---
 

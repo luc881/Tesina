@@ -31,12 +31,22 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
 % ═══════════════════════════════════════════════════════════════════════════
 \subsection{Diagrama de navegación}
 
-Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas. A diferencia de un diagrama de flujo —que describe pasos y decisiones de un proceso— el diagrama de navegación describe la \textbf{estructura de la aplicación}: qué pantallas existen, cómo se llega a cada una y desde dónde se puede salir. Cada nodo representa una pantalla; las flechas indican una transición posible y se etiquetan con la acción que la provoca.
+Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas: cada recuadro representa una pantalla y las líneas indican desde dónde se puede llegar a ella. La Fig.~\ref{fig:cap3-wireflow-general} presenta el diagrama de navegación completo del sistema, y se lee de arriba hacia abajo.
 
-La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación completo del sistema. El Dashboard es el punto de entrada a todas las secciones; el menú lateral agrupa las pantallas en cuatro áreas: General, Punto de venta, Operaciones y Sistema.
+El recorrido siempre inicia en la pantalla de \textbf{Inicio de sesión}, en la parte superior: es la única pantalla accesible sin identificarse, y su única salida —etiquetada \textit{acceso exitoso}— conduce al \textbf{Dashboard}. El Dashboard es el centro de la aplicación: de él se desprenden las cuatro ramas que corresponden a los grupos del menú lateral, visibles como columnas en el diagrama:
+
+\begin{itemize}[nosep, itemsep=3pt]
+    \item \textbf{General:} las pantallas de Inicio y Estadísticas, con los indicadores del negocio.
+    \item \textbf{Punto de venta:} el módulo de Productos —que se subdivide en el listado, el alta de nuevos productos, y los catálogos de categorías, marcas, lotes con existencias, fórmulas genéricas y sustancias—, el módulo de Ventas y el Calendario.
+    \item \textbf{Operaciones:} los módulos de Devoluciones, Proveedores y Compras.
+    \item \textbf{Sistema:} los módulos de Usuarios —incluida la pantalla Mi cuenta del usuario activo—, Roles, Sucursales y el monitoreo del Sensor ambiental.
+\end{itemize}
+
+Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Lista} que muestra los registros existentes y una pantalla \textit{Nueva/Nuevo} para dar de alta un registro. Esta uniformidad es intencional: una vez que el usuario aprende a operar un módulo, sabe operar todos los demás. El diagrama también permite trazar rutas concretas; por ejemplo, para cobrar un producto el cajero recorre \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva}, tres transiciones en total desde que enciende el equipo.
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \scalebox{0.65}{%
 \begin{tikzpicture}[
   hub/.style={draw=black!75, fill=gray!35, very thick, rounded corners=4pt,
@@ -197,8 +207,9 @@ La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación compl
 \draw[treeEdge] (7.2, -13.3) -- (sensor.west);
 
 \end{tikzpicture}%
+}%
 }
-\caption{Diagrama de navegación del sistema: estructura de pantallas organizadas por sección del menú lateral}
+\caption{Diagrama de navegación del sistema}
 \label{fig:cap3-wireflow-general}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -209,29 +220,31 @@ La Fig.~\ref{fig:cap3-wireflow-general} muestra el diagrama de navegación compl
 % ═══════════════════════════════════════════════════════════════════════════
 \subsection{Diagrama de casos de uso}
 
-Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las \textbf{líneas sólidas} indican quién tiene acceso a qué función; las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base.
+Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores} —los tipos de usuario del sistema, más el propio sensor—; los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función; las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base —por ejemplo, usar el escáner es una extensión opcional de registrar una venta, no un paso obligatorio.
+
+Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama se dividió en dos figuras para que se mantenga legible: la Fig.~\ref{fig:cap3-uc-operaciones} cubre la operación diaria del punto de venta y el inventario, y la Fig.~\ref{fig:cap3-uc-administracion} cubre la administración del sistema y el monitoreo ambiental.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/DiagramaUC1_Operaciones.pdf}}
-    \caption{Diagrama de casos de uso — Operaciones: actores Cajero y Almacenista con sus funciones en el punto de venta e inventario}
+    \caption{Diagrama de casos de uso — Operaciones}
     \label{fig:cap3-uc-operaciones}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Ambos comparten las funciones de autenticación, gestión de perfil, dashboard y monitoreo ambiental.
+En la Fig.~\ref{fig:cap3-uc-operaciones} aparecen los dos actores de la operación diaria. El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Las funciones del centro del diagrama —autenticación, gestión de perfil, dashboard y monitoreo ambiental— están conectadas con ambos actores porque son comunes a los dos perfiles.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Cap3/DiagramaUC2_Administracion.pdf}}
-    \caption{Diagrama de casos de uso — Administración y monitoreo: actores Administrador, Solo lectura y Sensor ESP32}
+    \caption{Diagrama de casos de uso — Administración y monitoreo}
     \label{fig:cap3-uc-administracion}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 \newpage
-El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade la gestión de usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro. El \textbf{Sensor ESP32} es un actor externo no humano que envía datos de temperatura y humedad de forma automática; los usuarios autenticados consultan estas lecturas desde el módulo de monitoreo ambiental.
+La Fig.~\ref{fig:cap3-uc-administracion} completa el panorama con los tres actores restantes. El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade las funciones exclusivas de gestión: usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro; este perfil existe para supervisión sin riesgo de alteración de datos. El \textbf{Sensor ESP32} es el único actor no humano: su única función es enviar datos de temperatura y humedad de forma automática, sin intervención de ningún usuario; los usuarios autenticados consultan esas lecturas desde el módulo de monitoreo ambiental.
 \newpage
 % ═══════════════════════════════════════════════════════════════════════════
 % 3.1.3 FLUJO DE PANTALLAS
@@ -241,6 +254,8 @@ El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista
 Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el flujo de pantallas incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
 A continuación se presenta el flujo de pantallas para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
+
+El flujo comienza en la pantalla de inicio de sesión (Fig.~\ref{fig:cap3-wireflow-login}): el usuario ingresa su correo y contraseña y, si las credenciales son correctas, el sistema lo redirige automáticamente al panel principal. Ninguna otra pantalla del sistema es accesible sin completar este paso.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 1: INICIO DE SESIÓN
@@ -267,11 +282,13 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \end{tikzpicture}%
 }%
 }
-\caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales y al acceder correctamente el sistema redirige al panel principal}
+\caption{Flujo de pantallas — inicio de sesión}
 \label{fig:cap3-wireflow-login}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+Tras el acceso, el usuario llega al \textbf{Dashboard} (Fig.~\ref{fig:cap3-wireflow-dashboard}), que concentra los indicadores del día y el menú lateral con los módulos del sistema. Para iniciar un cobro, el cajero selecciona \textit{Ventas} en el menú; el sistema muestra primero el historial de transacciones, desde donde el botón de nueva venta abre el formulario de registro.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 2: DASHBOARD + HISTORIAL DE VENTAS
@@ -333,11 +350,13 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \end{tikzpicture}%
 }%
 }
-\caption{Panel principal y módulo de ventas: el Dashboard da acceso al sistema completo mediante el menú lateral; al seleccionar Ventas se muestra el historial de transacciones}
+\caption{Flujo de pantallas — panel principal y módulo de ventas}
 \label{fig:cap3-wireflow-dashboard}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+En el formulario de nueva venta (Fig.~\ref{fig:cap3-wireflow-ventas}) los productos pueden agregarse de dos maneras: buscándolos manualmente por nombre, o presionando la tecla \textbf{F2} para activar el \textbf{modo lector}, que dirige el foco al campo de escaneo y permite agregar artículos pasándolos por el lector de código de barras sin tocar el teclado ni el ratón.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 3: FORMULARIO DE NUEVA VENTA + MODO LECTOR
@@ -372,11 +391,13 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \end{tikzpicture}%
 }%
 }
-\caption{Registro de venta: el formulario permite agregar productos manualmente; la tecla F2 activa el modo lector que redirige el foco al escáner de código de barras}
+\caption{Flujo de pantallas — registro de venta y modo lector}
 \label{fig:cap3-wireflow-ventas}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+Al confirmar la venta (Fig.~\ref{fig:cap3-wireflow-completar}) el sistema descuenta las unidades del inventario y muestra la pantalla de confirmación. Desde ahí es posible abrir el detalle de la transacción, que conserva los productos vendidos, los montos y el método de pago para consultas posteriores.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 4: VENTA REGISTRADA + DETALLE DE LA VENTA
@@ -409,11 +430,13 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \end{tikzpicture}%
 }%
 }
-\caption{Cierre de la transacción: al confirmar la venta el sistema descuenta el inventario y muestra la confirmación; desde el detalle es posible consultar los productos, montos y método de pago}
+\caption{Flujo de pantallas — cierre y detalle de la transacción}
 \label{fig:cap3-wireflow-completar}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restantes, accesibles en cualquier momento desde el menú lateral del Dashboard: el inventario de productos y lotes, el registro de compras a proveedores, la gestión de usuarios y roles, y el monitoreo ambiental que presenta las lecturas del sensor. Los cuatro comparten la misma estructura de listado con buscador descrita al inicio de la sección.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 5: MÓDULOS ADICIONALES (rejilla 2×2)
@@ -454,7 +477,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \end{tikzpicture}%
 }%
 }
-\caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
+\caption{Flujo de pantallas — módulos adicionales del sistema}
 \label{fig:cap3-wireflow-modulos}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -649,6 +672,7 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[
     node distance=0.7cm,
     box/.style={rectangle, draw, rounded corners=4pt, minimum width=6.8cm, minimum height=0.90cm, align=center, font=\small},
@@ -681,7 +705,8 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 % Carril izquierdo: respuesta exitosa de vuelta al cliente
 \coordinate (lrail) at ($(db.west)+(-0.5,0)$);
 \draw[arr] (db.west) -- ([xshift=-1cm]db.west -| lrail) -- ([xshift=-1cm]client.west -| lrail) -- node[above, font=\footnotesize]{respuesta exitosa} (client.west);
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Secuencia de filtros de la API REST}
 \label{fig:cap3-api-capas}
 \vspace{0.2cm}
@@ -691,6 +716,28 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 \subsection{Modelos ORM con SQLAlchemy}
 
 Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Esto permite trabajar con objetos en lugar de instrucciones SQL escritas manualmente, y centraliza la definición del esquema en un único lugar: cualquier modificación —agregar una columna, renombrar un campo— se aplica una sola vez y se refleja en toda la aplicación.
+
+Como ejemplo, el siguiente fragmento del código de la API muestra la clase que representa la tabla de lotes de inventario:
+
+\begin{lstlisting}[language=Python]
+class ProductBatch(Base):
+    __tablename__ = "product_batches"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id"), nullable=False, index=True)
+    lot_code: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True)
+    expiration_date: Mapped[Optional[date]] = mapped_column(
+        Date, nullable=True)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    product = relationship("Product", back_populates="batches")
+\end{lstlisting}
+
+La primera línea declara el nombre de la tabla y cada atributo de la clase corresponde a una columna con su tipo de dato y sus reglas: \texttt{nullable=False} marca la cantidad como obligatoria, \texttt{nullable=True} permite que el código de lote y la caducidad queden vacíos —el caso de los lotes sin código descrito en el OE1—, y \texttt{ForeignKey} enlaza cada lote con el producto al que pertenece. La última línea define la relación en ambos sentidos: desde un lote se puede consultar su producto y desde un producto todos sus lotes.
+
+Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabla \texttt{product\_batches} con sus columnas, tipos y restricciones exactamente como se declararon en la clase, sin haber escrito ninguna instrucción SQL. El resto de las 22 tablas del esquema se define de la misma manera.
 
 \newpage
 
@@ -707,6 +754,7 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[
     node distance=0.5cm,
     box/.style={rectangle, draw, rounded corners=3pt, minimum width=7.2cm, minimum height=0.82cm, align=center, font=\small},
@@ -738,7 +786,8 @@ El segundo paso es la \textbf{autorización}: cada operación de la API declara 
     -- node[right, font=\footnotesize]{Reintentar} (rrail |- login.east) -- (login.east);
 \draw[arr] (err2.east) -- ([xshift=2cm]err2.east -| rrail2)
     -- ([xshift=2cm]rrail2 |- login.east) -- (login.east);
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Diagrama de flujo de autenticación y autorización}
 \label{fig:cap3-jwt-flujo}
 \vspace{0.2cm}
@@ -775,6 +824,37 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 
 Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente —usuarios, roles, sucursales— aplican borrado lógico, como se describió en el OE1.
 
+Para ilustrar cómo se construye una de estas operaciones, el siguiente fragmento corresponde al endpoint que recibe las lecturas del nodo sensor:
+
+\begin{lstlisting}[language=Python]
+@router.post("", response_model=SensorReadingResponse,
+             status_code=status.HTTP_201_CREATED)
+async def create_reading(data: SensorReadingCreate, db: db_dependency):
+    reading = SensorReading(
+        temperature=data.temperature,
+        humidity=data.humidity,
+        device_id=data.device_id,
+    )
+    db.add(reading)
+    db.commit()
+    db.refresh(reading)
+    return reading
+\end{lstlisting}
+
+La primera línea registra la operación en el enrutador e indica que una creación exitosa responde con el código 201. El parámetro \texttt{data} llega ya validado: si el nodo enviara un valor con formato incorrecto, la petición se rechazaría antes de ejecutar esta función, como se describió en la sección de esquemas de validación. El cuerpo de la función construye el registro con los tres valores recibidos, lo guarda en la base de datos y lo devuelve al cliente.
+
+Lo que se obtiene al invocar esta operación es una respuesta en formato JSON con el registro recién almacenado, incluyendo el identificador y la fecha que el sistema le asignó:
+
+\begin{lstlisting}
+{
+  "id": 1024,
+  "temperature": 23.4,
+  "humidity": 41.2,
+  "device_id": "esp32-farmacia-01",
+  "recorded_at": "2026-05-12T10:31:08"
+}
+\end{lstlisting}
+
 \subsection{Despliegue en Railway}
 
 La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tanto el servidor como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala. Cada vez que se publica una nueva versión del código, el despliegue se actualiza de forma automática.
@@ -798,10 +878,11 @@ Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajust
 
 La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados —tablas paginadas, formularios, diálogos, selectores de fecha— que garantiza consistencia visual en toda la aplicación y evita desarrollar esos elementos desde cero.
 
-La figura siguiente muestra la disposición de la interfaz: una barra lateral persistente agrupa los módulos por área funcional, y el área de contenido presenta en todos los módulos la misma estructura de componentes reutilizables.
+La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la interfaz. A la izquierda, una barra lateral persistente agrupa los dieciséis módulos por área funcional —principal, configuración y monitoreo—, con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros y opción de exportar, la tabla de datos con los registros, y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario que se usa como ejemplo en la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % Marco exterior (ventana del navegador)
@@ -885,8 +966,9 @@ La figura siguiente muestra la disposición de la interfaz: una barra lateral pe
 % Paginación
 \node[font=\scriptsize] at (7.5, 4.18) {$\langle$\enspace 1 \enspace 2 \enspace 3 \enspace $\cdots$\enspace $\rangle$};
 
-\end{tikzpicture}
-\caption{Estructura de la interfaz web: barra lateral con grupos de navegación (izquierda), barra de acciones con botón de alta, buscador con filtros, tabla de datos paginada y control de paginación (área de contenido)}
+\end{tikzpicture}%
+}
+\caption{Estructura de la interfaz web}
 \label{fig:cap3-frontend-wireframe}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -910,6 +992,28 @@ Los formularios se implementaron con \textbf{React Hook Form}, que valida cada c
 \subsection{Autenticación en el cliente}
 
 Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
+
+El siguiente fragmento del código de la interfaz es la función que administra la sesión; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
+
+\begin{lstlisting}
+export async function setSession(accessToken) {
+  if (accessToken) {
+    sessionStorage.setItem(JWT_STORAGE_KEY, accessToken);
+    axios.defaults.headers.common.Authorization =
+      `Bearer ${accessToken}`;
+
+    const decoded = jwtDecode(accessToken);
+    if (decoded?.exp) scheduleTokenRefresh(decoded.exp);
+  } else {
+    sessionStorage.removeItem(JWT_STORAGE_KEY);
+    delete axios.defaults.headers.common.Authorization;
+  }
+}
+\end{lstlisting}
+
+Cuando hay token, la función lo guarda en el almacenamiento del navegador, lo registra como encabezado por defecto —a partir de ese momento toda petición a la API lo lleva incluido sin código adicional en cada módulo— y programa su renovación automática leyendo la fecha de expiración contenida en el propio token. Cuando no hay token, revierte esos tres pasos y la sesión queda cerrada.
+
+Lo que se obtiene con esta función es que ningún otro componente de la aplicación tenga que ocuparse de la autenticación: los dieciséis módulos realizan sus peticiones sin mencionar el token, y la renovación ocurre en segundo plano sin que el usuario vuelva a ingresar su contraseña.
 
 \subsection{Despliegue en Vercel}
 
@@ -938,6 +1042,7 @@ El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bu
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[font=\small]
 
 % Periféricos I²C (izquierda)
@@ -985,7 +1090,8 @@ El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bu
     node[right, font=\footnotesize]{5\,V}
     (esp.south);
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Diagrama de conexiones del nodo sensor}
 \label{fig:cap3-sensor-hw}
 \vspace{0.2cm}
@@ -1009,13 +1115,41 @@ El firmware sigue el modelo de Arduino: una función de configuración inicial q
 
 Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
 
+El corazón del firmware es la función que se ejecuta en cada ciclo de lectura. El siguiente fragmento es su código tal como opera en el nodo:
+
+\begin{lstlisting}[language=C++]
+void leerYEnviar() {
+  Wire.end(); Wire.begin(SDA_AHT, SCL_AHT);
+  sensors_event_t humEv, tempEv;
+  aht.getEvent(&humEv, &tempEv);
+
+  float t = tempEv.temperature;
+  float h = humEv.relative_humidity;
+
+  if (t < -10 || t > 85 || h < 0 || h > 100) {
+    Serial.printf("Fuera de rango: %.1fC %.1f%%\n", t, h);
+    return;
+  }
+
+  mostrarTemperatura(t);
+  mostrarHumedad(h);
+  if (wifiOk) enviarLectura(t, h);
+}
+\end{lstlisting}
+
+La función realiza cuatro pasos. Primero activa el canal de comunicación del sensor y le solicita las dos mediciones. Después valida que los valores estén dentro del rango físicamente posible del sensor —de $-10$ a $85\,^\circ$C y de 0 a 100\,\% de humedad—: si una lectura cae fuera, se descarta y la función termina sin enviar nada, evitando que un fallo momentáneo del sensor registre datos falsos. En seguida actualiza las pantallas OLED con los valores medidos, y por último, solo si hay conexión WiFi, envía la lectura a la API.
+
+Lo que se obtiene en cada ciclo es un mensaje en formato JSON —\texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}— que la API almacena en la base de datos, como se mostró en la sección del OE2, y que aparece segundos después en el tablero de la aplicación web.
+
 Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85\,°C para temperatura; 0\% a 100\% para humedad) antes de enviarse; si cae fuera de rango, se descarta sin enviar. Las lecturas válidas se envían al \textit{endpoint} \texttt{/api/v1/sensor-readings} mediante una petición POST con cifrado HTTPS. El intervalo de 30 segundos balancea la granularidad de los datos con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
 
 \subsection{Pantallas OLED}
 
 Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
-Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en la secuencia de arranque y el ciclo operativo.
+Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración —con tres minutos como tiempo límite— y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
+
+La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, que se repite de forma continua mientras el nodo está encendido. Cada iteración verifica primero si el botón de reinicio lleva más de tres segundos presionado —en cuyo caso borra las credenciales WiFi y reinicia el equipo—; después comprueba si ya transcurrieron los 30 segundos del intervalo de lectura. Cuando el intervalo se cumple, lee el sensor, valida que los valores estén dentro del rango físico admisible, actualiza las pantallas y, si hay conexión, envía la lectura a la API. Las salidas marcadas con \textit{No} en los rombos regresan por el carril izquierdo al inicio del ciclo: una lectura inválida o la falta de red no detienen el programa, solo omiten el envío de esa iteración.
 
 \begin{figure}[H]
 \centering
@@ -1087,7 +1221,7 @@ Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} present
 \end{tikzpicture}%
 }%
 }
-\caption{Diagrama de flujo de la inicialización del firmware (función \textit{setup}): secuencia desde el encendido del nodo hasta el inicio del ciclo operativo}
+\caption{Diagrama de flujo de la inicialización del firmware}
 \label{fig:cap3-firmware-setup}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -1153,7 +1287,7 @@ Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} present
 \end{tikzpicture}%
 }%
 }
-\caption{Diagrama de flujo del ciclo operativo del firmware (función \textit{loop}): cada iteración verifica el botón de reinicio, comprueba si han transcurrido 30~segundos, lee y valida los datos del sensor y, si hay conectividad, los envía a la API}
+\caption{Diagrama de flujo del ciclo operativo del firmware}
 \label{fig:cap3-firmware-loop}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -1200,6 +1334,7 @@ El diagrama siguiente resume el flujo de interacción del modo lector:
 
 \begin{figure}[H]
 \centering
+\fbox{%
 \begin{tikzpicture}[
     node distance=0.55cm,
     box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small, text width=7.8cm},
@@ -1231,7 +1366,8 @@ El diagrama siguiente resume el flujo de interacción del modo lector:
 \coordinate (loopL) at ($(more.west)+(-4.2,0)$);
 \draw[arr] (more.west) -- (loopL) -- (loopL |- scan.west) -- node[above, font=\footnotesize]{Sí} (scan.west);
 \draw[arr] (more)  -- node[left, font=\footnotesize]{No} (end);
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Diagrama de flujo del modo lector de código de barras en el registro de ventas}
 \label{fig:cap3-barcode-flujo}
 \vspace{0.2cm}
