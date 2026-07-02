@@ -13,13 +13,13 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 % SECCIÓN 3.1: DIAGRAMA DE BLOQUES
 % =============================================
 
-\section{Arquitectura general del sistema}
+\section{Diagrama de bloques}
 
 El diagrama de bloques muestra los tres componentes principales del sistema y los canales de comunicación entre ellos: el nodo sensor instalado en la farmacia, el servidor y base de datos alojados en la nube, y la interfaz web accesible desde el navegador. Cada componente corresponde a uno de los objetivos específicos del proyecto y se describe en detalle en las secciones siguientes.
 
 \begin{figure}[H]
     \centering
-    \fbox{\includegraphics[width=\textwidth]{0_imagenes/DiagramaBloques/DiagramaBloques.png}}
+    \fbox{\includegraphics[width=\textwidth]{0_imagenes/DiagramaBloques/Captura de pantalla 2026-06-19 004825.png}}
     \caption{Diagrama de bloques del sistema}
     \label{fig:cap3-diagrama-bloques}
     \vspace{0.2cm}
@@ -247,6 +247,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
+\fbox{%
 \scalebox{0.75}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -264,6 +265,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (login.south) -- ++(0,-0.7)
   node[lbl, right, midway] {acceso exitoso};
 \end{tikzpicture}%
+}%
 }
 \caption{Pantalla de inicio de sesión: el usuario ingresa sus credenciales y al acceder correctamente el sistema redirige al panel principal}
 \label{fig:cap3-wireflow-login}
@@ -277,6 +279,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-login})}\\[0.2cm]
+\fbox{%
 \scalebox{0.84}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -328,6 +331,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (historial.south) -- ++(0,-0.7)
   node[lbl, right, midway] {nueva venta};
 \end{tikzpicture}%
+}%
 }
 \caption{Panel principal y módulo de ventas: el Dashboard da acceso al sistema completo mediante el menú lateral; al seleccionar Ventas se muestra el historial de transacciones}
 \label{fig:cap3-wireflow-dashboard}
@@ -341,6 +345,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-dashboard})}\\[0.2cm]
+\fbox{%
 \scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -365,6 +370,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \draw[mainArrow] (lector.south) -- ++(0,-0.7)
   node[lbl, right, midway] {confirmar venta};
 \end{tikzpicture}%
+}%
 }
 \caption{Registro de venta: el formulario permite agregar productos manualmente; la tecla F2 activa el modo lector que redirige el foco al escáner de código de barras}
 \label{fig:cap3-wireflow-ventas}
@@ -378,6 +384,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 \begin{figure}[H]
 \centering
 \textcolor{gray!60}{\footnotesize\itshape (continúa de Fig.~\ref{fig:cap3-wireflow-ventas})}\\[0.2cm]
+\fbox{%
 \scalebox{0.92}{%
 \begin{tikzpicture}[
   screenFull/.style={rectangle split, rectangle split parts=2,
@@ -400,6 +407,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
   \includegraphics[width=15.8cm,height=8.5cm]{0_imagenes/Cap3/DetalleVenta.png}%
 };
 \end{tikzpicture}%
+}%
 }
 \caption{Cierre de la transacción: al confirmar la venta el sistema descuenta el inventario y muestra la confirmación; desde el detalle es posible consultar los productos, montos y método de pago}
 \label{fig:cap3-wireflow-completar}
@@ -412,6 +420,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 % ═══════════════════════════════════════════════════════════════════════════
 \begin{figure}[H]
 \centering
+\fbox{%
 \scalebox{0.88}{%
 \begin{tikzpicture}[
   screenMd/.style={rectangle split, rectangle split parts=2,
@@ -443,6 +452,7 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
   \includegraphics[width=7.3cm,height=8cm]{0_imagenes/Cap3/Sensor.png}%
 };
 \end{tikzpicture}%
+}%
 }
 \caption{Módulos adicionales del sistema: inventario de productos y lotes, registro de compras a proveedores, gestión de usuarios y roles, y monitoreo ambiental del sensor}
 \label{fig:cap3-wireflow-modulos}
@@ -1004,6 +1014,150 @@ Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85
 \subsection{Pantallas OLED}
 
 Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
+
+Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en la secuencia de arranque y el ciclo operativo.
+
+\begin{figure}[H]
+\centering
+\fbox{%
+\scalebox{0.80}{%
+\begin{tikzpicture}[
+  term/.style={draw, rounded corners=8pt, fill=gray!25,
+    minimum width=5.8cm, minimum height=0.72cm,
+    align=center, font=\small\bfseries},
+  proc/.style={draw, fill=white,
+    minimum width=5.8cm, minimum height=0.72cm,
+    align=center, font=\small},
+  dec/.style={diamond, draw, fill=gray!8, aspect=2.3,
+    minimum width=3.0cm, align=center,
+    font=\scriptsize, inner sep=3pt},
+  side/.style={draw, fill=gray!5, rounded corners=4pt,
+    minimum width=3.0cm, minimum height=0.65cm,
+    align=center, font=\scriptsize},
+  arr/.style={->, >=Stealth, thick},
+  lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt}
+]
+
+\node[term] (start)    at (0,  0.0) {INICIO};
+\node[proc] (initHW)   at (0, -1.5) {Inicializar serial, pines y buses I\textsuperscript{2}C};
+\node[proc] (initOLED) at (0, -3.1) {Inicializar las tres pantallas OLED\\(una por bus I\textsuperscript{2}C)};
+\node[proc] (msgInit)  at (0, -4.8) {Mostrar \textit{«Iniciando\ldots»} en las tres pantallas};
+\node[proc] (initAHT)  at (0, -6.2) {Inicializar sensor AHT10};
+\node[dec]  (decAHT)   at (0, -7.9) {¿AHT10\\detectado?};
+\node[side] (ahtNo)    at (-4.6, -7.9) {ahtOk = falso};
+\node[side] (ahtSi)    at ( 4.6, -7.9) {ahtOk = verdadero};
+\node[proc] (msgWifi)  at (0, -9.7) {Mostrar \textit{«Conectando WiFi\ldots»}};
+\node[proc] (wifiAuto) at (0, -11.4){Portal de configuración WiFi\\(tiempo límite: 3 minutos)};
+\node[dec]  (decWifi)  at (0, -13.2){¿WiFi\\conectado?};
+\node[side] (wifiNo)   at (-4.6, -13.2) {wifiOk = falso};
+\node[side] (wifiSi)   at ( 4.6, -13.2) {wifiOk = verdadero};
+\node[proc] (showConn) at (0, -15.0){Actualizar pantalla de estado de conexión};
+\node[dec]  (decFirst) at (0, -16.7){¿AHT10\\disponible?};
+\node[proc] (firstR)   at (4.6, -16.7){Primera lectura\\(leerYEnviar)};
+\node[proc] (markTime) at (0, -18.5){Registrar ultimaLectura = millis()};
+\node[term] (toCiclo)  at (0, -19.9){$\downarrow$\, CICLO PRINCIPAL};
+
+\draw[arr] (start)    -- (initHW);
+\draw[arr] (initHW)   -- (initOLED);
+\draw[arr] (initOLED) -- (msgInit);
+\draw[arr] (msgInit)  -- (initAHT);
+\draw[arr] (initAHT)  -- (decAHT);
+
+\draw[arr] (decAHT.west) -- node[lbl, above] {No} (ahtNo.east);
+\draw[arr] (decAHT.east) -- node[lbl, above] {Sí} (ahtSi.west);
+\draw[arr] (ahtNo.south)  -- (-4.6, -9.7) -- (msgWifi.west);
+\draw[arr] (ahtSi.south)  -- ( 4.6, -9.7) -- (msgWifi.east);
+
+\draw[arr] (msgWifi)  -- (wifiAuto);
+\draw[arr] (wifiAuto) -- (decWifi);
+
+\draw[arr] (decWifi.west) -- node[lbl, above] {No} (wifiNo.east);
+\draw[arr] (decWifi.east) -- node[lbl, above] {Sí} (wifiSi.west);
+\draw[arr] (wifiNo.south)  -- (-4.6, -15.0) -- (showConn.west);
+\draw[arr] (wifiSi.south)  -- ( 4.6, -15.0) -- (showConn.east);
+
+\draw[arr] (showConn) -- (decFirst);
+
+\draw[arr] (decFirst.east)  -- node[lbl, above] {Sí} (firstR.west);
+\draw[arr] (firstR.south)   -- (4.6, -18.5) -- (markTime);
+\draw[arr] (decFirst.south) -- node[lbl, right] {No} (markTime);
+
+\draw[arr] (markTime) -- (toCiclo);
+
+\end{tikzpicture}%
+}%
+}
+\caption{Diagrama de flujo de la inicialización del firmware (función \textit{setup}): secuencia desde el encendido del nodo hasta el inicio del ciclo operativo}
+\label{fig:cap3-firmware-setup}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\fbox{%
+\scalebox{0.85}{%
+\begin{tikzpicture}[
+  term/.style={draw, rounded corners=8pt, fill=gray!25,
+    minimum width=5.8cm, minimum height=0.72cm,
+    align=center, font=\small\bfseries},
+  proc/.style={draw, fill=white,
+    minimum width=5.8cm, minimum height=0.72cm,
+    align=center, font=\small},
+  dec/.style={diamond, draw, fill=gray!8, aspect=2.3,
+    minimum width=3.0cm, align=center,
+    font=\scriptsize, inner sep=3pt},
+  rst/.style={draw, rounded corners=5pt, fill=gray!15, dashed,
+    minimum width=4.2cm, minimum height=0.72cm,
+    align=center, font=\scriptsize},
+  arr/.style={->, >=Stealth, thick},
+  lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt}
+]
+
+\node[term] (ciclo)    at (0,  0.0) {CICLO PRINCIPAL};
+\node[dec]  (decBoot)  at (0, -1.8) {¿Botón BOOT\\mantenido $>$3\,s?};
+\node[rst]  (resetRst) at (5.5, -1.8){Borrar credenciales WiFi\\y reiniciar ESP};
+
+\node[dec]  (decTimer) at (0, -3.9) {¿AHT10 activo y han\\transcurrido 30\,s?};
+
+\node[proc] (markT)    at (0, -5.7) {Actualizar ultimaLectura};
+\node[proc] (readAHT)  at (0, -7.2) {Leer temperatura y humedad del AHT10};
+\node[dec]  (decRange) at (0, -9.0) {¿Valores en rango?\\$-$10 a 85\,°C,\; 0 a 100\,\%};
+\node[proc] (showR)    at (0, -10.9){Mostrar temperatura y humedad\\en las pantallas OLED};
+\node[dec]  (decWifi)  at (0, -12.7){¿WiFi\\conectado?};
+\node[proc] (buildJSON)at (0, -14.5){Construir JSON\\{\footnotesize\texttt{\{temperature, humidity, device\_id\}}}};
+\node[proc] (httpPost) at (0, -16.1){POST HTTPS a la API};
+\node[proc] (updConn)  at (0, -17.6){Registrar apiOk y actualizar\\pantalla de conexión};
+
+% Flechas de retorno al ciclo (bus lateral izquierdo)
+\draw (decTimer.west)  -- node[lbl, near start, above] {No} (-4.6, -3.9);
+\draw (decRange.west)  -- node[lbl, near start, above] {No} (-4.6, -9.0);
+\draw (decWifi.west)   -- node[lbl, near start, above] {No} (-4.6, -12.7);
+\draw (updConn.south)  -- (0, -18.6) -- (-4.6, -18.6);
+\draw (-4.6, -18.6) -- (-4.6, 0);
+\draw[arr] (-4.6, 0) -- (ciclo.west);
+
+% Flujo principal
+\draw[arr] (ciclo)          -- (decBoot);
+\draw[arr] (decBoot.east)   -- node[lbl, above] {Sí} (resetRst.west);
+\draw[arr] (decBoot.south)  -- node[lbl, right] {No} (decTimer.north);
+\draw[arr] (decTimer.south) -- node[lbl, right] {Sí} (markT.north);
+\draw[arr] (markT)          -- (readAHT);
+\draw[arr] (readAHT)        -- (decRange);
+\draw[arr] (decRange.south) -- node[lbl, right] {Sí} (showR.north);
+\draw[arr] (showR)          -- (decWifi);
+\draw[arr] (decWifi.south)  -- node[lbl, right] {Sí} (buildJSON.north);
+\draw[arr] (buildJSON)      -- (httpPost);
+\draw[arr] (httpPost)       -- (updConn);
+
+\end{tikzpicture}%
+}%
+}
+\caption{Diagrama de flujo del ciclo operativo del firmware (función \textit{loop}): cada iteración verifica el botón de reinicio, comprueba si han transcurrido 30~segundos, lee y valida los datos del sensor y, si hay conectividad, los envía a la API}
+\label{fig:cap3-firmware-loop}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 
 % =============================================
