@@ -33,16 +33,16 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
 
 Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas: cada recuadro representa una pantalla y las líneas indican desde dónde se puede llegar a ella. La Fig.~\ref{fig:cap3-wireflow-general} presenta el diagrama de navegación completo del sistema, y se lee de arriba hacia abajo.
 
-El recorrido siempre inicia en la pantalla de \textbf{Inicio de sesión}, en la parte superior: es la única pantalla accesible sin identificarse, y su única salida —etiquetada \textit{acceso exitoso}— conduce al \textbf{Dashboard}. El Dashboard es el centro de la aplicación: de él se desprenden las cuatro ramas que corresponden a los grupos del menú lateral, visibles como columnas en el diagrama:
+El recorrido siempre inicia en la pantalla de \textbf{Inicio de sesión}, en la parte superior: es la única pantalla accesible sin identificarse, y su única salida (etiquetada \textit{acceso exitoso}) conduce al \textbf{Dashboard}. El Dashboard es el centro de la aplicación: de él se desprenden las cuatro ramas que corresponden a los grupos del menú lateral, visibles como columnas en el diagrama:
 
 \begin{itemize}[nosep, itemsep=3pt]
     \item \textbf{General:} las pantallas de Inicio y Estadísticas, con los indicadores del negocio.
-    \item \textbf{Punto de venta:} el módulo de Productos —que se subdivide en el listado, el alta de nuevos productos, y los catálogos de categorías, marcas, lotes con existencias, fórmulas genéricas y sustancias—, el módulo de Ventas y el Calendario.
+    \item \textbf{Punto de venta:} el módulo de Productos, que se subdivide en el listado, el alta de nuevos productos y los catálogos de categorías, marcas, lotes con existencias, fórmulas genéricas y sustancias; el módulo de Ventas; y el Calendario.
     \item \textbf{Operaciones:} los módulos de Devoluciones, Proveedores y Compras.
-    \item \textbf{Sistema:} los módulos de Usuarios —incluida la pantalla Mi cuenta del usuario activo—, Roles, Sucursales y el monitoreo del Sensor ambiental.
+    \item \textbf{Sistema:} los módulos de Usuarios (incluida la pantalla Mi cuenta del usuario activo), Roles, Sucursales y el monitoreo del Sensor ambiental.
 \end{itemize}
 
-Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Lista} que muestra los registros existentes y una pantalla \textit{Nueva/Nuevo} para dar de alta un registro. Esta uniformidad es intencional: una vez que el usuario aprende a operar un módulo, sabe operar todos los demás. El diagrama también permite trazar rutas concretas; por ejemplo, para cobrar un producto el cajero recorre \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva}, tres transiciones en total desde que enciende el equipo.
+Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Lista} que muestra los registros existentes y una pantalla \textit{Nueva/Nuevo} para dar de alta un registro. Esta uniformidad es intencional: una vez que el usuario aprende a operar un módulo, sabe operar todos los demás. Sobre el diagrama también se pueden trazar rutas completas; por ejemplo, para cobrar un producto el cajero recorre \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva}: tres transiciones en total desde que enciende el equipo.
 
 \begin{figure}[H]
 \centering
@@ -220,7 +220,7 @@ Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Li
 % ═══════════════════════════════════════════════════════════════════════════
 \subsection{Diagrama de casos de uso}
 
-Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores} —los tipos de usuario del sistema, más el propio sensor—; los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función; las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base —por ejemplo, usar el escáner es una extensión opcional de registrar una venta, no un paso obligatorio.
+Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores}: los tipos de usuario del sistema, más el propio sensor. Los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función. Las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base; usar el escáner, por ejemplo, es una extensión opcional de registrar una venta, no un paso obligatorio.
 
 Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama se dividió en dos figuras para que se mantenga legible: la Fig.~\ref{fig:cap3-uc-operaciones} cubre la operación diaria del punto de venta y el inventario, y la Fig.~\ref{fig:cap3-uc-administracion} cubre la administración del sistema y el monitoreo ambiental.
 
@@ -233,7 +233,7 @@ Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama 
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-En la Fig.~\ref{fig:cap3-uc-operaciones} aparecen los dos actores de la operación diaria. El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Las funciones del centro del diagrama —autenticación, gestión de perfil, dashboard y monitoreo ambiental— están conectadas con ambos actores porque son comunes a los dos perfiles.
+En la Fig.~\ref{fig:cap3-uc-operaciones} aparecen los dos actores de la operación diaria. El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Las funciones del centro del diagrama (autenticación, gestión de perfil, dashboard y monitoreo ambiental) están conectadas con ambos actores porque son comunes a los dos perfiles.
 
 \begin{figure}[H]
     \centering
@@ -251,7 +251,7 @@ La Fig.~\ref{fig:cap3-uc-administracion} completa el panorama con los tres actor
 % ═══════════════════════════════════════════════════════════════════════════
 \subsection{Flujo de pantallas}
 
-Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional —que solo muestra decisiones y pasos— el flujo de pantallas incluye la apariencia aproximada de cada pantalla, permitiendo visualizar tanto qué hace el usuario como qué ve en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
+Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional, que solo muestra decisiones y pasos, el flujo de pantallas incluye la apariencia aproximada de cada pantalla: se ve tanto qué hace el usuario como qué tiene enfrente en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
 
 A continuación se presenta el flujo de pantallas para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
 
@@ -534,9 +534,9 @@ Esta separación hace que las tablas de un módulo puedan crecer o modificarse s
 
 Este módulo agrupa las cinco tablas relacionadas con el acceso al sistema: usuarios, roles, permisos, la relación entre roles y permisos, y sucursales.
 
-El control de acceso se estructuró por roles: cada usuario pertenece a un rol —por ejemplo, \textit{administrador} o \textit{cajero}— y el rol define qué operaciones puede realizar. Esto simplifica la administración: cambiar los privilegios de un grupo de usuarios requiere modificar únicamente el rol, no cada cuenta individualmente.
+El control de acceso se estructuró por roles: cada usuario pertenece a un rol (por ejemplo, \textit{administrador} o \textit{cajero}) y el rol define qué operaciones puede realizar. Esto simplifica la administración: cambiar los privilegios de un grupo de usuarios requiere modificar únicamente el rol, no cada cuenta individualmente.
 
-Para los registros que no deben eliminarse permanentemente —usuarios, roles y sucursales— se optó por conservar el registro en la base de datos y anotar la fecha de baja en una columna adicional. Esto es necesario porque el historial de ventas referencia al usuario que realizó cada transacción; eliminar físicamente ese registro rompería esa relación.
+Para los registros que no deben eliminarse permanentemente (usuarios, roles y sucursales) se optó por conservarlos en la base de datos y anotar la fecha de baja en una columna adicional. Esto es necesario porque el historial de ventas referencia al usuario que realizó cada transacción; eliminar físicamente ese registro rompería esa relación.
 
 % -------------------------------------------------------
 % DIAGRAMA 1 — Módulo de Autenticación y Control de Acceso
@@ -558,11 +558,11 @@ Para los registros que no deben eliminarse permanentemente —usuarios, roles y 
 
 Este módulo gestiona la información de los medicamentos a través de seis tablas: el catálogo general de productos, los medicamentos genéricos, las categorías, las marcas, los ingredientes activos y la relación entre productos e ingredientes.
 
-Se separó el medicamento genérico de sus presentaciones comerciales. Por ejemplo, \textit{Paracetamol} existe como un único registro genérico, y cada presentación concreta —\textit{Paracetamol 500~mg tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}— es un registro distinto que apunta a ese genérico. Esto evita repetir el nombre del principio activo en cada presentación y permite agrupar reportes por nombre genérico sin trabajo adicional.
+Se separó el medicamento genérico de sus presentaciones comerciales. Por ejemplo, \textit{Paracetamol} existe como un único registro genérico, y cada presentación (\textit{Paracetamol 500~mg tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}) es un registro distinto que apunta a ese genérico. Esto evita repetir el nombre del principio activo en cada presentación y permite agrupar reportes por nombre genérico sin trabajo adicional.
 
 Las categorías se organizan en una jerarquía de niveles: una categoría puede contener subcategorías, y estas pueden contener otras más específicas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}). Todo esto se almacena en una sola tabla, sin límite fijo de profundidad.
 
-La relación entre productos e ingredientes activos se registra con la cantidad y unidad de medida de cada componente. Guardar esta información en la base de datos —no solo en la etiqueta física— permite buscar o filtrar medicamentos por principio activo directamente desde la aplicación.
+La relación entre productos e ingredientes activos se registra con la cantidad y unidad de medida de cada componente. Guardar esta información en la base de datos, y no únicamente en la etiqueta física, hace posible buscar o filtrar medicamentos por principio activo directamente desde la aplicación.
 
 % -------------------------------------------------------
 % DIAGRAMA 2 — Módulo de Catálogo de Productos
@@ -584,7 +584,7 @@ Este módulo controla las existencias físicas y el abastecimiento. Sus tablas r
 
 El inventario se gestiona a nivel de \textbf{lote}, no solo por producto. Cada lote tiene su propio código, fecha de caducidad y cantidad disponible. Esto es necesario en una farmacia porque las regulaciones de buenas prácticas de almacenamiento establecen que los medicamentos deben despacharse en orden de caducidad: primero los lotes que vencen antes. Sin este desglose por lote, el sistema sabría cuántas unidades hay de un producto, pero no podría determinar cuál lote se está consumiendo en cada venta.
 
-Se identificó durante el análisis una situación concreta: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Para no bloquear ese registro, la restricción de unicidad sobre el código de lote se configuró de forma que aplique solo cuando el código existe —si no hay código, se permiten múltiples entradas del mismo producto sin conflicto. Cuando sí hay código, no se permite duplicarlo para el mismo producto, previniendo registros erróneos.
+Durante el análisis se identificó una situación particular: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Para no bloquear ese registro, la restricción de unicidad sobre el código de lote se configuró para aplicar solo cuando el código existe. Si no hay código, se aceptan múltiples entradas del mismo producto sin conflicto; cuando sí lo hay, no puede duplicarse para el mismo producto, lo que previene registros erróneos.
 
 % -------------------------------------------------------
 % DIAGRAMA 3 — Módulo de Inventario y Compras
@@ -604,7 +604,7 @@ Se identificó durante el análisis una situación concreta: algunos medicamento
 
 Este módulo registra las transacciones comerciales a través de cinco tablas: la venta en sí, el detalle de productos incluidos, el vínculo con los lotes descontados, los pagos y las devoluciones.
 
-Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción —empleado, sucursal, descuento y total— y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
+Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción (empleado, sucursal, descuento y total) y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
 
 Adicionalmente, cada línea de detalle queda vinculada al lote específico del que se descontaron las unidades. Esto permite rastrear, dado un lote, en qué ventas fue despachado. En el contexto farmacéutico es relevante ante un retiro de mercado: el sistema puede identificar exactamente qué ventas contienen el lote afectado.
 
@@ -658,7 +658,7 @@ Para cumplir con el segundo objetivo específico se diseñó e implementó una A
 
 \subsection{Selección de FastAPI}
 
-Se eligió FastAPI sobre alternativas como Flask o Django por dos razones concretas.
+Se eligió FastAPI sobre alternativas como Flask o Django por dos razones.
 
 La primera es que verifica automáticamente que los datos que llegan en cada petición sean correctos antes de procesarlos. Si algo no cumple lo esperado, rechaza la petición con un mensaje descriptivo sin necesidad de escribir ese código de validación manualmente.
 
@@ -715,7 +715,7 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \subsection{Modelos ORM con SQLAlchemy}
 
-Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Esto permite trabajar con objetos en lugar de instrucciones SQL escritas manualmente, y centraliza la definición del esquema en un único lugar: cualquier modificación —agregar una columna, renombrar un campo— se aplica una sola vez y se refleja en toda la aplicación.
+Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Así se trabaja con objetos en lugar de instrucciones SQL escritas a mano, y la definición del esquema queda centralizada en un único lugar: cualquier modificación (agregar una columna, renombrar un campo) se aplica una sola vez y se refleja en toda la aplicación.
 
 Como ejemplo, el siguiente fragmento del código de la API muestra la clase que representa la tabla de lotes de inventario:
 
@@ -735,7 +735,7 @@ class ProductBatch(Base):
     product = relationship("Product", back_populates="batches")
 \end{lstlisting}
 
-La primera línea declara el nombre de la tabla y cada atributo de la clase corresponde a una columna con su tipo de dato y sus reglas: \texttt{nullable=False} marca la cantidad como obligatoria, \texttt{nullable=True} permite que el código de lote y la caducidad queden vacíos —el caso de los lotes sin código descrito en el OE1—, y \texttt{ForeignKey} enlaza cada lote con el producto al que pertenece. La última línea define la relación en ambos sentidos: desde un lote se puede consultar su producto y desde un producto todos sus lotes.
+La primera línea declara el nombre de la tabla y cada atributo de la clase corresponde a una columna con su tipo de dato y sus reglas: \texttt{nullable=False} marca la cantidad como obligatoria, \texttt{nullable=True} deja que el código de lote y la caducidad queden vacíos (el caso de los lotes sin código descrito en el OE1), y \texttt{ForeignKey} enlaza cada lote con el producto al que pertenece. La última línea define la relación en ambos sentidos: desde un lote se puede consultar su producto y desde un producto todos sus lotes.
 
 Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabla \texttt{product\_batches} con sus columnas, tipos y restricciones exactamente como se declararon en la clase, sin haber escrito ninguna instrucción SQL. El resto de las 22 tablas del esquema se define de la misma manera.
 
@@ -743,7 +743,7 @@ Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabl
 
 \subsection{Esquemas de validación con Pydantic}
 
-Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato —un precio negativo, un campo requerido ausente— se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
+Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato (un precio negativo, un campo requerido ausente) se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
 
 
 \subsection{Autenticación y autorización}
@@ -822,7 +822,7 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{table}
 
-Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente —usuarios, roles, sucursales— aplican borrado lógico, como se describió en el OE1.
+Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente (usuarios, roles, sucursales) aplican borrado lógico, como se describió en el OE1.
 
 Para ilustrar cómo se construye una de estas operaciones, el siguiente fragmento corresponde al endpoint que recibe las lecturas del nodo sensor:
 
@@ -876,9 +876,9 @@ Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajust
 
 \subsection{Estructura e interfaz de la aplicación}
 
-La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados —tablas paginadas, formularios, diálogos, selectores de fecha— que garantiza consistencia visual en toda la aplicación y evita desarrollar esos elementos desde cero.
+La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados (tablas paginadas, formularios, diálogos, selectores de fecha) que da consistencia visual a toda la aplicación y evita desarrollar esos elementos desde cero.
 
-La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la interfaz. A la izquierda, una barra lateral persistente agrupa los dieciséis módulos por área funcional —principal, configuración y monitoreo—, con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros y opción de exportar, la tabla de datos con los registros, y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario que se usa como ejemplo en la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
+La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la interfaz. A la izquierda, una barra lateral persistente agrupa los dieciséis módulos por área funcional (principal, configuración y monitoreo), con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros y opción de exportar, la tabla de datos con los registros, y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario que se usa como ejemplo en la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
 
 \begin{figure}[H]
 \centering
@@ -985,13 +985,13 @@ La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la 
 
 \subsection{Gestión de datos y formularios}
 
-El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} —usuario, rol y permisos— se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
+El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} (usuario, rol y permisos) se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
 Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas el formulario lo indica visualmente sin generar una petición al servidor.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye de forma automática en cada petición posterior. Cuando el token expira, se renueva de forma transparente sin interrumpir la sesión. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token incluya los permisos necesarios, de forma consistente con la estructura de roles del OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye automáticamente en cada petición posterior. Cuando el token expira, se renueva sin interrumpir la sesión ni avisar al usuario. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token los incluya, en línea con la estructura de roles del OE1.
 
 El siguiente fragmento del código de la interfaz es la función que administra la sesión; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
 
@@ -1011,7 +1011,7 @@ export async function setSession(accessToken) {
 }
 \end{lstlisting}
 
-Cuando hay token, la función lo guarda en el almacenamiento del navegador, lo registra como encabezado por defecto —a partir de ese momento toda petición a la API lo lleva incluido sin código adicional en cada módulo— y programa su renovación automática leyendo la fecha de expiración contenida en el propio token. Cuando no hay token, revierte esos tres pasos y la sesión queda cerrada.
+Cuando hay token, la función lo guarda en el almacenamiento del navegador, lo registra como encabezado por defecto y programa su renovación automática leyendo la fecha de expiración contenida en el propio token. A partir de ese momento toda petición a la API lo lleva incluido, sin código adicional en cada módulo. Cuando no hay token, revierte esos tres pasos y la sesión queda cerrada.
 
 Lo que se obtiene con esta función es que ningún otro componente de la aplicación tenga que ocuparse de la autenticación: los dieciséis módulos realizan sus peticiones sin mencionar el token, y la renovación ocurre en segundo plano sin que el usuario vuelva a ingresar su contraseña.
 
@@ -1032,9 +1032,9 @@ Para cumplir con el cuarto objetivo específico se diseñó e implementó un nod
 
 \subsection{Selección del hardware}
 
-Se eligió el \textbf{ESP32-C5} como microcontrolador por tres razones: integra conectividad WiFi de forma nativa sin necesitar un módulo adicional, soporta el protocolo I\textsuperscript{2}C necesario para comunicarse con el sensor y las pantallas, y es compatible con el entorno Arduino, que provee bibliotecas maduras para red y manejo de datos. Se descartó el Arduino Uno por carecer de WiFi integrado, y una Raspberry Pi habría resultado sobredimensionada para la tarea concreta de leer y enviar dos valores numéricos periódicamente, con un costo y consumo de energía mayores sin beneficio funcional correspondiente.
+Se eligió el \textbf{ESP32-C5} como microcontrolador por tres razones: integra conectividad WiFi de forma nativa sin necesitar un módulo adicional, soporta el protocolo I\textsuperscript{2}C necesario para comunicarse con el sensor y las pantallas, y es compatible con el entorno Arduino, que provee bibliotecas maduras para red y manejo de datos. Se descartó el Arduino Uno por carecer de WiFi integrado. Una Raspberry Pi, por su parte, habría resultado sobredimensionada para leer y enviar dos valores numéricos periódicamente: cuesta y consume más sin aportar un beneficio funcional que lo justifique.
 
-Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones: utiliza I\textsuperscript{2}C —el mismo bus compartido con las pantallas, sin necesitar conductores adicionales—, y ofrece una precisión de ±0.3\,°C en temperatura y ±2\% en humedad, adecuada para detectar variaciones relevantes en el almacenamiento de medicamentos donde los rangos recomendados son 15–25\,°C y 30–65\% de humedad relativa.
+Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones. La primera es que utiliza I\textsuperscript{2}C, el mismo bus compartido con las pantallas, sin necesitar conductores adicionales. La segunda es su precisión de ±0.3\,°C en temperatura y ±2\% en humedad, suficiente para detectar variaciones relevantes en el almacenamiento de medicamentos, donde los rangos recomendados son 15–25\,°C y 30–65\% de humedad relativa.
 
 \subsection{Arquitectura del nodo}
 
@@ -1111,9 +1111,9 @@ El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bu
 
 \subsection{Funcionamiento del firmware}
 
-El firmware sigue el modelo de Arduino: una función de configuración inicial que se ejecuta una sola vez al encender el dispositivo —inicializa el bus I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi— y un ciclo operativo continuo que realiza las lecturas cada 30 segundos y las envía a la API. El ciclo utiliza temporización no bloqueante: en lugar de pausar el programa durante la espera, compara continuamente el tiempo transcurrido, lo que permite verificar el estado de la conexión WiFi en cada iteración.
+El firmware sigue el modelo de Arduino: una función de configuración inicial que se ejecuta una sola vez al encender el dispositivo (inicializa el bus I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi) y un ciclo operativo continuo que realiza las lecturas cada 30 segundos y las envía a la API. El ciclo utiliza temporización no bloqueante: en lugar de pausar el programa durante la espera, compara continuamente el tiempo transcurrido, lo que permite verificar el estado de la conexión WiFi en cada iteración.
 
-Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red —por ejemplo, al reubicar el dispositivo—, mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
+Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red (por ejemplo, al reubicar el dispositivo), mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
 
 El corazón del firmware es la función que se ejecuta en cada ciclo de lectura. El siguiente fragmento es su código tal como opera en el nodo:
 
@@ -1137,19 +1137,19 @@ void leerYEnviar() {
 }
 \end{lstlisting}
 
-La función realiza cuatro pasos. Primero activa el canal de comunicación del sensor y le solicita las dos mediciones. Después valida que los valores estén dentro del rango físicamente posible del sensor —de $-10$ a $85\,^\circ$C y de 0 a 100\,\% de humedad—: si una lectura cae fuera, se descarta y la función termina sin enviar nada, evitando que un fallo momentáneo del sensor registre datos falsos. En seguida actualiza las pantallas OLED con los valores medidos, y por último, solo si hay conexión WiFi, envía la lectura a la API.
+La función realiza cuatro pasos. Primero activa el canal de comunicación del sensor y le solicita las dos mediciones. Después valida que los valores estén dentro del rango físicamente posible del sensor (de $-10$ a $85\,^\circ$C y de 0 a 100\,\% de humedad); si una lectura cae fuera, se descarta y la función termina sin enviar nada, para que un fallo momentáneo del sensor no registre datos falsos. En seguida actualiza las pantallas OLED con los valores medidos. Por último, solo si hay conexión WiFi, envía la lectura a la API.
 
-Lo que se obtiene en cada ciclo es un mensaje en formato JSON —\texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}— que la API almacena en la base de datos, como se mostró en la sección del OE2, y que aparece segundos después en el tablero de la aplicación web.
+Lo que se obtiene en cada ciclo es un mensaje en formato JSON, por ejemplo \texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}, que la API almacena en la base de datos como se mostró en la sección del OE2, y que aparece segundos después en el tablero de la aplicación web.
 
 Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85\,°C para temperatura; 0\% a 100\% para humedad) antes de enviarse; si cae fuera de rango, se descarta sin enviar. Las lecturas válidas se envían al \textit{endpoint} \texttt{/api/v1/sensor-readings} mediante una petición POST con cifrado HTTPS. El intervalo de 30 segundos balancea la granularidad de los datos con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
 
 \subsection{Pantallas OLED}
 
-Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo —temperatura, humedad y conexión WiFi— sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
+Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
-Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración —con tres minutos como tiempo límite— y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
+Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración (con tres minutos como tiempo límite) y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
 
-La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, que se repite de forma continua mientras el nodo está encendido. Cada iteración verifica primero si el botón de reinicio lleva más de tres segundos presionado —en cuyo caso borra las credenciales WiFi y reinicia el equipo—; después comprueba si ya transcurrieron los 30 segundos del intervalo de lectura. Cuando el intervalo se cumple, lee el sensor, valida que los valores estén dentro del rango físico admisible, actualiza las pantallas y, si hay conexión, envía la lectura a la API. Las salidas marcadas con \textit{No} en los rombos regresan por el carril izquierdo al inicio del ciclo: una lectura inválida o la falta de red no detienen el programa, solo omiten el envío de esa iteración.
+La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, que se repite de forma continua mientras el nodo está encendido. Cada iteración verifica primero si el botón de reinicio lleva más de tres segundos presionado, en cuyo caso borra las credenciales WiFi y reinicia el equipo; después comprueba si ya transcurrieron los 30 segundos del intervalo de lectura. Cuando el intervalo se cumple, lee el sensor, valida que los valores estén dentro del rango físico admisible, actualiza las pantallas y, si hay conexión, envía la lectura a la API. Las salidas marcadas con \textit{No} en los rombos regresan por el carril izquierdo al inicio del ciclo: una lectura inválida o la falta de red no detienen el programa, solo omiten el envío de esa iteración.
 
 \begin{figure}[H]
 \centering
@@ -1305,7 +1305,7 @@ El quinto objetivo específico consistió en diseñar y fabricar el gabinete que
 
 El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
-Las decisiones de diseño respondieron a restricciones concretas. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso; con el encaje a presión, abrir y cerrar el gabinete no deteriora el mecanismo. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una ranura en la base, suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del área de almacenamiento.
+Cada decisión de diseño respondió a una restricción práctica. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso, mientras que el encaje a presión tolera abrir y cerrar el gabinete sin deteriorarse. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una ranura en la base, suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del área de almacenamiento.
 
 % TODO: subir 0_imagenes/Cap3/GabineteFoto.png a Overleaf para descomentar
 %\begin{figure}[H]
