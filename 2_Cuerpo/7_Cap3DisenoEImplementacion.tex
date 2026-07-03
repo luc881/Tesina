@@ -488,6 +488,7 @@ Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restant
 % OE 1: BASE DE DATOS
 % =============================================
 
+\secbreak
 \section{Desarrollo de la base de datos en PostgreSQL}
 
 Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
@@ -652,6 +653,7 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
+\secbreak
 \section{Desarrollo de la API REST con FastAPI}
 
 Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
@@ -866,6 +868,7 @@ La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tan
 % =============================================
 
 \clearpage
+\secbreak
 \section{Desarrollo de la interfaz web con React}
 
 Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
@@ -1026,6 +1029,7 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 % =============================================
 
 \clearpage
+\secbreak
 \section{Desarrollo del nodo sensor con ESP32}
 
 Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
@@ -1299,6 +1303,7 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 % =============================================
 
 \clearpage
+\secbreak
 \section{Diseño e impresión del gabinete físico}
 
 El quinto objetivo específico consistió en diseñar y fabricar el gabinete que aloja el nodo sensor. Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
@@ -1322,6 +1327,7 @@ Cada decisión de diseño respondió a una restricción práctica. El ensamble a
 % =============================================
 
 \clearpage
+\secbreak
 \section{Integración del lector de código de barras}
 
 El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. El dispositivo elegido es un lector USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
@@ -1373,3 +1379,5 @@ El diagrama siguiente resume el flujo de interacción del modo lector:
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+\secbreak
