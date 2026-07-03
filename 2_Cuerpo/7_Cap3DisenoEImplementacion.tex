@@ -257,6 +257,14 @@ A continuación se presenta el flujo de pantallas para el caso de uso de registr
 
 El flujo comienza en la pantalla de inicio de sesión (Fig.~\ref{fig:cap3-wireflow-login}): el usuario ingresa su correo y contraseña y, si las credenciales son correctas, el sistema lo redirige automáticamente al panel principal. Ninguna otra pantalla del sistema es accesible sin completar este paso.
 
+Tras el acceso, el usuario llega al \textbf{Dashboard} (Fig.~\ref{fig:cap3-wireflow-dashboard}), que concentra los indicadores del día y el menú lateral con los módulos del sistema. Para iniciar un cobro, el cajero selecciona \textit{Ventas} en el menú; el sistema muestra primero el historial de transacciones, desde donde el botón de nueva venta abre el formulario de registro.
+
+En el formulario de nueva venta (Fig.~\ref{fig:cap3-wireflow-ventas}) los productos pueden agregarse de dos maneras: buscándolos manualmente por nombre, o presionando la tecla \textbf{F2} para activar el \textbf{modo lector}, que dirige el foco al campo de escaneo y permite agregar artículos pasándolos por el lector de código de barras sin tocar el teclado ni el ratón.
+
+Al confirmar la venta (Fig.~\ref{fig:cap3-wireflow-completar}) el sistema descuenta las unidades del inventario y muestra la pantalla de confirmación. Desde ahí es posible abrir el detalle de la transacción, que conserva los productos vendidos, los montos y el método de pago para consultas posteriores.
+
+Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restantes, accesibles en cualquier momento desde el menú lateral del Dashboard: el inventario de productos y lotes, el registro de compras a proveedores, la gestión de usuarios y roles, y el monitoreo ambiental que presenta las lecturas del sensor. Los cuatro comparten la misma estructura de listado con buscador descrita al inicio de la sección.
+
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 1: INICIO DE SESIÓN
 % ═══════════════════════════════════════════════════════════════════════════
@@ -287,8 +295,6 @@ El flujo comienza en la pantalla de inicio de sesión (Fig.~\ref{fig:cap3-wirefl
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-Tras el acceso, el usuario llega al \textbf{Dashboard} (Fig.~\ref{fig:cap3-wireflow-dashboard}), que concentra los indicadores del día y el menú lateral con los módulos del sistema. Para iniciar un cobro, el cajero selecciona \textit{Ventas} en el menú; el sistema muestra primero el historial de transacciones, desde donde el botón de nueva venta abre el formulario de registro.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 2: DASHBOARD + HISTORIAL DE VENTAS
@@ -356,8 +362,6 @@ Tras el acceso, el usuario llega al \textbf{Dashboard} (Fig.~\ref{fig:cap3-wiref
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-En el formulario de nueva venta (Fig.~\ref{fig:cap3-wireflow-ventas}) los productos pueden agregarse de dos maneras: buscándolos manualmente por nombre, o presionando la tecla \textbf{F2} para activar el \textbf{modo lector}, que dirige el foco al campo de escaneo y permite agregar artículos pasándolos por el lector de código de barras sin tocar el teclado ni el ratón.
-
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 3: FORMULARIO DE NUEVA VENTA + MODO LECTOR
 % ═══════════════════════════════════════════════════════════════════════════
@@ -397,8 +401,6 @@ En el formulario de nueva venta (Fig.~\ref{fig:cap3-wireflow-ventas}) los produc
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Al confirmar la venta (Fig.~\ref{fig:cap3-wireflow-completar}) el sistema descuenta las unidades del inventario y muestra la pantalla de confirmación. Desde ahí es posible abrir el detalle de la transacción, que conserva los productos vendidos, los montos y el método de pago para consultas posteriores.
-
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 4: VENTA REGISTRADA + DETALLE DE LA VENTA
 % ═══════════════════════════════════════════════════════════════════════════
@@ -435,8 +437,6 @@ Al confirmar la venta (Fig.~\ref{fig:cap3-wireflow-completar}) el sistema descue
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
-
-Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restantes, accesibles en cualquier momento desde el menú lateral del Dashboard: el inventario de productos y lotes, el registro de compras a proveedores, la gestión de usuarios y roles, y el monitoreo ambiental que presenta las lecturas del sensor. Los cuatro comparten la misma estructura de listado con buscador descrita al inicio de la sección.
 
 % ═══════════════════════════════════════════════════════════════════════════
 % WIREFLOW — FIGURA 5: MÓDULOS ADICIONALES (rejilla 2×2)
