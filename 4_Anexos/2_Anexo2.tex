@@ -3,34 +3,41 @@
 \renewcommand{\thesection}{A2.\arabic{section}}
 \setcounter{section}{0}
 
-En este apartado se vera todo lo relacionado al mantenimiento de la integridad físico-química de los productos farmacéuticos que están intrínsecamente ligado al control estricto de las variables macroambientales en sus áreas de almacenamiento y distribución. 
-\section{Normas Oficiales Mexicanas (NOM)}
+Este anexo reúne la normativa mexicana que regula las condiciones de almacenamiento de los medicamentos. Estos documentos son la razón por la que el sistema incluye monitoreo ambiental: los rangos de temperatura y humedad que el nodo sensor vigila, y los umbrales a partir de los cuales la interfaz web genera alertas, provienen directamente de lo que aquí se describe. La vigilancia del cumplimiento de estas disposiciones corresponde a la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS).
 
-Los medicamentos catalogados como sensibles a la humedad experimentan tasas de degradación acelerada ante desviaciones térmicas, lo que compromete su eficacia terapéutica y la seguridad del paciente. Almacenarlos fuera de estos rangos puede degradar su composición química y representar un riesgo para el paciente. En México, la Comisión Federal para la Protección contra Riesgos Sanitarios (COFEPRIS) vigila el cumplimiento de un conjunto de Normas Oficiales Mexicanas (NOM) que dictan los criterios de ingeniería y control de calidad aplicables.
+\section{NOM-073-SSA1-2015: Estabilidad de fármacos y medicamentos}
 
-\subsection{NOM-073-SSA1-2015: Estabilidad de Fármacos y Medicamentos}
+Esta norma \cite{nom073} regula los estudios de estabilidad, es decir, las pruebas con las que se determina cuánto tiempo conserva un medicamento sus propiedades y bajo qué condiciones debe almacenarse. De estos estudios se derivan la fecha de caducidad y la leyenda de conservación que aparece en el empaque de cada producto.
 
-La NOM-073-SSA1-2015 \cite{nom073} establece las condiciones de temperatura y humedad relativa bajo las cuales deben conservarse los medicamentos para garantizar su estabilidad. Para México, que se clasifica en las Zonas Climáticas II y IVb, los rangos de referencia para almacenamiento son:
+Para efectos de estos estudios, la norma clasifica a la República Mexicana en la \textbf{Zona Climática II} (clima subtropical con posible humedad elevada), conforme a la clasificación de la Organización Mundial de la Salud. A partir de esa clasificación se establecen las condiciones de conservación a largo plazo que sirven de referencia para el almacenamiento:
 
 \begin{itemize}
-    \item \textbf{Temperatura ambiente:} máximo $30~^{\circ}\text{C}$ con una humedad relativa máxima de $65\%$.
+    \item \textbf{Temperatura ambiente:} máximo $30~^{\circ}\text{C}$, con humedad relativa máxima de $65\%$.
     \item \textbf{Refrigeración:} entre $2~^{\circ}\text{C}$ y $8~^{\circ}\text{C}$, para medicamentos que requieren cadena de frío.
 \end{itemize}
 
-Estos rangos son los que el sistema utiliza como referencia para configurar los umbrales de alerta del nodo sensor: cuando la temperatura o la humedad supera los valores establecidos, el sistema notifica al administrador para que tome medidas correctivas.
+Estos son los valores que el sistema utiliza como umbrales de alerta: cuando la temperatura o la humedad del área de almacenamiento supera los límites, el tablero de la interfaz web lo señala para que el personal tome medidas correctivas.
 
-\subsection{NOM-059-SSA1-2015: Buenas Prácticas de Fabricación de Medicamentos}
+\section{NOM-059-SSA1-2015: Buenas prácticas de fabricación de medicamentos}
 
-Esta norma técnico-sanitaria establece los requisitos mínimos para la fabricación y conservación de productos farmacéuticos. Desde la perspectiva de la ingeniería de sistemas y automatización, la NOM-059-SSA1-2015 introduce dos conceptos críticos:
+Esta norma \cite{nom059} está dirigida a los establecimientos que fabrican medicamentos, por lo que no aplica de manera directa a una farmacia. Se incluye como referencia porque de ella provienen dos prácticas que orientaron el diseño del monitoreo ambiental del proyecto:
 
 \begin{itemize}
-    \item Mapeo Térmico y de Humedad: Proceso analítico-experimental que exige determinar la distribución tridimensional de las variables ambientales dentro de un volumen de almacenamiento. El sistema automatizado de monitoreo debe desplegar sus sensores, específicamente en los "puntos críticos" (puntos más fríos, más cálidos y de mayor oscilación de humedad) identificados durante ese mapeo.
+    \item \textbf{Mapeo térmico y de humedad:} antes de instalar un sistema de monitoreo, la norma pide identificar los puntos críticos del área de almacenamiento (los más fríos, los más calientes y los de mayor variación de humedad) para colocar los sensores donde las condiciones son menos favorables, y no donde resulte más cómodo. Este criterio se retoma en las recomendaciones de instalación del nodo sensor.
 
-
-    \item Validación de Sistemas Computarizados: Cualquier plataforma digital, firmware o software orientado al registro y control de variables que afecten la calidad del medicamento debe ser validado. El sistema de adquisición de datos debe garantizar la integridad, trazabilidad y seguridad de la información, impidiendo la manipulación o pérdida de registros históricos.
-
+    \item \textbf{Validación de sistemas computarizados:} todo sistema digital que registre variables que afecten la calidad del medicamento debe garantizar la integridad y trazabilidad de la información, impidiendo la alteración o pérdida de los registros históricos. En el sistema desarrollado, las lecturas del sensor se almacenan en la base de datos con fecha y hora, y la interfaz web no ofrece ninguna función para editarlas o eliminarlas.
 \end{itemize}
 
-\subsection{Suplemento de la FEUM para Establecimientos de Venta y Suministro}
+\section{Suplemento de la FEUM para establecimientos de venta y suministro}
 
-Para los entornos de dispensación final (farmacias y almacenes de distribución), el Suplemento de la Farmacopea de los Estados Unidos Mexicanos (FEUM) vigente opera los límites de tolerancia ambiental. El sistema de instrumentación y monitoreo automatizado debe calibrarse y parametrizarse bajo los umbrales operativos. Los sensores de temperatura y humedad integrados en los nodos IoT deben contar con certificados de calibración trazables ante el Centro Nacional de Metrología (CENAM) u organismos acreditados bajo la norma ISO/IEC 17025, garantizando una incertidumbre expandida máxima de $\pm 0.5 \text{ }^{\circ}\text{C}$ y $\pm 3.0\% \text{ HR}$.
+El Suplemento de la Farmacopea de los Estados Unidos Mexicanos (FEUM) \cite{feum-suplemento} es el documento que aplica directamente a las farmacias. Establece los requisitos de operación de los establecimientos dedicados a la venta y suministro de medicamentos, y en materia de condiciones ambientales dispone lo siguiente:
+
+\begin{itemize}
+    \item Las áreas de almacenamiento deben mantenerse ventiladas, a una temperatura no mayor de $30~^{\circ}\text{C}$ y con humedad relativa no mayor de $65\%$, en congruencia con la NOM-073-SSA1-2015.
+
+    \item El establecimiento debe contar con instrumentos de medición de temperatura y humedad (termohigrómetros) con certificado de calibración vigente, trazable a patrones nacionales o internacionales.
+
+    \item Las condiciones ambientales deben registrarse \textbf{al menos tres veces al día} (o tres veces por turno, si el establecimiento opera por turnos), y los registros deben conservarse como evidencia del cumplimiento.
+\end{itemize}
+
+Este último punto es el que el proyecto atiende de manera más directa: el registro manual tres veces al día depende de que el personal lo recuerde y lo capture correctamente, mientras que el nodo sensor toma una lectura cada 30 segundos y la almacena de forma automática, generando un historial continuo que supera ampliamente el mínimo exigido. Cabe señalar que, para efectos de una verificación sanitaria formal, el instrumento de medición requeriría además un certificado de calibración emitido por un laboratorio acreditado, trámite que queda fuera del alcance de este trabajo y se señala como paso previo a la operación definitiva del sistema.
