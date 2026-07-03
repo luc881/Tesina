@@ -36,8 +36,24 @@ Borrado lógico &
 Técnica de eliminación de registros en la que el elemento no se suprime físicamente de la base de datos, sino que se marca con una fecha de baja. Permite conservar el historial de operaciones vinculadas al registro y reactivarlo en el futuro sin pérdida de información. En este proyecto se aplica a usuarios, roles, sucursales y productos. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
+Cadena de frío &
+Sistema de conservación que mantiene un producto dentro de un rango de temperatura controlado —típicamente entre 2\,°C y 8\,°C— desde su fabricación hasta su entrega. Algunos medicamentos la requieren de forma obligatoria para conservar su efectividad. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Despliegue &
+Proceso de publicar una aplicación en un servidor para que quede disponible a sus usuarios finales a través de internet. En este proyecto, la interfaz web se despliega en Vercel y el servidor junto con la base de datos en Railway. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
 Endpoint &
 Dirección específica dentro de una API a la que se envían solicitudes para realizar una operación determinada, como consultar el inventario o registrar una venta. Funciona de forma similar a un número de extensión: cada operación disponible en el servidor tiene su propia dirección única. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Esquema (base de datos) &
+Estructura que define las tablas de una base de datos, las columnas de cada una y las relaciones entre ellas. Funciona como el plano sobre el que se organiza toda la información del sistema; en este proyecto evolucionó mediante doce migraciones durante el desarrollo. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Firmware &
+Programa que se graba en la memoria de un microcontrolador y controla directamente su hardware. En este proyecto, el firmware del ESP32-C5 lee el sensor AHT10, actualiza las pantallas OLED y envía las lecturas al servidor cada 30 segundos. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Framework &
@@ -46,6 +62,14 @@ Estructura de software prediseñada que proporciona las herramientas, convencion
 
 Humedad relativa &
 Porcentaje de vapor de agua presente en el aire respecto al máximo que el aire puede contener a una temperatura determinada. Es una variable crítica para el almacenamiento de medicamentos, ya que valores fuera del rango recomendado degradan su composición química. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Índice (base de datos) &
+Estructura auxiliar que acelera las búsquedas sobre una tabla. Funciona como el índice de un libro: en lugar de recorrer todos los registros uno por uno, la base de datos localiza directamente los que coinciden con la consulta. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Integridad relacional &
+Propiedad que garantiza que los datos relacionados entre distintas tablas se mantengan coherentes; por ejemplo, que ninguna venta haga referencia a un producto inexistente. Se implementa mediante restricciones definidas en la propia base de datos. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Inventario &
@@ -76,8 +100,16 @@ Módulo &
 Unidad funcional independiente dentro de un sistema de software o hardware que agrupa elementos relacionados entre sí. La división en módulos facilita el mantenimiento, la comprensión y la ampliación del sistema. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
+Nodo sensor &
+Conjunto formado por el microcontrolador ESP32-C5, el sensor AHT10 y las tres pantallas OLED, alojado en el gabinete impreso en 3D. Toma lecturas de temperatura y humedad del área de almacenamiento y las transmite al servidor por Wi-Fi. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
 ORM &
 Object-Relational Mapper — Mapeador Objeto-Relacional. Herramienta que permite interactuar con una base de datos relacional utilizando objetos del lenguaje de programación, sin necesidad de escribir instrucciones SQL directamente. En este proyecto se utiliza SQLAlchemy como ORM. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Portal cautivo &
+Página web que un dispositivo genera y muestra automáticamente cuando alguien se conecta a la red Wi-Fi que él mismo emite. El nodo sensor lo utiliza durante la instalación para que el usuario le indique, desde un teléfono o computadora, a qué red de la farmacia debe conectarse. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Principio activo &
@@ -94,6 +126,14 @@ Dispositivo electrónico que detecta una magnitud física del entorno —como te
 
 Sistema embebido &
 Sistema de cómputo diseñado para realizar una función específica dentro de un dispositivo más grande, generalmente con recursos limitados de memoria y procesamiento. El ESP32-C5 programado para gestionar el sensor y la conexión Wi-Fi es un ejemplo de sistema embebido. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Tablero de indicadores &
+Pantalla principal de la interfaz web (también llamada \textit{dashboard}) que concentra en una sola vista los indicadores del negocio: ventas del día, nivel de existencias, lotes próximos a vencer y lecturas ambientales en tiempo real. \\
+\specialrule{0.3pt}{0pt}{0pt}
+
+Termohigrómetro &
+Instrumento que mide simultáneamente la temperatura y la humedad relativa del ambiente. La normativa sanitaria exige que las farmacias cuenten con uno calibrado y registren sus lecturas; en este proyecto esa función la cumple el nodo sensor de forma automática. \\
 \specialrule{0.3pt}{0pt}{0pt}
 
 Token de autenticación &
