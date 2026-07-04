@@ -15,7 +15,7 @@ En este capítulo se describe cómo se planeó y construyó el sistema. Las tres
 
 \section{Diagrama de bloques}
 
-El diagrama de bloques (Fig.~\ref{fig:cap3-diagrama-bloques}) muestra todas las piezas del sistema y los canales por los que se comunican. Se lee de izquierda a derecha en tres columnas: \textbf{entradas}, \textbf{procesos} y \textbf{salidas}.
+El primer paso del diseño fue definir qué piezas tendría el sistema y por qué canales se comunicarían, antes de construir cualquiera de ellas. El resultado de esa definición es el diagrama de bloques (Fig.~\ref{fig:cap3-diagrama-bloques}), que se lee de izquierda a derecha en tres columnas: \textbf{entradas}, \textbf{procesos} y \textbf{salidas}.
 
 La columna de \textbf{entradas} contiene los dispositivos que capturan información: el sensor AHT10, que mide la temperatura y la humedad del área de almacenamiento; el lector de código de barras, que captura el código de cada producto durante una venta y lo entrega por USB o Bluetooth; y el equipo del usuario (computadora, tableta o teléfono), desde el que el personal opera el sistema.
 
@@ -39,7 +39,9 @@ Un ejemplo permite recorrer el diagrama completo: una lectura de temperatura nac
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Diagrama de casos de uso}
 
-Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores}: los tipos de usuario del sistema, más el propio sensor. Los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función. Las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base; usar el escáner, por ejemplo, es una extensión opcional de registrar una venta, no un paso obligatorio.
+Definidas las piezas del sistema, el siguiente paso del diseño fue delimitar quién lo usaría y qué podría hacer cada quien. Ese análisis se documentó en diagramas de casos de uso, y de él se derivó la estructura de roles y permisos que la base de datos y la API implementan más adelante.
+
+En estos diagramas, las figuras de personas en los extremos son los \textbf{actores}: los tipos de usuario del sistema, más el propio sensor. Los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función. Las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base; usar el escáner, por ejemplo, es una extensión opcional de registrar una venta, no un paso obligatorio.
 
 Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama se dividió en dos figuras para que se mantenga legible: la Fig.~\ref{fig:cap3-uc-operaciones} cubre la operación diaria del punto de venta y el inventario, y la Fig.~\ref{fig:cap3-uc-administracion} cubre la administración del sistema y el monitoreo ambiental.
 
@@ -71,9 +73,9 @@ La Fig.~\ref{fig:cap3-uc-administracion} completa el panorama con los tres actor
 % ═══════════════════════════════════════════════════════════════════════════
 \section{Flujo de pantallas}
 
-Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional, que solo muestra decisiones y pasos, el flujo de pantallas incluye la apariencia aproximada de cada pantalla: se ve tanto qué hace el usuario como qué tiene enfrente en cada momento.
+El último elemento del diseño general fue la interacción: antes de programar la interfaz se definió qué pantallas existirían, cómo se llegaría de una a otra y qué patrón repetirían todos los módulos (un listado con su pantalla de alta). Esta sección documenta ese diseño mediante un flujo de pantallas, una representación que combina las pantallas del sistema con el recorrido de navegación entre ellas: se ve tanto qué hace el usuario como qué tiene enfrente en cada momento.
 
-Esta sección se apoya en el diagrama de navegación, que funciona como el mapa general de todas las pantallas del sistema, y lo usa como ejemplo visual: primero se presenta el mapa completo y después se recorre, con las pantallas reales del sistema, la ruta más importante de ese mapa, que es el registro de una venta.
+En las figuras, el diseño se ilustra con las pantallas ya implementadas en lugar de bocetos, porque permiten ver el recorrido tal como lo vive el usuario final; las pruebas de estos recorridos corresponden al Capítulo 4. La sección presenta primero el diagrama de navegación, que es el mapa general de todas las pantallas, y después recorre la ruta más importante de ese mapa: el registro de una venta.
 
 \subsection{Diagrama de navegación}
 
@@ -651,7 +653,7 @@ La segunda es que genera automáticamente una página de documentación interact
 
 \subsection{Arquitectura en capas}
 
-La API funciona como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
+La API se diseñó como una serie de filtros por los que pasa cada petición antes de poder interactuar con la base de datos. Se separó en filtros distintos porque cada uno tiene una responsabilidad diferente: si en algún momento cambia una regla de seguridad o una validación del negocio, solo se modifica ese filtro sin tocar el resto.
 
 El primer filtro actúa como un enrutador: dependiendo de la dirección de la petición, determina a qué operación corresponde y la redirige al área correspondiente, de forma similar a como un router de red decide por qué camino enviar el tráfico. El segundo filtro verifica que el usuario esté identificado y que tenga permiso para realizar esa operación; si no cumple alguna de las dos condiciones, la petición es rechazada sin continuar. El tercero aplica las reglas del negocio, como confirmar que hay existencias suficientes antes de registrar una venta. El último ejecuta la operación sobre la base de datos y devuelve el resultado al cliente.
 
@@ -700,7 +702,7 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \subsection{Modelos ORM con SQLAlchemy}
 
-Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en la sección de la base de datos se representa como una clase. Así se trabaja con objetos en lugar de instrucciones SQL escritas a mano, y la definición del esquema queda centralizada en un único lugar: cualquier modificación (agregar una columna, renombrar un campo) se aplica una sola vez y se refleja en toda la aplicación.
+Para interactuar con la base de datos desde el código Python se decidió representar cada tabla del esquema como una clase. Así se trabaja con objetos en lugar de instrucciones SQL escritas a mano, y la definición del esquema queda centralizada en un único lugar: cualquier modificación (agregar una columna, renombrar un campo) se aplica una sola vez y se refleja en toda la aplicación.
 
 Como ejemplo, el siguiente fragmento del código de la API muestra la clase que representa la tabla de lotes de inventario:
 
@@ -728,7 +730,7 @@ Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabl
 
 \subsection{Validación de los datos de entrada}
 
-Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato (un precio negativo, un campo requerido ausente) se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
+Para cada operación de la API se definió un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato (un precio negativo, un campo requerido ausente) se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
 
 
 \subsection{Autenticación y autorización}
@@ -784,7 +786,7 @@ Para el segundo requisito, la \textbf{autorización}, se decidió que cada opera
 \newpage
 \subsection{Endpoints por módulo}
 
-Los 23 grupos de rutas de la API se organizan en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
+Los 23 grupos de rutas de la API se organizaron en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
 
 \begin{table}[H]
 \centering
@@ -862,7 +864,7 @@ Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajust
 
 \subsection{Estructura e interfaz de la aplicación}
 
-La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados (tablas paginadas, formularios, diálogos, selectores de fecha) que da consistencia visual a toda la aplicación y evita desarrollar esos elementos desde cero.
+La aplicación se organizó en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). Para el enrutamiento entre vistas se utilizó React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados (tablas paginadas, formularios, diálogos, selectores de fecha) que da consistencia visual a toda la aplicación y evita desarrollar esos elementos desde cero.
 
 La Fig.~\ref{fig:cap3-screenshot} muestra la disposición general de la interfaz con el módulo de inventario como ejemplo. A la izquierda, una barra lateral siempre visible agrupa los dieciséis módulos en las mismas cuatro áreas del diagrama de navegación (General, Punto de venta, Operaciones y Sistema), con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros, la tabla de datos con los registros y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario de la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
 
@@ -877,15 +879,15 @@ La Fig.~\ref{fig:cap3-screenshot} muestra la disposición general de la interfaz
 
 \subsection{Gestión de datos y formularios}
 
-El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} (usuario, rol y permisos) se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
+Al diseñar el manejo de la información dentro de la aplicación se separaron dos responsabilidades. El \textbf{estado de sesión} (usuario, rol y permisos) se colocó en un contexto global, de modo que cualquier módulo pueda consultarlo para decidir qué mostrar y qué operaciones habilitar. Para los \textbf{datos del servidor} se optó por una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación, lo que evita recargar la página y reduce las peticiones repetidas a la API.
 
-Los formularios validan cada campo antes de enviar la petición a la API: si un dato no cumple las reglas, el formulario lo señala visualmente sin llegar a generar una petición al servidor.
+Los formularios se diseñaron para validar cada campo antes de enviar la petición: si un dato no cumple las reglas, se señala visualmente sin llegar a generar tráfico al servidor.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye automáticamente en cada petición posterior. Cuando el token expira, se renueva sin interrumpir la sesión ni avisar al usuario. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token los incluya, en línea con la estructura de roles del sistema.
+La API exige un token en cada petición y ese token caduca a los 30 minutos, de modo que al diseñar la interfaz hubo que resolver tres problemas: dónde guardar el token, cómo incluirlo en todas las peticiones sin repetir código en dieciséis módulos, y cómo renovarlo sin interrumpir al usuario.
 
-El siguiente fragmento del código de la interfaz es la función que administra la sesión; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
+La decisión fue concentrar toda la gestión de la sesión en una sola función, en lugar de repartirla por la aplicación. Esa función guarda el token en el almacenamiento del navegador, lo registra como encabezado por defecto de todas las peticiones y programa su renovación automática leyendo la fecha de caducidad que el propio token trae dentro. El siguiente fragmento del código de la interfaz muestra esa función; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
 
 \begin{lstlisting}
 export async function setSession(accessToken) {
@@ -903,9 +905,9 @@ export async function setSession(accessToken) {
 }
 \end{lstlisting}
 
-Cuando hay token, la función lo guarda en el almacenamiento del navegador, lo registra como encabezado por defecto y programa su renovación automática leyendo la fecha de expiración contenida en el propio token. A partir de ese momento toda petición a la API lo lleva incluido, sin código adicional en cada módulo. Cuando no hay token, revierte esos tres pasos y la sesión queda cerrada.
+Cuando recibe un token, la función ejecuta los tres pasos del diseño (guardar, registrar como encabezado, programar la renovación); cuando se llama sin token, los revierte y la sesión queda cerrada.
 
-Lo que se obtiene con esta función es que ningún otro componente de la aplicación tenga que ocuparse de la autenticación: los dieciséis módulos realizan sus peticiones sin mencionar el token, y la renovación ocurre en segundo plano sin que el usuario vuelva a ingresar su contraseña.
+Con esto, ningún otro componente tiene que ocuparse de la autenticación: los dieciséis módulos hacen sus peticiones sin mencionar el token y la renovación ocurre en segundo plano, sin que el usuario vuelva a escribir su contraseña. Sobre esta misma base se protegieron las rutas de la aplicación: si no hay sesión activa, cualquier intento de abrir una pantalla redirige al inicio de sesión, y las operaciones que exigen permisos específicos comprueban que el token los incluya, en línea con la estructura de roles del sistema.
 
 \subsection{Despliegue en Vercel}
 
@@ -929,7 +931,7 @@ Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativ
 
 \subsection{Arquitectura del nodo}
 
-El sensor AHT10 y las tres pantallas OLED se comunican con el ESP32-C5 mediante I\textsuperscript{2}C, una interfaz que requiere solo dos conductores por conexión. Las pantallas utilizadas tienen una dirección de fábrica que no puede cambiarse, por lo que no pueden convivir en una misma línea de comunicación; se aprovechó que el ESP32-C5 permite habilitar varios buses I\textsuperscript{2}C simultáneos y cada pantalla se conectó a un bus propio, al igual que el sensor. La alimentación proviene de una fuente USB de 5\,V y la conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
+El sensor AHT10 y las tres pantallas OLED se conectaron al ESP32-C5 mediante I\textsuperscript{2}C, una interfaz que requiere solo dos conductores por conexión. Las pantallas utilizadas tienen una dirección de fábrica que no puede cambiarse, por lo que no pueden convivir en una misma línea de comunicación; se aprovechó que el ESP32-C5 permite habilitar varios buses I\textsuperscript{2}C simultáneos y cada pantalla se conectó a un bus propio, al igual que el sensor. La alimentación proviene de una fuente USB de 5\,V y la conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
 
 \begin{figure}[H]
 \centering
@@ -1000,7 +1002,7 @@ El sensor AHT10 y las tres pantallas OLED se comunican con el ESP32-C5 mediante 
 
 \subsection{Funcionamiento del firmware}
 
-El firmware sigue el modelo de Arduino: una función de configuración inicial que se ejecuta una sola vez al encender el dispositivo (inicializa el bus I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi) y un ciclo operativo continuo que realiza las lecturas cada 30 segundos y las envía a la API. El ciclo utiliza temporización no bloqueante: en lugar de pausar el programa durante la espera, compara continuamente el tiempo transcurrido, lo que permite verificar el estado de la conexión WiFi en cada iteración.
+El firmware se estructuró según el modelo de Arduino: una función de configuración que se ejecuta una sola vez al encender el dispositivo (inicializa los buses I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi) y un ciclo continuo que realiza las lecturas cada 30 segundos y las envía a la API. Para la espera entre lecturas se decidió no pausar el programa, sino comparar continuamente el tiempo transcurrido: así el ciclo puede vigilar la conexión WiFi y el botón de reinicio en cada vuelta, en lugar de quedarse congelado 30 segundos.
 
 Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red (por ejemplo, al reubicar el dispositivo), mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
 
@@ -1190,7 +1192,7 @@ Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para qu
 \clearpage
 \section{Diseño e impresión del gabinete físico}
 
-El quinto objetivo específico consistió en diseñar y fabricar el gabinete que aloja el nodo sensor. Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
+El quinto objetivo específico consistió en diseñar y fabricar el gabinete que aloja el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido. Se optó por un diseño a medida fabricado mediante \textbf{impresión 3D} porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente, y adaptar una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
 
 El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
@@ -1213,8 +1215,10 @@ Cada decisión de diseño respondió a una restricción práctica. El ensamble a
 \clearpage
 \section{Integración del lector de código de barras}
 
-El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. El dispositivo elegido es un lector USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
+El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un lector USB que el sistema operativo reconoce como un teclado estándar: desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
 
 El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
 
-Al escanear un código, la aplicación lo compara contra el catálogo de productos cargado en memoria al abrir el formulario. Si hay coincidencia, el producto se agrega a la lista de artículos de la venta; si no la hay, el campo muestra una señal de error. La búsqueda se resuelve localmente sin generar una petición al servidor por cada código, lo que evita la latencia de red en un flujo donde múltiples artículos se escanean en secuencia rápida. El modo se desactiva automáticamente cuando el usuario hace clic fuera del área de escaneo.
+La búsqueda del código se diseñó para resolverse localmente: el catálogo de productos se carga en memoria al abrir el formulario y cada código escaneado se compara contra él, sin generar una petición al servidor por artículo. Esto evita la latencia de red en un flujo donde varios artículos se escanean en secuencia rápida. Si hay coincidencia, el producto se agrega a la venta; si no la hay, el campo muestra una señal de error. El modo se desactiva automáticamente al hacer clic fuera del área de escaneo.
+
+Con esto quedan descritos el diseño y la construcción de los seis componentes planteados en los objetivos: la base de datos, la API, la interfaz web, el nodo sensor, su gabinete y la integración del lector. El Capítulo 4 documenta las pruebas a las que se sometió cada componente y los ajustes que resultaron de ellas.
