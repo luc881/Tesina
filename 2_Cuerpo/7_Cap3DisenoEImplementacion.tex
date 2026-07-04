@@ -503,7 +503,7 @@ Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restant
 
 \section{Desarrollo de la base de datos en PostgreSQL}
 
-Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
+Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
 \subsection{Selección de PostgreSQL}
 
@@ -535,11 +535,9 @@ Esta separación hace que las tablas de un módulo puedan crecer o modificarse s
 \clearpage
 \subsection{Módulo 1: Autenticación y control de acceso}
 
-Este módulo agrupa las cinco tablas relacionadas con el acceso al sistema: usuarios, roles, permisos, la relación entre roles y permisos, y sucursales.
+Este módulo agrupa cinco tablas: usuarios, roles, permisos, la relación entre roles y permisos, y sucursales. El acceso se estructuró por roles: cada usuario pertenece a un rol (\textit{administrador}, \textit{cajero}) y el rol define qué operaciones puede realizar, de modo que cambiar los privilegios de un grupo requiere modificar solo el rol y no cada cuenta.
 
-El control de acceso se estructuró por roles: cada usuario pertenece a un rol (por ejemplo, \textit{administrador} o \textit{cajero}) y el rol define qué operaciones puede realizar. Esto simplifica la administración: cambiar los privilegios de un grupo de usuarios requiere modificar únicamente el rol, no cada cuenta individualmente.
-
-Para los registros que no deben eliminarse permanentemente (usuarios, roles y sucursales) se optó por conservarlos en la base de datos y anotar la fecha de baja en una columna adicional. Esto es necesario porque el historial de ventas referencia al usuario que realizó cada transacción; eliminar físicamente ese registro rompería esa relación.
+Los usuarios, roles y sucursales no se eliminan físicamente: se marcan con una fecha de baja. El historial de ventas referencia al usuario que realizó cada transacción, y borrar ese registro rompería esa relación.
 
 % -------------------------------------------------------
 % DIAGRAMA 1 — Módulo de Autenticación y Control de Acceso
@@ -559,13 +557,9 @@ Para los registros que no deben eliminarse permanentemente (usuarios, roles y su
 \clearpage
 \subsection{Módulo 2: Catálogo de productos}
 
-Este módulo gestiona la información de los medicamentos a través de seis tablas: el catálogo general de productos, los medicamentos genéricos, las categorías, las marcas, los ingredientes activos y la relación entre productos e ingredientes.
+Este módulo gestiona la información de los medicamentos en seis tablas: el catálogo de productos, los medicamentos genéricos, las categorías, las marcas, los ingredientes activos y la relación entre productos e ingredientes.
 
-Se separó el medicamento genérico de sus presentaciones comerciales. Por ejemplo, \textit{Paracetamol} existe como un único registro genérico, y cada presentación (\textit{Paracetamol 500~mg tabletas}, \textit{Paracetamol suspensión 250~mg/5~ml}) es un registro distinto que apunta a ese genérico. Esto evita repetir el nombre del principio activo en cada presentación y permite agrupar reportes por nombre genérico sin trabajo adicional.
-
-Las categorías se organizan en una jerarquía de niveles: una categoría puede contener subcategorías, y estas pueden contener otras más específicas (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}). Todo esto se almacena en una sola tabla, sin límite fijo de profundidad.
-
-La relación entre productos e ingredientes activos se registra con la cantidad y unidad de medida de cada componente. Guardar esta información en la base de datos, y no únicamente en la etiqueta física, hace posible buscar o filtrar medicamentos por principio activo directamente desde la aplicación.
+La decisión principal fue separar el medicamento genérico de sus presentaciones comerciales: \textit{Paracetamol} existe una sola vez como genérico y cada presentación (tabletas de 500~mg, suspensión) es un registro que apunta a él, lo que permite agrupar reportes por nombre genérico. Las categorías forman una jerarquía sin límite de profundidad (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) almacenada en una sola tabla, y la relación entre producto e ingrediente guarda la cantidad y su unidad, lo que hace posible buscar medicamentos por principio activo desde la aplicación.
 
 % -------------------------------------------------------
 % DIAGRAMA 2 — Módulo de Catálogo de Productos
@@ -583,11 +577,9 @@ La relación entre productos e ingredientes activos se registra con la cantidad 
 \clearpage
 \subsection{Módulo 3: Inventario y compras}
 
-Este módulo controla las existencias físicas y el abastecimiento. Sus tablas registran los lotes de cada producto, los proveedores y las órdenes de compra con el detalle de cada línea.
+Este módulo controla las existencias y el abastecimiento: los lotes de cada producto, los proveedores y las órdenes de compra con su detalle.
 
-El inventario se gestiona a nivel de \textbf{lote}, no solo por producto. Cada lote tiene su propio código, fecha de caducidad y cantidad disponible. Esto es necesario en una farmacia porque las regulaciones de buenas prácticas de almacenamiento establecen que los medicamentos deben despacharse en orden de caducidad: primero los lotes que vencen antes. Sin este desglose por lote, el sistema sabría cuántas unidades hay de un producto, pero no podría determinar cuál lote se está consumiendo en cada venta.
-
-Durante el análisis se identificó una situación particular: algunos medicamentos ingresan a la farmacia sin número de lote asignado por el fabricante. Para no bloquear ese registro, la restricción de unicidad sobre el código de lote se configuró para aplicar solo cuando el código existe. Si no hay código, se aceptan múltiples entradas del mismo producto sin conflicto; cuando sí lo hay, no puede duplicarse para el mismo producto, lo que previene registros erróneos.
+El inventario se gestiona por \textbf{lote}, no solo por producto: cada lote tiene su código, su fecha de caducidad y su cantidad disponible. Sin este desglose, el sistema sabría cuántas unidades hay, pero no cuál lote debe despacharse primero según su vencimiento. Además, como algunos medicamentos llegan sin número de lote del fabricante, la restricción que impide códigos duplicados se aplica solo cuando el código existe: los productos sin lote se registran sin conflicto y los que sí lo tienen no pueden duplicarse.
 
 % -------------------------------------------------------
 % DIAGRAMA 3 — Módulo de Inventario y Compras
@@ -605,15 +597,11 @@ Durante el análisis se identificó una situación particular: algunos medicamen
 \clearpage
 \subsection{Módulo 4: Registro de ventas}
 
-Este módulo registra las transacciones comerciales a través de cinco tablas: la venta en sí, el detalle de productos incluidos, el vínculo con los lotes descontados, los pagos y las devoluciones.
+Este módulo registra las transacciones en cinco tablas: la venta, su detalle de productos, el vínculo con los lotes descontados, los pagos y las devoluciones.
 
-Cada venta se divide en dos niveles: un encabezado con los datos generales de la transacción (empleado, sucursal, descuento y total) y líneas de detalle con cada producto, su cantidad y precio unitario. Esta separación permite que una sola venta contenga múltiples productos sin repetir los datos generales en cada línea.
+Cada venta se divide en un encabezado con los datos generales (empleado, sucursal, descuento y total) y líneas de detalle con cada producto, su cantidad y su precio, de modo que una venta con varios productos no repite los datos generales. Cada línea queda además vinculada al lote del que salieron las unidades; ante un retiro de mercado, el sistema puede identificar exactamente qué ventas contienen el lote afectado.
 
-Adicionalmente, cada línea de detalle queda vinculada al lote específico del que se descontaron las unidades. Esto permite rastrear, dado un lote, en qué ventas fue despachado. En el contexto farmacéutico es relevante ante un retiro de mercado: el sistema puede identificar exactamente qué ventas contienen el lote afectado.
-
-La venta puede encontrarse en uno de tres estados: en progreso, completada o cancelada. El descuento del inventario ocurre únicamente al confirmar la transacción, no antes. Esto evita que una venta que no se concreta descuente existencias.
-
-Los pagos se registran en una tabla separada para soportar el cobro con más de un método: una transacción puede liquidarse parte en efectivo y parte con tarjeta, registrando cada pago de forma independiente.
+La venta maneja tres estados (en progreso, completada o cancelada) y el inventario se descuenta solo al confirmarla, para que una venta que no se concreta no reste existencias. Los pagos van en una tabla separada para permitir cobros mixtos: parte en efectivo y parte con tarjeta.
 
 % -------------------------------------------------------
 % DIAGRAMA 4 — Módulo de Registro de Ventas
@@ -631,9 +619,7 @@ Los pagos se registran en una tabla separada para soportar el cobro con más de 
 \clearpage
 \subsection{Módulo 5: Mediciones del sensor}
 
-Este módulo comprende una sola tabla que almacena cada medición enviada por el nodo electrónico: la temperatura, la humedad, la fecha y hora del registro, y un identificador del dispositivo que la envió.
-
-El identificador se definió como un texto simple en lugar de crear una tabla de dispositivos aparte, ya que el sistema opera con un único nodo sensor. Agregar esa tabla representaría complejidad sin beneficio inmediato; el identificador como texto es suficiente para distinguir nodos adicionales en el futuro sin necesidad de modificar el esquema.
+Este módulo comprende una sola tabla, donde cada fila es una medición del nodo sensor: temperatura, humedad, fecha y hora, y el identificador del dispositivo que la envió. El identificador se definió como un texto simple en lugar de crear una tabla de dispositivos aparte: el sistema opera con un solo nodo y ese texto basta para distinguir nodos adicionales en el futuro sin modificar el esquema.
 
 % TODO: subir 0_imagenes/Cap3/DiagramaSensor.png a Overleaf para descomentar
 %\begin{figure}[H]
@@ -644,10 +630,6 @@ El identificador se definió como un texto simple en lugar de crear una tabla de
 %    \vspace{0.2cm}
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
-
-Con esta estructura, el esquema cubre la totalidad de las entidades descritas en el objetivo: el módulo de autenticación gestiona los usuarios y el control de acceso, el catálogo y el inventario cubren los productos y sus niveles de existencia por lote, el módulo de ventas registra las transacciones comerciales y su trazabilidad, y el módulo de sensor almacena las mediciones ambientales del nodo electrónico.
-
-
 
 
 % =============================================
@@ -751,9 +733,11 @@ Cada operación de la API define un contrato: qué información acepta cuando el
 
 \subsection{Autenticación y autorización}
 
-El acceso al sistema se controla en dos pasos. El primero es la \textbf{autenticación}: al iniciar sesión, la API verifica la contraseña y, si es correcta, emite un \textbf{token de sesión} con vigencia de 30 minutos que contiene el identificador del usuario y sus permisos. Este token acompaña cada petición posterior; el servidor lo verifica sin consultar la base de datos, ya que la información necesaria está incluida y firmada dentro del propio token. Cuando expira, se renueva de forma automática sin que el usuario tenga que ingresar su contraseña de nuevo.
+El diseño del control de acceso partió de dos requisitos: que cada petición pudiera verificarse sin consultar la base de datos, para no sumar una consulta adicional a cada operación del sistema, y que los permisos definidos en la base de datos fueran exactamente los que se aplican al momento de operar.
 
-El segundo paso es la \textbf{autorización}: cada operación de la API declara qué permiso requiere para ejecutarse. Antes de procesar la petición, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada. Esto conecta con la estructura de roles definida en la base de datos: un cajero puede registrar ventas pero no modificar usuarios ni configurar sucursales.
+Para el primer requisito se decidió usar \textbf{tokens firmados}. Al iniciar sesión, la API verifica la contraseña (que se almacena cifrada, nunca en texto legible) y emite un token de sesión con vigencia de 30 minutos que lleva dentro la identidad y los permisos del usuario; como el token va firmado, el servidor confía en su contenido sin volver a consultar la base de datos. La vigencia se fijó corta a propósito, para limitar el daño si un token llegara a ser interceptado. Y para que esa vigencia corta no obligue al usuario a escribir su contraseña cada 30 minutos, se emite también un token de renovación válido por 7 días, con el que la sesión se extiende en segundo plano.
+
+Para el segundo requisito, la \textbf{autorización}, se decidió que cada operación de la API declare el permiso que exige y lo compruebe contra el token antes de ejecutarse. Así, la estructura de roles definida en la base de datos se aplica en cada petición: un cajero puede registrar ventas, pero no modificar usuarios ni configurar sucursales. La Fig.~\ref{fig:cap3-jwt-flujo} resume el flujo resultante.
 
 \begin{figure}[H]
 \centering
@@ -863,7 +847,6 @@ Lo que se obtiene al invocar esta operación es una respuesta en formato JSON co
 La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tanto el servidor como la base de datos PostgreSQL en el mismo entorno. Se evaluaron otras opciones como AWS o servidores dedicados, pero resultaban sobredimensionadas para un sistema con una sola instalación activa: Railway ofrece los mismos componentes esenciales a un costo significativamente menor y sin la complejidad de configuración que implica una infraestructura de mayor escala. Cada vez que se publica una nueva versión del código, el despliegue se actualiza de forma automática.
 
 
-
 % =============================================
 % OE 3: FRONTEND REACT
 % =============================================
@@ -927,7 +910,6 @@ Lo que se obtiene con esta función es que ningún otro componente de la aplicac
 \subsection{Despliegue en Vercel}
 
 La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en aplicaciones JavaScript modernas. Se eligió sobre alternativas como AWS por la misma razón de escala que Railway: ofrece red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización, sin la complejidad de una infraestructura mayor. Se configuró además una regla de enrutamiento que redirige cualquier URL al punto de entrada de la aplicación, necesaria para que React Router pueda gestionar la navegación correctamente cuando el usuario accede directamente a una ruta o recarga la página.
-
 
 
 % =============================================
@@ -1049,10 +1031,6 @@ La función realiza cuatro pasos. Primero activa el canal de comunicación del s
 Lo que se obtiene en cada ciclo es un mensaje en formato JSON, por ejemplo \texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}, que la API almacena en la base de datos como se mostró en la sección de la API, y que aparece segundos después en el tablero de la aplicación web.
 
 El envío se realiza mediante una petición cifrada (HTTPS). El intervalo de 30 segundos entre lecturas balancea el detalle del historial con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
-
-\subsection{Pantallas OLED}
-
-Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Como los módulos vienen de fábrica con una dirección I\textsuperscript{2}C fija que no puede modificarse, las tres pantallas no pueden compartir una sola línea de comunicación: cada una opera en un bus I\textsuperscript{2}C independiente del ESP32-C5, separado también del bus que usa el sensor. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
 Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración (con tres minutos como tiempo límite) y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
 
@@ -1200,6 +1178,10 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
+\subsection{Pantallas OLED}
+
+Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Como los módulos vienen de fábrica con una dirección I\textsuperscript{2}C fija que no puede modificarse, las tres pantallas no pueden compartir una sola línea de comunicación: cada una opera en un bus I\textsuperscript{2}C independiente del ESP32-C5, separado también del bus que usa el sensor. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
+
 
 % =============================================
 % OE 5: GABINETE FÍSICO
@@ -1236,48 +1218,3 @@ El sexto objetivo específico consistió en incorporar un lector de código de b
 El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
 
 Al escanear un código, la aplicación lo compara contra el catálogo de productos cargado en memoria al abrir el formulario. Si hay coincidencia, el producto se agrega a la lista de artículos de la venta; si no la hay, el campo muestra una señal de error. La búsqueda se resuelve localmente sin generar una petición al servidor por cada código, lo que evita la latencia de red en un flujo donde múltiples artículos se escanean en secuencia rápida. El modo se desactiva automáticamente cuando el usuario hace clic fuera del área de escaneo.
-
-El diagrama siguiente resume el flujo de interacción del modo lector:
-
-\begin{figure}[H]
-\centering
-\fbox{%
-\begin{tikzpicture}[
-    node distance=0.55cm,
-    box/.style={rectangle, draw, rounded corners=3pt, minimum width=8.2cm, minimum height=0.82cm, align=center, font=\small, text width=7.8cm},
-    dec/.style={diamond, draw, aspect=2.5, align=center, font=\small, inner sep=2pt},
-    ok/.style={rectangle, draw, rounded corners=3pt, fill=gray!8, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
-    err/.style={rectangle, draw, rounded corners=3pt, fill=gray!20, minimum width=3.0cm, minimum height=0.9cm, align=center, font=\small, text width=2.8cm},
-    arr/.style={-{Stealth}, thick}
-]
-\node[box, fill=gray!15]  (start) {\textbf{1.} Formulario de creación de venta abierto};
-\node[box, fill=gray!8,   below=of start] (f2)    {\textbf{2.} Usuario presiona F2 → modo lector activo};
-\node[box, fill=gray!10,  below=of f2]    (scan)  {\textbf{3.} Apuntar lector al código de barras};
-\node[box, fill=gray!10,  below=of scan]  (look)  {\textbf{4.} Buscar código en el catálogo local};
-\node[dec,                below=of look]  (found) {¿Producto\\encontrado?};
-\node[ok,  right=of found, xshift=0.6cm]  (add)   {Agregar /\\incrementar\\en la lista};
-\node[err, left=of found,  xshift=-0.6cm] (nf)    {Señal visual\\de error};
-\node[box, fill=gray!12, below=1.6cm of found] (flash) {\textbf{5.} Confirmar resultado visualmente};
-\node[dec,                below=of flash] (more)  {¿Más artículos\\por escanear?};
-\node[box, fill=gray!15,  below=of more]  (end)   {\textbf{6.} Clic fuera del área → modo desactivado};
-
-\draw[arr] (start) -- (f2);
-\draw[arr] (f2)    -- (scan);
-\draw[arr] (scan)  -- (look);
-\draw[arr] (look)  -- (found);
-\draw[arr] (found.east) -- node[above, font=\footnotesize]{Sí} (add.west);
-\draw[arr] (found.west) -- node[above, font=\footnotesize]{No} (nf.east);
-\draw[arr] (add.south)  |- (flash.east);
-\draw[arr] (nf.south)   |- (flash.west);
-\draw[arr] (flash) -- (more);
-\coordinate (loopL) at ($(more.west)+(-4.2,0)$);
-\draw[arr] (more.west) -- (loopL) -- (loopL |- scan.west) -- node[above, font=\footnotesize]{Sí} (scan.west);
-\draw[arr] (more)  -- node[left, font=\footnotesize]{No} (end);
-\end{tikzpicture}%
-}
-\caption{Diagrama de flujo del modo lector de código de barras en el registro de ventas}
-\label{fig:cap3-barcode-flujo}
-\vspace{0.2cm}
-\footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
-
