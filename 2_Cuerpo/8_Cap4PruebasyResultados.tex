@@ -154,7 +154,6 @@ El esquema final de la base de datos opera establemente en el entorno de producc
 % =============================================
 
 \clearpage
-\secbreak
 \section{Pruebas de la API REST}
 
 Para verificar el funcionamiento de la API se probó cada uno de sus módulos contra la base de datos real del sistema, en lugar de datos simulados. La razón es simple: una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias, de modo que lo verificado es idéntico a lo que se ejecuta en producción. Se cubrieron escenarios positivos (operaciones que deben completarse con éxito) y negativos (operaciones que el sistema debe rechazar) en los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
@@ -407,7 +406,6 @@ La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de 
 % =============================================
 
 \clearpage
-\secbreak
 \section{Pruebas de la interfaz web}
 
 La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo.
@@ -682,7 +680,6 @@ Con los ajustes realizados, la interfaz web quedó desplegada de forma permanent
 % =============================================
 
 \clearpage
-\secbreak
 \section{Pruebas del nodo sensor}
 
 Las pruebas del nodo sensor cubrieron tres aspectos: la correcta transmisión de las lecturas al servidor, el comportamiento del firmware ante valores fuera de rango, y la estabilidad de la conexión WiFi. Las pruebas se realizaron en el entorno de desarrollo mientras se finaliza el diseño del gabinete físico para la instalación en la farmacia.
@@ -857,7 +854,6 @@ Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo o
 % =============================================
 
 \clearpage
-\secbreak
 \section{Pruebas del gabinete impreso en 3D}
 
 Con el primer diseño del gabinete se utilizaron las dimensiones nominales de cada componente tal como las especifican los fabricantes: el largo, ancho y alto de la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
@@ -935,7 +931,6 @@ Con el segundo diseño fabricado se montaron todos los componentes y se incorpor
 \end{figure}
 
 \clearpage
-\secbreak
 \section{Pruebas del lector de código de barras}
 
 El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante USB y fue reconocido automáticamente por el sistema operativo como un dispositivo de teclado estándar, sin requerir la instalación de controladores adicionales. Se realizaron pruebas de escaneo con productos reales del inventario de la farmacia: todos los códigos de barras presentes en los productos fueron leídos correctamente y el código obtenido coincidió con el registrado en el catálogo del sistema.
@@ -956,7 +951,6 @@ La integración del lector con el flujo de registro de ventas en la interfaz web
 % =============================================
 
 \clearpage
-\secbreak
 \section{Prueba de integración del sistema}
 
 Una vez verificado cada componente por separado, se realizó una prueba de integración del sistema completo para confirmar que los cinco objetivos específicos operan de forma conjunta. El escenario de prueba cubrió el flujo de extremo a extremo más representativo del sistema: desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario, pasando por todas las capas del sistema. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado: el nodo sensor envía sus lecturas a la API, que las almacena en la base de datos; la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
@@ -1023,6 +1017,5 @@ La prueba confirmó que el flujo opera correctamente de extremo a extremo: el no
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
 
-\secbreak
 
 El único elemento pendiente al momento de la redacción de este capítulo son las pruebas de operación continua del sistema en las instalaciones de la farmacia, previstas para realizarse una vez que el gabinete físico sea entregado e instalado en el local.

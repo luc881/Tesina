@@ -7,7 +7,7 @@
 \refstepcounter{chapter}
 \addcontentsline{toc}{chapter}{Cap. 3 Diseño e Implementación}
 
-En este capítulo se describe el proceso de diseño e implementación del sistema, desarrollando cada uno de los objetivos específicos del proyecto en el orden en que fueron planteados. Para cada objetivo se presentan las decisiones técnicas tomadas y la justificación que las respalda.
+En este capítulo se describe cómo se planeó y construyó el sistema. Las tres primeras secciones presentan el diseño general por medio de diagramas: el diagrama de bloques, que muestra las piezas del sistema y cómo se conectan; los casos de uso, que muestran quién puede hacer qué; y el flujo de pantallas, que muestra lo que el usuario ve al usarlo. Las secciones restantes desarrollan la construcción de cada componente en el orden de los objetivos específicos del proyecto: la base de datos, el servidor (API), la interfaz web, el nodo sensor, el gabinete y el lector de código de barras. En cada caso se explica qué se hizo y por qué se decidió hacerlo de esa manera.
 
 % =============================================
 % SECCIÓN 3.1: DIAGRAMA DE BLOQUES
@@ -15,7 +15,15 @@ En este capítulo se describe el proceso de diseño e implementación del sistem
 
 \section{Diagrama de bloques}
 
-El diagrama de bloques muestra los tres componentes principales del sistema y los canales de comunicación entre ellos: el nodo sensor instalado en la farmacia, el servidor y base de datos alojados en la nube, y la interfaz web accesible desde el navegador. Cada componente corresponde a uno de los objetivos específicos del proyecto y se describe en detalle en las secciones siguientes.
+El diagrama de bloques (Fig.~\ref{fig:cap3-diagrama-bloques}) muestra todas las piezas del sistema y los canales por los que se comunican. Se lee de izquierda a derecha en tres columnas: \textbf{entradas}, \textbf{procesos} y \textbf{salidas}.
+
+La columna de \textbf{entradas} contiene los dispositivos que capturan información: el sensor AHT10, que mide la temperatura y la humedad del área de almacenamiento; el lector de código de barras, que captura el código de cada producto durante una venta y lo entrega por USB o Bluetooth; y el equipo del usuario (computadora, tableta o teléfono), desde el que el personal opera el sistema.
+
+La columna central agrupa los \textbf{procesos}, donde la información se transforma y se guarda. El microcontrolador ESP32-C5 recibe las mediciones del sensor a través de la interfaz I\textsuperscript{2}C y las transmite por la red WiFi del establecimiento. La API es el punto de entrada único de todo el sistema: cualquier dato, ya sea una lectura del sensor o una operación de un usuario, pasa por ella, se valida, y se guarda o se consulta en la base de datos.
+
+La columna de \textbf{salidas} muestra los dos destinos de la información. El principal es la interfaz web, que solicita los datos a la API y los presenta con formato en el navegador del usuario. El segundo son las pantallas del propio nodo sensor, que muestran la última lectura directamente en el punto de medición, sin pasar por internet.
+
+Un ejemplo permite recorrer el diagrama completo: una lectura de temperatura nace en el sensor (entrada), pasa por el microcontrolador y la API hasta quedar guardada en la base de datos (procesos), y termina visible tanto en el tablero de la interfaz web como en las pantallas del nodo (salidas). Cada bloque del diagrama se desarrolla a detalle en una sección de este capítulo.
 
 \begin{figure}[H]
     \centering
@@ -27,8 +35,46 @@ El diagrama de bloques muestra los tres componentes principales del sistema y lo
 \end{figure}
 \newpage
 % ═══════════════════════════════════════════════════════════════════════════
-% 3.1.1 DIAGRAMA DE NAVEGACIÓN
+% 3.2 DIAGRAMA DE CASOS DE USO
 % ═══════════════════════════════════════════════════════════════════════════
+\section{Diagrama de casos de uso}
+
+Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores}: los tipos de usuario del sistema, más el propio sensor. Los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función. Las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base; usar el escáner, por ejemplo, es una extensión opcional de registrar una venta, no un paso obligatorio.
+
+Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama se dividió en dos figuras para que se mantenga legible: la Fig.~\ref{fig:cap3-uc-operaciones} cubre la operación diaria del punto de venta y el inventario, y la Fig.~\ref{fig:cap3-uc-administracion} cubre la administración del sistema y el monitoreo ambiental.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/DiagramaUC1_Operaciones.pdf}}
+    \caption{Diagrama de casos de uso — Operaciones}
+    \label{fig:cap3-uc-operaciones}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+En la Fig.~\ref{fig:cap3-uc-operaciones} aparecen los dos actores de la operación diaria. El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Las funciones del centro del diagrama (autenticación, gestión de perfil, dashboard y monitoreo ambiental) están conectadas con ambos actores porque son comunes a los dos perfiles.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Cap3/DiagramaUC2_Administracion.pdf}}
+    \caption{Diagrama de casos de uso — Administración y monitoreo}
+    \label{fig:cap3-uc-administracion}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+La Fig.~\ref{fig:cap3-uc-administracion} completa el panorama con los tres actores restantes. El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade las funciones exclusivas de gestión: usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro; este perfil existe para supervisión sin riesgo de alteración de datos. El \textbf{Sensor ESP32} es el único actor no humano: su única función es enviar datos de temperatura y humedad de forma automática, sin intervención de ningún usuario; los usuarios autenticados consultan esas lecturas desde el módulo de monitoreo ambiental.
+\newpage
+
+% ═══════════════════════════════════════════════════════════════════════════
+% 3.3 FLUJO DE PANTALLAS
+% ═══════════════════════════════════════════════════════════════════════════
+\section{Flujo de pantallas}
+
+Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional, que solo muestra decisiones y pasos, el flujo de pantallas incluye la apariencia aproximada de cada pantalla: se ve tanto qué hace el usuario como qué tiene enfrente en cada momento.
+
+Esta sección se apoya en el diagrama de navegación, que funciona como el mapa general de todas las pantallas del sistema, y lo usa como ejemplo visual: primero se presenta el mapa completo y después se recorre, con las pantallas reales del sistema, la ruta más importante de ese mapa, que es el registro de una venta.
+
 \subsection{Diagrama de navegación}
 
 Un diagrama de navegación muestra todas las pantallas del sistema y cómo el usuario puede desplazarse entre ellas: cada recuadro representa una pantalla y las líneas indican desde dónde se puede llegar a ella. La Fig.~\ref{fig:cap3-wireflow-general} presenta el diagrama de navegación completo del sistema, y se lee de arriba hacia abajo.
@@ -42,7 +88,7 @@ El recorrido siempre inicia en la pantalla de \textbf{Inicio de sesión}, en la 
     \item \textbf{Sistema:} los módulos de Usuarios (incluida la pantalla Mi cuenta del usuario activo), Roles, Sucursales y el monitoreo del Sensor ambiental.
 \end{itemize}
 
-Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Lista} que muestra los registros existentes y una pantalla \textit{Nueva/Nuevo} para dar de alta un registro. Esta uniformidad es intencional: una vez que el usuario aprende a operar un módulo, sabe operar todos los demás. Sobre el diagrama también se pueden trazar rutas completas; por ejemplo, para cobrar un producto el cajero recorre \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva}: tres transiciones en total desde que enciende el equipo.
+Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Lista} que muestra los registros existentes y una pantalla \textit{Nueva/Nuevo} para dar de alta un registro. Esta uniformidad es intencional: una vez que el usuario aprende a operar un módulo, sabe operar todos los demás. Sobre el diagrama también se pueden trazar rutas completas; por ejemplo, para cobrar un producto el cajero recorre \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva}: tres transiciones en total desde que enciende el equipo. Ese recorrido exacto es el que la siguiente subsección muestra con las pantallas reales del sistema.
 
 \begin{figure}[H]
 \centering
@@ -216,44 +262,11 @@ Bajo casi todos los módulos se repite el mismo par de pantallas: una \textit{Li
 \end{figure}
 \newpage
 % ═══════════════════════════════════════════════════════════════════════════
-% 3.1.2 DIAGRAMA DE CASOS DE USO
+% 3.3.2 RECORRIDO DE EJEMPLO: REGISTRO DE UNA VENTA
 % ═══════════════════════════════════════════════════════════════════════════
-\subsection{Diagrama de casos de uso}
+\subsection{Recorrido de ejemplo: registro de una venta}
 
-Los diagramas de casos de uso muestran quiénes interactúan con el sistema y qué funciones tiene disponibles cada uno. Las figuras de personas en los extremos son los \textbf{actores}: los tipos de usuario del sistema, más el propio sensor. Los óvalos del centro son las \textbf{funciones} disponibles. Una \textbf{línea sólida} entre un actor y un óvalo significa que ese actor puede ejecutar esa función. Las \textbf{flechas punteadas} señalan funciones opcionales que amplían una función base; usar el escáner, por ejemplo, es una extensión opcional de registrar una venta, no un paso obligatorio.
-
-Dado que el sistema tiene cinco actores y más de veinte funciones, el diagrama se dividió en dos figuras para que se mantenga legible: la Fig.~\ref{fig:cap3-uc-operaciones} cubre la operación diaria del punto de venta y el inventario, y la Fig.~\ref{fig:cap3-uc-administracion} cubre la administración del sistema y el monitoreo ambiental.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap3/DiagramaUC1_Operaciones.pdf}}
-    \caption{Diagrama de casos de uso — Operaciones}
-    \label{fig:cap3-uc-operaciones}
-    \vspace{0.2cm}
-    \footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
-
-En la Fig.~\ref{fig:cap3-uc-operaciones} aparecen los dos actores de la operación diaria. El \textbf{Cajero} registra ventas, consulta el historial, aplica devoluciones y puede usar el escáner de código de barras como función opcional al registrar una venta. El \textbf{Almacenista} gestiona el catálogo de productos, controla los lotes de inventario, registra compras a proveedores y consulta alertas de vencimiento. Las funciones del centro del diagrama (autenticación, gestión de perfil, dashboard y monitoreo ambiental) están conectadas con ambos actores porque son comunes a los dos perfiles.
-
-\begin{figure}[H]
-    \centering
-    \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Cap3/DiagramaUC2_Administracion.pdf}}
-    \caption{Diagrama de casos de uso — Administración y monitoreo}
-    \label{fig:cap3-uc-administracion}
-    \vspace{0.2cm}
-    \footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
-\newpage
-La Fig.~\ref{fig:cap3-uc-administracion} completa el panorama con los tres actores restantes. El \textbf{Administrador} hereda todas las funciones del Cajero y el Almacenista (Fig.~\ref{fig:cap3-uc-operaciones}) y añade las funciones exclusivas de gestión: usuarios, roles y permisos, y sucursales. El actor \textbf{Solo lectura} puede consultar toda la información del sistema sin modificar ningún registro; este perfil existe para supervisión sin riesgo de alteración de datos. El \textbf{Sensor ESP32} es el único actor no humano: su única función es enviar datos de temperatura y humedad de forma automática, sin intervención de ningún usuario; los usuarios autenticados consultan esas lecturas desde el módulo de monitoreo ambiental.
-\newpage
-% ═══════════════════════════════════════════════════════════════════════════
-% 3.1.3 FLUJO DE PANTALLAS
-% ═══════════════════════════════════════════════════════════════════════════
-\subsection{Flujo de pantallas}
-
-Un flujo de pantallas es una representación que combina el boceto de las pantallas del sistema con el flujo de navegación entre ellas. A diferencia de un diagrama de flujo convencional, que solo muestra decisiones y pasos, el flujo de pantallas incluye la apariencia aproximada de cada pantalla: se ve tanto qué hace el usuario como qué tiene enfrente en cada momento. Las \textbf{flechas sólidas} indican transiciones principales entre pantallas; las \textbf{flechas punteadas} muestran rutas de navegación opcionales desde el menú lateral.
-
-A continuación se presenta el flujo de pantallas para el caso de uso de registro de una venta, por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta. Los demás módulos del sistema siguen una estructura de navegación similar: un listado general con opción de crear, editar o consultar el detalle de cada registro.
+A continuación se recorre, con las pantallas reales del sistema, la ruta \textit{Inicio de sesión} → \textit{Dashboard} → \textit{Ventas} → \textit{Nueva} trazada sobre el diagrama de navegación (Fig.~\ref{fig:cap3-wireflow-general}). Se eligió el registro de una venta por ser el flujo principal del sistema y el más representativo de la interacción diaria en el punto de venta; los demás módulos siguen una estructura similar, con un listado general y la opción de crear, editar o consultar el detalle de cada registro. En las figuras, las \textbf{flechas sólidas} indican transiciones principales entre pantallas y las \textbf{flechas punteadas} rutas de navegación opcionales desde el menú lateral.
 
 El flujo comienza en la pantalla de inicio de sesión (Fig.~\ref{fig:cap3-wireflow-login}): el usuario ingresa su correo y contraseña y, si las credenciales son correctas, el sistema lo redirige automáticamente al panel principal. Ninguna otra pantalla del sistema es accesible sin completar este paso.
 
@@ -488,24 +501,13 @@ Finalmente, la Fig.~\ref{fig:cap3-wireflow-modulos} muestra los módulos restant
 % OE 1: BASE DE DATOS
 % =============================================
 
-\secbreak
 \section{Desarrollo de la base de datos en PostgreSQL}
 
 Para cumplir con el primer objetivo específico se diseñó e implementó una base de datos relacional en PostgreSQL que centraliza toda la información del sistema: productos, lotes de inventario, usuarios, ventas y mediciones ambientales. Una base de datos relacional organiza la información en tablas vinculadas entre sí mediante referencias, lo que permite consultar datos relacionados de forma eficiente y mantener la consistencia de la información. El esquema resultante comprende \textbf{22 tablas} agrupadas en cinco módulos funcionales.
 
 \subsection{Selección de PostgreSQL}
 
-  Se eligió PostgreSQL como sistema gestor de base de datos por ser la opción
-  recomendada por los ecosistemas de las herramientas utilizadas en este proyecto
-  y por su amplia adopción en el desarrollo de aplicaciones
-  web profesionales. Frente a alternativas como MySQL o SQLite, ofrece una ventaja
-  concreta para este sistema.
-  
-  Esta es, el tipo de dato \textbf{NUMERIC}, que almacena cantidades monetarias
-  con precisión exacta, sin los errores de redondeo que presentan los tipos de punto
-  flotante al acumular operaciones. En un sistema que calcula totales de ventas y
-  maneja precios con decimales, esta precisión es necesaria para garantizar que los
-  montos registrados sean exactos.
+Se eligió PostgreSQL como sistema gestor de base de datos por ser la opción recomendada por las herramientas utilizadas en el proyecto y por su amplia adopción en aplicaciones web profesionales. Frente a alternativas como MySQL o SQLite ofrece además una ventaja concreta para este sistema: su tipo de dato \textbf{NUMERIC} almacena cantidades monetarias con precisión exacta, sin los pequeños errores de redondeo que otros formatos numéricos acumulan al operar con decimales. En un sistema que calcula totales de ventas, esa exactitud es indispensable.
 
 \subsection{Organización modular del esquema}
 
@@ -653,7 +655,6 @@ Con esta estructura, el esquema cubre la totalidad de las entidades descritas en
 % =============================================
 
 \clearpage
-\secbreak
 \section{Desarrollo de la API REST con FastAPI}
 
 Para cumplir con el segundo objetivo específico se diseñó e implementó una API REST en Python con el \textit{framework} FastAPI. La API actúa como intermediario entre los clientes y la base de datos: recibe peticiones, las procesa y devuelve la información en un formato que ambos clientes pueden interpretar. El resultado expone operaciones para gestionar inventario, ventas, usuarios, compras y lecturas del sensor, organizadas en 23 grupos de rutas.
@@ -717,7 +718,7 @@ El primer filtro actúa como un enrutador: dependiendo de la dirección de la pe
 
 \subsection{Modelos ORM con SQLAlchemy}
 
-Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en el OE1 se representa como una clase. Así se trabaja con objetos en lugar de instrucciones SQL escritas a mano, y la definición del esquema queda centralizada en un único lugar: cualquier modificación (agregar una columna, renombrar un campo) se aplica una sola vez y se refleja en toda la aplicación.
+Para interactuar con la base de datos desde el código Python, cada tabla del esquema descrito en la sección de la base de datos se representa como una clase. Así se trabaja con objetos en lugar de instrucciones SQL escritas a mano, y la definición del esquema queda centralizada en un único lugar: cualquier modificación (agregar una columna, renombrar un campo) se aplica una sola vez y se refleja en toda la aplicación.
 
 Como ejemplo, el siguiente fragmento del código de la API muestra la clase que representa la tabla de lotes de inventario:
 
@@ -737,13 +738,13 @@ class ProductBatch(Base):
     product = relationship("Product", back_populates="batches")
 \end{lstlisting}
 
-La primera línea declara el nombre de la tabla y cada atributo de la clase corresponde a una columna con su tipo de dato y sus reglas: \texttt{nullable=False} marca la cantidad como obligatoria, \texttt{nullable=True} deja que el código de lote y la caducidad queden vacíos (el caso de los lotes sin código descrito en el OE1), y \texttt{ForeignKey} enlaza cada lote con el producto al que pertenece. La última línea define la relación en ambos sentidos: desde un lote se puede consultar su producto y desde un producto todos sus lotes.
+La primera línea declara el nombre de la tabla y cada atributo de la clase corresponde a una columna con su tipo de dato y sus reglas: \texttt{nullable=False} marca la cantidad como obligatoria, \texttt{nullable=True} deja que el código de lote y la caducidad queden vacíos (el caso de los lotes sin código descrito en la sección de la base de datos), y \texttt{ForeignKey} enlaza cada lote con el producto al que pertenece. La última línea define la relación en ambos sentidos: desde un lote se puede consultar su producto y desde un producto todos sus lotes.
 
 Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabla \texttt{product\_batches} con sus columnas, tipos y restricciones exactamente como se declararon en la clase, sin haber escrito ninguna instrucción SQL. El resto de las 22 tablas del esquema se define de la misma manera.
 
 \newpage
 
-\subsection{Esquemas de validación con Pydantic}
+\subsection{Validación de los datos de entrada}
 
 Cada operación de la API define un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato (un precio negativo, un campo requerido ausente) se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
 
@@ -752,7 +753,7 @@ Cada operación de la API define un contrato: qué información acepta cuando el
 
 El acceso al sistema se controla en dos pasos. El primero es la \textbf{autenticación}: al iniciar sesión, la API verifica la contraseña y, si es correcta, emite un \textbf{token de sesión} con vigencia de 30 minutos que contiene el identificador del usuario y sus permisos. Este token acompaña cada petición posterior; el servidor lo verifica sin consultar la base de datos, ya que la información necesaria está incluida y firmada dentro del propio token. Cuando expira, se renueva de forma automática sin que el usuario tenga que ingresar su contraseña de nuevo.
 
-El segundo paso es la \textbf{autorización}: cada operación de la API declara qué permiso requiere para ejecutarse. Antes de procesar la petición, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada. Esto conecta con la estructura de roles del OE1: un cajero puede registrar ventas pero no modificar usuarios ni configurar sucursales.
+El segundo paso es la \textbf{autorización}: cada operación de la API declara qué permiso requiere para ejecutarse. Antes de procesar la petición, la API verifica que el token del usuario incluya ese permiso; si no lo tiene, la petición es rechazada. Esto conecta con la estructura de roles definida en la base de datos: un cajero puede registrar ventas pero no modificar usuarios ni configurar sucursales.
 
 \begin{figure}[H]
 \centering
@@ -824,7 +825,7 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{table}
 
-Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente (usuarios, roles, sucursales) aplican borrado lógico, como se describió en el OE1.
+Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente (usuarios, roles, sucursales) aplican borrado lógico, como se describió en la sección de la base de datos.
 
 Para ilustrar cómo se construye una de estas operaciones, el siguiente fragmento corresponde al endpoint que recibe las lecturas del nodo sensor:
 
@@ -868,10 +869,9 @@ La API se desplegó en \textbf{Railway}, una plataforma en la nube que aloja tan
 % =============================================
 
 \clearpage
-\secbreak
 \section{Desarrollo de la interfaz web con React}
 
-Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API del OE2 para consultar y registrar información, y está desplegada en la plataforma Vercel.
+Para cumplir con el tercer objetivo específico se diseñó e implementó una interfaz de usuario accesible desde el navegador web, organizada en \textbf{dieciséis módulos de navegación} y respaldada por una biblioteca de componentes visuales reutilizables. La interfaz se comunica con la API descrita en la sección anterior para consultar y registrar información, y está desplegada en la plataforma Vercel.
 
 \subsection{Selección de React y Vite}
 
@@ -881,101 +881,7 @@ Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajust
 
 La aplicación se divide en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). El enrutamiento entre vistas se gestiona con React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados (tablas paginadas, formularios, diálogos, selectores de fecha) que da consistencia visual a toda la aplicación y evita desarrollar esos elementos desde cero.
 
-La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la interfaz. A la izquierda, una barra lateral persistente agrupa los dieciséis módulos por área funcional (principal, configuración y monitoreo), con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros y opción de exportar, la tabla de datos con los registros, y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario que se usa como ejemplo en la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
-
-\begin{figure}[H]
-\centering
-\fbox{%
-\begin{tikzpicture}[font=\small]
-
-% Marco exterior (ventana del navegador)
-\draw[thick, rounded corners=3pt] (0, 0) rectangle (12.5, 7.6);
-
-% Encabezado
-\fill[gray!20] (0, 7.0) rectangle (12.5, 7.6);
-\draw[gray!50] (0, 7.0) -- (12.5, 7.0);
-\node[anchor=west, font=\small\bfseries] at (0.3, 7.3) {Sistema de Gestión — Farmacia Selene};
-
-% Barra lateral
-\fill[gray!8] (0, 0) rectangle (2.7, 7.0);
-\draw[gray!50] (2.7, 0) -- (2.7, 7.0);
-
-% Grupos de navegación
-\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 6.65) {PRINCIPAL};
-\node[anchor=west, font=\scriptsize] at (0.4, 6.32) {Dashboard};
-\fill[gray!25] (0, 5.92) rectangle (2.7, 6.22); % ítem activo
-\node[anchor=west, font=\scriptsize\bfseries] at (0.4, 6.07) {Inventario};
-\node[anchor=west, font=\scriptsize] at (0.4, 5.65) {Ventas};
-\node[anchor=west, font=\scriptsize] at (0.4, 5.3) {Catálogo};
-\draw[gray!40] (0.25, 5.05) -- (2.45, 5.05);
-\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 4.75) {CONFIGURACIÓN};
-\node[anchor=west, font=\scriptsize] at (0.4, 4.42) {Usuarios};
-\node[anchor=west, font=\scriptsize] at (0.4, 4.08) {Roles};
-\node[anchor=west, font=\scriptsize] at (0.4, 3.74) {Sucursales};
-\draw[gray!40] (0.25, 3.5) -- (2.45, 3.5);
-\node[anchor=west, font=\scriptsize\bfseries, text=gray!60] at (0.25, 3.2) {MONITOREO};
-\node[anchor=west, font=\scriptsize] at (0.4, 2.87) {Sensor};
-\node[anchor=west, font=\scriptsize] at (0.4, 2.53) {Estadísticas};
-\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 1.1) {16 módulos};
-\node[font=\scriptsize\itshape, text=gray!60] at (1.35, 0.7) {agrupados por área};
-
-% ── Área de contenido ─────────────────────────────────────
-
-% Barra de acciones del módulo
-\fill[gray!12] (2.9, 6.6) rectangle (12.3, 7.0);
-\node[anchor=west, font=\small\bfseries] at (3.1, 6.8) {Inventario — Lotes};
-\draw[draw=gray!60, fill=white, rounded corners=1pt] (10.5, 6.65) rectangle (12.1, 6.95);
-\node[font=\scriptsize] at (11.3, 6.8) {+ Nuevo lote};
-
-% Buscador y filtros
-\draw[draw=gray!50, fill=white, rounded corners=2pt] (2.9, 6.15) rectangle (8.8, 6.5);
-\node[anchor=west, font=\scriptsize, text=gray!60] at (3.1, 6.32) {Buscar producto o lote\ldots};
-\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (9.0, 6.15) rectangle (10.3, 6.5);
-\node[font=\scriptsize] at (9.65, 6.32) {Filtros};
-\draw[draw=gray!50, fill=gray!10, rounded corners=2pt] (10.5, 6.15) rectangle (12.1, 6.5);
-\node[font=\scriptsize] at (11.3, 6.32) {Exportar};
-
-% Encabezado de tabla
-\fill[gray!20] (2.9, 5.68) rectangle (12.3, 6.05);
-\node[anchor=west, font=\scriptsize\bfseries] at (3.1, 5.87) {Producto};
-\node[anchor=west, font=\scriptsize\bfseries] at (6.0, 5.87) {No.\ Lote};
-\node[anchor=west, font=\scriptsize\bfseries] at (7.8, 5.87) {Vencimiento};
-\node[anchor=west, font=\scriptsize\bfseries] at (9.8, 5.87) {Stock};
-
-% Fila 1
-\draw[gray!30] (2.9, 5.3) -- (12.3, 5.3);
-\node[anchor=west, font=\scriptsize] at (3.1, 5.49) {Paracetamol 500 mg};
-\node[anchor=west, font=\scriptsize] at (6.0, 5.49) {L-0124};
-\node[anchor=west, font=\scriptsize] at (7.8, 5.49) {Jun 2025};
-\node[anchor=west, font=\scriptsize] at (9.8, 5.49) {120 pzas.};
-
-% Fila 2
-\draw[gray!30] (2.9, 4.92) -- (12.3, 4.92);
-\node[anchor=west, font=\scriptsize] at (3.1, 5.11) {Ibuprofeno 400 mg};
-\node[anchor=west, font=\scriptsize] at (6.0, 5.11) {L-0224};
-\node[anchor=west, font=\scriptsize] at (7.8, 5.11) {Ene 2026};
-\node[anchor=west, font=\scriptsize] at (9.8, 5.11) {85 pzas.};
-
-% Fila 3
-\draw[gray!30] (2.9, 4.54) -- (12.3, 4.54);
-\node[anchor=west, font=\scriptsize] at (3.1, 4.73) {Amoxicilina 500 mg};
-\node[anchor=west, font=\scriptsize] at (6.0, 4.73) {L-0324};
-\node[anchor=west, font=\scriptsize] at (7.8, 4.73) {Mar 2026};
-\node[anchor=west, font=\scriptsize] at (9.8, 4.73) {200 pzas.};
-
-% Borde de tabla
-\draw[gray!60] (2.9, 4.54) rectangle (12.3, 6.05);
-
-% Paginación
-\node[font=\scriptsize] at (7.5, 4.18) {$\langle$\enspace 1 \enspace 2 \enspace 3 \enspace $\cdots$\enspace $\rangle$};
-
-\end{tikzpicture}%
-}
-\caption{Estructura de la interfaz web}
-\label{fig:cap3-frontend-wireframe}
-\vspace{0.2cm}
-\footnotesize \textbf{Fuente:} Elaboración propia.
-\end{figure}
+La Fig.~\ref{fig:cap3-screenshot} muestra la disposición general de la interfaz con el módulo de inventario como ejemplo. A la izquierda, una barra lateral siempre visible agrupa los dieciséis módulos en las mismas cuatro áreas del diagrama de navegación (General, Punto de venta, Operaciones y Sistema), con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros, la tabla de datos con los registros y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario de la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
 
 \begin{figure}[H]
     \centering
@@ -990,11 +896,11 @@ La Fig.~\ref{fig:cap3-frontend-wireframe} muestra la disposición general de la 
 
 El estado de la aplicación se divide en dos responsabilidades. El \textbf{estado de sesión} (usuario, rol y permisos) se almacena en un contexto global y determina qué módulos son visibles y qué operaciones están disponibles para el usuario activo. El \textbf{estado de los datos del servidor} se gestiona con una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación sin que el usuario tenga que recargar la página.
 
-Los formularios se implementaron con \textbf{React Hook Form}, que valida cada campo antes de enviar la petición a la API. Si un dato no cumple las reglas el formulario lo indica visualmente sin generar una petición al servidor.
+Los formularios validan cada campo antes de enviar la petición a la API: si un dato no cumple las reglas, el formulario lo señala visualmente sin llegar a generar una petición al servidor.
 
 \subsection{Autenticación en el cliente}
 
-Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye automáticamente en cada petición posterior. Cuando el token expira, se renueva sin interrumpir la sesión ni avisar al usuario. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token los incluya, en línea con la estructura de roles del OE1.
+Al iniciar sesión, la aplicación almacena el token recibido de la API y lo incluye automáticamente en cada petición posterior. Cuando el token expira, se renueva sin interrumpir la sesión ni avisar al usuario. Las rutas de la aplicación están protegidas: si no hay sesión activa, el usuario es redirigido a la pantalla de inicio de sesión. Para operaciones que requieren permisos específicos se verifica además que el token los incluya, en línea con la estructura de roles del sistema.
 
 El siguiente fragmento del código de la interfaz es la función que administra la sesión; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
 
@@ -1029,20 +935,19 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 % =============================================
 
 \clearpage
-\secbreak
 \section{Desarrollo del nodo sensor con ESP32}
 
-Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del OE2. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
+Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del sistema. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
 
 \subsection{Selección del hardware}
 
 Se eligió el \textbf{ESP32-C5} como microcontrolador por tres razones: integra conectividad WiFi de forma nativa sin necesitar un módulo adicional, soporta el protocolo I\textsuperscript{2}C necesario para comunicarse con el sensor y las pantallas, y es compatible con el entorno Arduino, que provee bibliotecas maduras para red y manejo de datos. Se descartó el Arduino Uno por carecer de WiFi integrado. Una Raspberry Pi, por su parte, habría resultado sobredimensionada para leer y enviar dos valores numéricos periódicamente: cuesta y consume más sin aportar un beneficio funcional que lo justifique.
 
-Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones. La primera es que utiliza I\textsuperscript{2}C, el mismo bus compartido con las pantallas, sin necesitar conductores adicionales. La segunda es su precisión de ±0.3\,°C en temperatura y ±2\% en humedad, suficiente para detectar variaciones relevantes en el almacenamiento de medicamentos, donde los rangos recomendados son 15–25\,°C y 30–65\% de humedad relativa.
+Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones. La primera es que se comunica por I\textsuperscript{2}C, la misma interfaz que usan las pantallas, con solo dos conductores por conexión. La segunda es su precisión de ±0.3\,°C en temperatura y ±2\% en humedad, suficiente para vigilar los límites de 30\,°C y 65\% de humedad relativa que la normativa sanitaria marca como máximos para el almacenamiento de medicamentos.
 
 \subsection{Arquitectura del nodo}
 
-El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bus I\textsuperscript{2}C, que requiere únicamente dos conductores compartidos entre todos los dispositivos. La alimentación proviene de una fuente USB de 5\,V. La conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
+El sensor AHT10 y las tres pantallas OLED se comunican con el ESP32-C5 mediante I\textsuperscript{2}C, una interfaz que requiere solo dos conductores por conexión. Las pantallas utilizadas tienen una dirección de fábrica que no puede cambiarse, por lo que no pueden convivir en una misma línea de comunicación; se aprovechó que el ESP32-C5 permite habilitar varios buses I\textsuperscript{2}C simultáneos y cada pantalla se conectó a un bus propio, al igual que el sensor. La alimentación proviene de una fuente USB de 5\,V y la conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
 
 \begin{figure}[H]
 \centering
@@ -1076,13 +981,11 @@ El sensor AHT10 y las tres pantallas OLED se conectan al ESP32-C5 mediante el bu
     (cloud) at (10.2, 0.35)
     {\textbf{API REST}\\[2pt]{\footnotesize Railway}\\{\footnotesize (nube)}};
 
-% Bus I²C: barra vertical + ramales horizontales
-\draw[thick] (3.0, 1.9) -- (3.0, -1.1);
-\draw[thick] (aht.east)  -- (3.0, 1.4);
-\draw[thick] (oled.east) -- (3.0, -0.7);
-\draw[thick] (3.0, 0.35) -- (esp.west);
-\node[font=\footnotesize, anchor=east] at (2.85, 0.4)
-    {Bus I\textsuperscript{2}C};
+% Conexiones I²C independientes (un bus por dispositivo)
+\draw[thick] (aht.east)  -- node[above, font=\footnotesize]{I\textsuperscript{2}C}
+    (esp.west |- aht.east);
+\draw[thick] (oled.east) -- node[above, font=\footnotesize]{I\textsuperscript{2}C (3 buses)}
+    (esp.west |- oled.east);
 
 % Conexión WiFi / HTTPS hacia la API
 \draw[-{Stealth}, thick] (esp.east) --
@@ -1143,13 +1046,13 @@ void leerYEnviar() {
 
 La función realiza cuatro pasos. Primero activa el canal de comunicación del sensor y le solicita las dos mediciones. Después valida que los valores estén dentro del rango físicamente posible del sensor (de $-10$ a $85\,^\circ$C y de 0 a 100\,\% de humedad); si una lectura cae fuera, se descarta y la función termina sin enviar nada, para que un fallo momentáneo del sensor no registre datos falsos. En seguida actualiza las pantallas OLED con los valores medidos. Por último, solo si hay conexión WiFi, envía la lectura a la API.
 
-Lo que se obtiene en cada ciclo es un mensaje en formato JSON, por ejemplo \texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}, que la API almacena en la base de datos como se mostró en la sección del OE2, y que aparece segundos después en el tablero de la aplicación web.
+Lo que se obtiene en cada ciclo es un mensaje en formato JSON, por ejemplo \texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}, que la API almacena en la base de datos como se mostró en la sección de la API, y que aparece segundos después en el tablero de la aplicación web.
 
-Cada lectura se valida dentro de rangos físicamente plausibles (−10\,°C a 85\,°C para temperatura; 0\% a 100\% para humedad) antes de enviarse; si cae fuera de rango, se descarta sin enviar. Las lecturas válidas se envían al \textit{endpoint} \texttt{/api/v1/sensor-readings} mediante una petición POST con cifrado HTTPS. El intervalo de 30 segundos balancea la granularidad de los datos con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
+El envío se realiza mediante una petición cifrada (HTTPS). El intervalo de 30 segundos entre lecturas balancea el detalle del historial con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
 
 \subsection{Pantallas OLED}
 
-Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Las tres comparten el mismo bus I\textsuperscript{2}C que el sensor AHT10 y operan cada una con una dirección de bus distinta para que el ESP32 pueda dirigirles instrucciones de forma individual. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
+Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Como los módulos vienen de fábrica con una dirección I\textsuperscript{2}C fija que no puede modificarse, las tres pantallas no pueden compartir una sola línea de comunicación: cada una opera en un bus I\textsuperscript{2}C independiente del ESP32-C5, separado también del bus que usa el sensor. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
 Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración (con tres minutos como tiempo límite) y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
 
@@ -1182,17 +1085,17 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 \node[proc] (msgInit)  at (0, -4.8) {Mostrar \textit{«Iniciando\ldots»} en las tres pantallas};
 \node[proc] (initAHT)  at (0, -6.2) {Inicializar sensor AHT10};
 \node[dec]  (decAHT)   at (0, -7.9) {¿AHT10\\detectado?};
-\node[side] (ahtNo)    at (-4.6, -7.9) {ahtOk = falso};
-\node[side] (ahtSi)    at ( 4.6, -7.9) {ahtOk = verdadero};
+\node[side] (ahtNo)    at (-4.6, -7.9) {Marcar sensor\\no disponible};
+\node[side] (ahtSi)    at ( 4.6, -7.9) {Marcar sensor\\disponible};
 \node[proc] (msgWifi)  at (0, -9.7) {Mostrar \textit{«Conectando WiFi\ldots»}};
 \node[proc] (wifiAuto) at (0, -11.4){Portal de configuración WiFi\\(tiempo límite: 3 minutos)};
 \node[dec]  (decWifi)  at (0, -13.2){¿WiFi\\conectado?};
-\node[side] (wifiNo)   at (-4.6, -13.2) {wifiOk = falso};
-\node[side] (wifiSi)   at ( 4.6, -13.2) {wifiOk = verdadero};
+\node[side] (wifiNo)   at (-4.6, -13.2) {Marcar WiFi\\desconectado};
+\node[side] (wifiSi)   at ( 4.6, -13.2) {Marcar WiFi\\conectado};
 \node[proc] (showConn) at (0, -15.0){Actualizar pantalla de estado de conexión};
 \node[dec]  (decFirst) at (0, -16.7){¿AHT10\\disponible?};
 \node[proc] (firstR)   at (4.6, -16.7){Primera lectura\\(leerYEnviar)};
-\node[proc] (markTime) at (0, -18.5){Registrar ultimaLectura = millis()};
+\node[proc] (markTime) at (0, -18.5){Registrar la hora de la última lectura};
 \node[term] (toCiclo)  at (0, -19.9){$\downarrow$\, CICLO PRINCIPAL};
 
 \draw[arr] (start)    -- (initHW);
@@ -1253,19 +1156,19 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 ]
 
 \node[term] (ciclo)    at (0,  0.0) {CICLO PRINCIPAL};
-\node[dec]  (decBoot)  at (0, -1.8) {¿Botón BOOT\\mantenido $>$3\,s?};
-\node[rst]  (resetRst) at (5.5, -1.8){Borrar credenciales WiFi\\y reiniciar ESP};
+\node[dec]  (decBoot)  at (0, -1.8) {¿Botón de reinicio\\mantenido $>$3\,s?};
+\node[rst]  (resetRst) at (5.5, -1.8){Borrar credenciales WiFi\\y reiniciar el nodo};
 
 \node[dec]  (decTimer) at (0, -3.9) {¿AHT10 activo y han\\transcurrido 30\,s?};
 
-\node[proc] (markT)    at (0, -5.7) {Actualizar ultimaLectura};
+\node[proc] (markT)    at (0, -5.7) {Registrar la hora de la lectura};
 \node[proc] (readAHT)  at (0, -7.2) {Leer temperatura y humedad del AHT10};
 \node[dec]  (decRange) at (0, -9.0) {¿Valores en rango?\\$-$10 a 85\,°C,\; 0 a 100\,\%};
 \node[proc] (showR)    at (0, -10.9){Mostrar temperatura y humedad\\en las pantallas OLED};
 \node[dec]  (decWifi)  at (0, -12.7){¿WiFi\\conectado?};
 \node[proc] (buildJSON)at (0, -14.5){Construir JSON\\{\footnotesize\texttt{\{temperature, humidity, device\_id\}}}};
 \node[proc] (httpPost) at (0, -16.1){POST HTTPS a la API};
-\node[proc] (updConn)  at (0, -17.6){Registrar apiOk y actualizar\\pantalla de conexión};
+\node[proc] (updConn)  at (0, -17.6){Registrar el resultado del envío y actualizar\\pantalla de conexión};
 
 % Flechas de retorno al ciclo (bus lateral izquierdo)
 \draw (decTimer.west)  -- node[lbl, near start, above] {No} (-4.6, -3.9);
@@ -1303,7 +1206,6 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 % =============================================
 
 \clearpage
-\secbreak
 \section{Diseño e impresión del gabinete físico}
 
 El quinto objetivo específico consistió en diseñar y fabricar el gabinete que aloja el nodo sensor. Para alojar el ESP32, el sensor AHT10 y las tres pantallas OLED en un conjunto compacto y protegido, se diseñó y fabricó mediante \textbf{impresión 3D} un gabinete personalizado. Un gabinete a medida fue necesario porque la alineación horizontal de tres módulos OLED no corresponde a ninguna caja disponible comercialmente; una adaptación de una caja genérica habría requerido cortes imprecisos y un acabado poco profesional.
@@ -1327,7 +1229,6 @@ Cada decisión de diseño respondió a una restricción práctica. El ensamble a
 % =============================================
 
 \clearpage
-\secbreak
 \section{Integración del lector de código de barras}
 
 El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. El dispositivo elegido es un lector USB que el sistema operativo reconoce como un teclado estándar; desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, sin requerir ningún controlador especial.
@@ -1380,4 +1281,3 @@ El diagrama siguiente resume el flujo de interacción del modo lector:
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\secbreak
