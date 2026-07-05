@@ -4,13 +4,13 @@ El desarrollo de la plataforma para Farmacia Selene partió de un diagnóstico c
 
 \begin{itemize}
 
-    \item La base de datos centraliza la información de productos, lotes, ventas, compras, proveedores y lecturas ambientales en un esquema único. Las restricciones de integridad y los índices definidos garantizan que los datos ingresados sean coherentes entre sí, y los doce ajustes aplicados durante el desarrollo demostraron que la estructura puede evolucionar sin pérdida de información previamente registrada.
+    \item La base de datos centraliza la información de productos, lotes, ventas, compras, proveedores y lecturas ambientales en un esquema único. Las restricciones de integridad y los índices definidos mantienen la coherencia entre los datos ingresados. Los doce ajustes aplicados durante el desarrollo demostraron, además, que la estructura puede evolucionar sin perder información ya registrada.
 
-    \item El servidor implementa la política FEFO —Primero en Vencer, Primero en Salir— al confirmar cada venta, identificando automáticamente los lotes con la caducidad más próxima y descontando sus unidades primero. Esta lógica elimina la dependencia del criterio manual para determinar qué lote despachar, reduciendo el riesgo de conservar en existencia medicamentos próximos a vencer mientras se despachan lotes de ingreso más reciente.
+    \item El servidor aplica la política FEFO (Primero en Vencer, Primero en Salir) al confirmar cada venta: identifica los lotes con la caducidad más próxima y descuenta sus unidades antes que las del resto. Con esto, decidir qué lote despachar ya no depende del criterio del personal, y baja el riesgo de que queden en existencia medicamentos por vencer mientras salen lotes que ingresaron después.
 
-    \item La interfaz web pone el sistema al alcance de cualquier dispositivo con navegador, sin instalación de software adicional. El tablero principal reúne los indicadores clave de la farmacia —ventas del día, nivel de existencias, alertas de lotes próximos a vencer y lecturas ambientales en tiempo real— en una sola pantalla. El sistema de roles garantiza que cada usuario acceda únicamente a las funciones que le corresponden según su perfil.
+    \item La interfaz web pone el sistema al alcance de cualquier dispositivo con navegador, sin instalar software adicional. El tablero principal reúne en una sola pantalla las ventas del día, el nivel de existencias, las alertas de lotes próximos a vencer y las lecturas ambientales en tiempo real. Por su parte, el sistema de roles limita las funciones de cada usuario a las que le corresponden según su perfil.
 
-    \item El nodo sensor transmite lecturas de temperatura y humedad relativa al servidor cada 30 segundos, y estas aparecen en tiempo real en el tablero de la interfaz web. Tras resolver un conflicto de hardware entre el control del LED integrado y el bus de comunicación del sensor, el nodo operó de forma estable durante todas las sesiones de prueba. Las tres pantallas OLED incorporadas al nodo muestran las condiciones actuales directamente en el punto de medición, sin necesidad de consultar la interfaz web.
+    \item El nodo sensor transmite lecturas de temperatura y humedad relativa al servidor cada 30 segundos, y estas aparecen en tiempo real en el tablero de la interfaz web. Hubo que resolver un conflicto de hardware entre el control del LED integrado y el bus de comunicación del sensor; una vez corregido, el nodo operó sin fallas durante todas las sesiones de prueba. Las tres pantallas OLED del nodo muestran las condiciones actuales directamente en el punto de medición, sin necesidad de abrir la interfaz web.
 
     \item El gabinete impreso en 3D que aloja el hardware del nodo sensor requirió un rediseño motivado por el sobredimensionamiento vertical de los conectores en la primera versión. El segundo diseño incorpora las dimensiones reales del conjunto ensamblado y permite alojar todos los componentes sin comprometer las conexiones. La fabricación mediante impresión 3D permitió iterar el diseño a bajo costo hasta obtener un resultado funcional.
 
@@ -18,14 +18,14 @@ El desarrollo de la plataforma para Farmacia Selene partió de un diagnóstico c
 
 \end{itemize}
 
-El conjunto de los seis componentes opera de forma integrada: el nodo sensor envía las lecturas ambientales al servidor, que las almacena y las pone a disposición de la interfaz web; de forma simultánea, el registro de ventas con descuento automático por FEFO, la gestión de compras y el control de acceso por roles funcionan sin conflictos entre sí. El sistema queda listo para su instalación definitiva en las instalaciones de la farmacia y para su validación con los usuarios finales en condiciones reales de operación.
+Los seis componentes operan en conjunto: el nodo sensor envía las lecturas ambientales al servidor, que las almacena y las pone a disposición de la interfaz web, mientras el registro de ventas con descuento automático por FEFO, la gestión de compras y el control de acceso por roles funcionan sin conflictos entre sí. El sistema queda listo para instalarse definitivamente en la farmacia y validarse con los usuarios finales en condiciones reales de operación.
 
 \thispagestyle{empty}
 
 
 \chapterstar{Recomendaciones}
 
-Las siguientes recomendaciones están dirigidas al personal administrativo y operativo de Farmacia Selene para asegurar el correcto aprovechamiento del sistema una vez instalado de forma definitiva.
+Las siguientes recomendaciones están dirigidas al personal administrativo y operativo de Farmacia Selene, con el fin de que el sistema se aproveche correctamente una vez instalado.
 
 \begin{itemize}
 
@@ -41,6 +41,8 @@ Las siguientes recomendaciones están dirigidas al personal administrativo y ope
 
     \item Colocar el gabinete del nodo sensor en una ubicación representativa del ambiente del almacén, alejado de fuentes de calor artificiales como aires acondicionados, ventiladores directos o lámparas. Mantener libres las aberturas del gabinete para que el flujo de aire alcance el sensor y las lecturas reflejen las condiciones reales de los medicamentos almacenados.
 
+    \item Tramitar la calibración certificada del instrumento de medición cuando el sistema pase a operación definitiva. El Suplemento de la FEUM exige que los termohigrómetros de las farmacias cuenten con un certificado de calibración vigente y trazable; obtenerlo para el nodo sensor daría validez formal a los registros del sistema ante una verificación sanitaria.
+
 \end{itemize}
 
 \thispagestyle{empty}
@@ -54,11 +56,13 @@ A partir de los resultados obtenidos y de los aspectos del sistema que pueden fo
 
     \item Sustituir los cables Dupont internos del nodo sensor por una placa de circuito impreso (PCB) diseñada a medida para los componentes del proyecto. Una PCB eliminaría los problemas de dimensionamiento del gabinete, reduciría el riesgo de desconexiones por vibración o manipulación y produciría un conjunto más compacto y duradero que el actual.
 
-    \item Incorporar un sistema de alimentación ininterrumpida dedicado al microcontrolador y al equipo de red de la farmacia. Un corte de energía eléctrica interrumpe tanto el monitoreo ambiental como el acceso al sistema de ventas; un respaldo de baterías garantizaría la continuidad de operación durante apagones breves sin pérdida de registros.
+    \item Incorporar un sistema de alimentación ininterrumpida dedicado al microcontrolador y al equipo de red de la farmacia. Un corte de energía eléctrica interrumpe tanto el monitoreo ambiental como el acceso al sistema de ventas; con un respaldo de baterías la operación continuaría durante apagones breves y sin pérdida de registros.
 
-    \item Implementar un módulo de notificaciones externas que envíe alertas automáticas al administrador por correo electrónico o mensaje de texto cuando las lecturas de temperatura o humedad superen los umbrales de la normatividad. Actualmente las alertas son visibles únicamente desde la interfaz web; las notificaciones externas garantizarían que el administrador sea informado incluso cuando no esté consultando el sistema de forma activa.
+    \item Implementar un módulo de notificaciones externas que envíe alertas automáticas al administrador por correo electrónico o mensaje de texto cuando las lecturas de temperatura o humedad superen los umbrales de la normatividad. Actualmente las alertas solo son visibles desde la interfaz web; con notificaciones externas el administrador se enteraría aunque no esté consultando el sistema en ese momento.
 
     \item Agregar almacenamiento local en el nodo sensor para que las lecturas ambientales se guarden en la memoria del microcontrolador cuando la conexión a internet no esté disponible, y se sincronicen automáticamente con el servidor al recuperarla. Esto eliminaría los huecos en el historial ambiental provocados por interrupciones momentáneas de la red.
+
+    \item Habilitar la actualización del firmware a distancia (OTA, por sus siglas en inglés) en el nodo sensor. Actualmente, cargar una nueva versión del programa requiere desmontar el nodo y conectarlo por cable a una computadora; con actualizaciones por la red, las mejoras futuras podrían instalarse sin interrumpir el monitoreo ni manipular el gabinete.
 
     \item Desarrollar un módulo de análisis de tendencias y proyecciones a partir del historial de ventas e inventario registrado en el sistema. Informes de rotación de productos, proyecciones de reabastecimiento y análisis de medicamentos de baja salida aportarían información estratégica para la toma de decisiones de compra y gestión de proveedores.
 

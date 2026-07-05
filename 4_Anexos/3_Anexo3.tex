@@ -3,63 +3,66 @@
 \renewcommand{\thesection}{A3.\arabic{section}}
 \setcounter{section}{0}
 
-En esta sección encontrara los datos técnicos mas importantes sobre los componentes electrónicos utilizados en la elaboración de este proyecto, como lo es el microcontrolador ESP32-C5, sensor de temperatura y humedad AHT10 y la pantalla OLED SSD1306 de 128 x 64 pixeles. 
+Este anexo resume las especificaciones técnicas de los componentes electrónicos que integran el nodo sensor del proyecto: el microcontrolador ESP32-C5, el sensor de temperatura y humedad AHT10 y las pantallas OLED con controlador SSD1306. Los datos provienen de las hojas de datos publicadas por sus fabricantes y se incluyen los que resultan relevantes para entender las decisiones de diseño del Capítulo 3.
 
 \section{Microcontrolador ESP32-C5}
-El ESP32-C5, desarrollado por Espressif Systems, es un Sistema en Chip (SoC) de alta integración diseñado para el ecosistema de Internet de las Cosas (IoT). Su arquitectura representa un hito al integrar conectividad inalámbrica de doble banda nativa en una arquitectura de código abierto. El núcleo del dispositivo opera de manera eficiente gestionando tareas de cómputo y conectividad en paralelo, respaldado por mecanismos de seguridad basados en hardware como el arranque seguro (Secure Boot) y el cifrado de memoria flash por hardware.
+
+El ESP32-C5 \cite{esp32c5-docs}, fabricado por Espressif Systems, es un sistema en chip (SoC) orientado a aplicaciones de Internet de las Cosas. Integra en un solo circuito el procesador, la memoria y la conectividad inalámbrica, lo que permite construir el nodo sensor sin componentes de comunicación adicionales.
 
 \begin{itemize}
-    \item Arquitectura de Procesamiento Dual: Cuenta con un procesador RISC-V de 32 bits de alto rendimiento (HP) que opera hasta a 240 MHz, y un procesador RISC-V de ultra bajo consumo (LP) a 48 MHz para tareas en modo de suspensión.
+    \item \textbf{Procesamiento:} procesador principal RISC-V de 32 bits a una frecuencia de hasta 240 MHz, acompañado de un segundo procesador de bajo consumo a 48 MHz para tareas en modo de suspensión.
 
-    \item Memoria Interna: 320 KB de ROM, 384 KB de SRAM (HP), 16 KB de SRAM (LP) y soporte directo para PSRAM y memoria Flash externa.
+    \item \textbf{Memoria interna:} 320 KB de ROM, 384 KB de SRAM de alto rendimiento y 16 KB de SRAM de bajo consumo, con soporte para memoria Flash externa.
 
-    \item Conectividad de Red: Wi-Fi 6 (802.11ax) de doble banda (2.4 GHz y 5 GHz) y Bluetooth 5 certificado con soporte para redes Mesh.
+    \item \textbf{Conectividad de red:} Wi-Fi 6 (802.11ax) de doble banda (2.4 GHz y 5 GHz) y Bluetooth 5 de bajo consumo (BLE). Es la característica que distingue a esta variante de la familia ESP32 y la razón de su elección: la banda de 5 GHz reduce la interferencia en entornos con muchas redes cercanas.
 
-    \item Protocolos IoT Avanzados: Soporte de hardware para el estándar IEEE 802.15.4, habilitando redes Zigbee 3.0 y Thread, lo que permite compatibilidad total con Matter.
+    \item \textbf{Protocolos IoT adicionales:} soporte de hardware para el estándar IEEE 802.15.4, que habilita redes Zigbee 3.0 y Thread.
 
-    \item Periféricos e Interfaces: Hasta 29 pines GPIO con soporte para ADC de 12 bits, SDIO 2.0 esclavo, SPI, UART, I2C, I2S y control de motores mediante PWM.
+    \item \textbf{Periféricos e interfaces:} hasta 29 pines de entrada/salida (GPIO) programables, con soporte para las interfaces I²C, SPI y UART, y un convertidor analógico-digital de 12 bits. Los pines GPIO son los que permiten conectar el sensor AHT10 y las tres pantallas OLED en buses I²C independientes.
 
-    \item Condiciones Ambientales Operativas: Soporta un rango de temperatura industrial de -40 °C a 85 °C.
+    \item \textbf{Condiciones de operación:} rango de temperatura de $-40~^{\circ}\text{C}$ a $85~^{\circ}\text{C}$.
+
+    \item \textbf{Seguridad:} mecanismos basados en hardware como el arranque seguro (Secure Boot) y el cifrado de la memoria Flash.
 \end{itemize}
 
 \section{Sensor de temperatura y humedad AHT10}
 
-Es un dispositivo digital de medición ambiental de nueva generación que establece un nuevo estándar en rendimiento y confiabilidad gracias a sus elementos de sensores capacitivos semiconductores mejorados y un chip ASIC integrado. Viene rigurosamente calibrado de fábrica y destaca por su alta estabilidad a largo plazo, entregando lecturas lineales listas para procesar a través de un bus de comunicación estándar, eliminando la necesidad de calibración externa en la etapa de ensamblaje.
+El AHT10 \cite{aht10-datasheet}, del fabricante Aosong Electronics, es un sensor digital que mide temperatura y humedad relativa con un elemento capacitivo y entrega las lecturas ya procesadas a través del bus I²C. Viene calibrado de fábrica, por lo que no requiere ajustes durante el ensamblaje del nodo.
+
 \begin{itemize}
-    \item Interfaz de Comunicación: Protocolo I2C exclusivo (dirección estándar 0x38).
+    \item \textbf{Interfaz de comunicación:} bus I²C, con dirección fija 0x38.
 
-    \item Rango Eléctrico: Rango de alimentación estricto de 1.8 V a 3.6 V DC (con 3.3 V recomendado).
+    \item \textbf{Alimentación:} de 1.8 V a 3.6 V de corriente directa, con 3.3 V como valor recomendado, compatible con la salida de 3.3 V del ESP32-C5.
 
-    \item Rendimiento Térmico: Rango de -40 °C a 85 °C con una precisión típica de ±0.3 °C y una resolución de 0.01 °C.
+    \item \textbf{Medición de temperatura:} rango de $-40~^{\circ}\text{C}$ a $85~^{\circ}\text{C}$, con precisión típica de $\pm 0.3~^{\circ}\text{C}$ y resolución de $0.01~^{\circ}\text{C}$.
 
-    \item Rendimiento de Humedad: Mide de 0% a 100% RH con una precisión de ±2% RH y una resolución de 0.024% RH.
+    \item \textbf{Medición de humedad:} rango de 0\% a 100\% de humedad relativa, con precisión típica de $\pm 2\%$ y resolución de 0.024\%.
 
-    \item Metrología Avanzada: Histéresis térmica de apenas ±0.1 °C, histéresis de humedad de ±1% RH, y una repetibilidad excelente (±0.1% RH).
+    \item \textbf{Estabilidad a largo plazo:} deriva menor a 0.5\% de humedad relativa por año y a $0.04~^{\circ}\text{C}$ por año en condiciones normales, lo que permite lecturas confiables durante la vida útil del nodo sin recalibración frecuente.
 
-    \item Deriva a Largo Plazo (Drift): Degradación mínima del sensor en el tiempo, siendo menor a 0.5% RH/año y 0.04 °C/año en condiciones normales.
+    \item \textbf{Consumo de corriente:} 23 µA durante la medición y 0.25 µA en modo de espera.
 
-    \item Empaquetado Físico: Formato de montaje superficial (SMD) sin cables, con dimensiones ultra reducidas de 4 x 5 x 1.6 mm.
-
-    \item Consumo de Corriente: Ultra bajo, demandando 23 µA en medición activa y solo 0.25 µA en modo de espera (Sleep Mode).
+    \item \textbf{Encapsulado:} montaje superficial (SMD) de $4 \times 5 \times 1.6$ mm.
 \end{itemize}
 
-
+La precisión del sensor ($\pm 0.3~^{\circ}\text{C}$ y $\pm 2\%$ de humedad relativa) es suficiente para vigilar los límites de $30~^{\circ}\text{C}$ y 65\% de humedad relativa que marca la normativa descrita en el Anexo 2.
 
 \section{Pantalla OLED SSD1306}
-Es un controlador CMOS diseñado para gobernar pantallas gráficas de matriz de puntos del tipo OLED (Diodos Orgánicos Emisores de Luz). Al no requerir retroiluminación trasera (cada píxel genera su propia iluminación de forma independiente), permite un diseño de hardware extremadamente delgado. Este controlador es ampliamente utilizado en la industria del prototipado por su eficiencia energética y su capacidad de mostrar gráficos nítidos en sistemas embebidos.
+
+El SSD1306 \cite{ssd1306-datasheet}, de Solomon Systech, es el circuito controlador de las tres pantallas OLED del nodo sensor. En una pantalla OLED cada píxel emite su propia luz, por lo que no se necesita retroiluminación; esto produce módulos delgados, de bajo consumo y con buen contraste incluso en tamaños pequeños.
 
 \begin{itemize}
-    \item Resolución y Geometría: Matriz activa de 128 x 64 píxeles en un área visible diagonal de 0.96 pulgadas.
+    \item \textbf{Resolución y tamaño:} matriz de $128 \times 64$ píxeles monocromáticos en un área visible de 0.96 pulgadas de diagonal.
 
-    \item Rendimiento Óptico: Relación de contraste excepcional de 10,000:1 y un ángulo de visión garantizado superior a los 160 grados.
+    \item \textbf{Memoria gráfica:} el controlador incorpora 1 KB de memoria interna (GDDRAM) donde se guarda la imagen en pantalla, de modo que el microcontrolador solo envía datos cuando el contenido cambia.
 
-    \item Tamaño del Píxel: Dimensión del punto (Dot Size) de típicamente 0.15 x 0.15 mm con una separación (Dot Pitch) de 0.17 x 0.17 mm, garantizando una alta densidad y nitidez.
+    \item \textbf{Interfaces:} bus I²C en modo rápido (400 kHz) o bus SPI de hasta 10 MHz. En el proyecto se utiliza I²C, la misma interfaz del sensor AHT10.
 
-    \item Búfer de Memoria: Incorpora una Memoria de Datos de Visualización Gráfica (GDDRAM) interna de 1 KB (128 x 64 bits), liberando recursos computacionales del microcontrolador anfitrión.
+    \item \textbf{Alimentación:} el módulo comercial admite niveles lógicos de 3.3 V a 5 V, compatible con el ESP32-C5.
 
-    \item Flexibilidad de Alimentación: El controlador nativo opera a bajas tensiones, pero el módulo comercial completo admite niveles lógicos e integración desde 3.3 V hasta 5 V DC.
+    \item \textbf{Ángulo de visión:} superior a 160 grados, lo que permite leer los valores de temperatura y humedad sin colocarse de frente al gabinete.
 
-    \item Velocidad de Interfaz: Soporta protocolos I2C (operando en Fast Mode a 400 kHz) y SPI (operando a velocidades de hasta 10 MHz para actualizaciones gráficas ultrarrápidas).
-
-    \item Rango de Temperatura Operativa: Funcional en entornos extremos desde -40 °C hasta 80 °C sin pérdida de contraste.
+    \item \textbf{Rango de temperatura de operación:} de $-30~^{\circ}\text{C}$ a $70~^{\circ}\text{C}$ para el módulo comercial, margen amplio respecto a las condiciones de una farmacia.
 \end{itemize}
+
+Los módulos utilizados tienen dirección I²C fija, por lo que las tres pantallas no pueden compartir un mismo bus; esta es la razón por la que cada una se conecta a un bus I²C independiente del ESP32-C5, como se describe en el Capítulo 3.

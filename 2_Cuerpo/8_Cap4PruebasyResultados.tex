@@ -19,9 +19,11 @@ La base de datos no se probó de forma aislada sino a través de la suite de pru
 
 \subsection{Restricciones e integridad relacional}
 
-Las restricciones definidas en el esquema —claves foráneas, unicidad y valores no nulos— se verificaron a través de los casos de prueba negativos de la API: intentar crear un lote con un producto inexistente devuelve error, intentar registrar un usuario con un correo ya registrado devuelve error, e intentar completar una venta vacía es rechazado por el sistema. En todos los casos el motor de base de datos aplicó la restricción correspondiente y la API tradujo ese rechazo en un código de respuesta apropiado.
+La \textbf{integridad relacional} es la propiedad que garantiza que los datos almacenados en las distintas tablas de la base de datos sean coherentes entre sí: que una venta siempre apunte a un producto que existe, que no haya dos usuarios con el mismo correo, y que los campos obligatorios nunca queden vacíos. Esta coherencia no depende de que el programador la vigile manualmente; se implementa mediante \textbf{restricciones}, reglas declaradas en el propio esquema que el motor de base de datos aplica de forma automática y rechaza cualquier operación que las incumpla. Las pruebas de esta sección verifican precisamente que esas reglas actúan como se espera.
 
-Un caso de diseño particular que se verificó fue el de los lotes sin número de código asignado. El inventario permite que un lote no tenga código —situación que ocurre cuando el fabricante no imprime uno— pero si un código está presente, no puede repetirse para el mismo producto. Para implementar esto sin bloquear los lotes sin código se utilizó un índice parcial: la restricción de unicidad aplica únicamente cuando el campo tiene un valor, ignorando los registros en que está vacío. La figura siguiente ilustra cómo se comporta este índice en la práctica:
+Las restricciones definidas en el esquema (claves foráneas, unicidad y valores no nulos) se verificaron a través de los casos de prueba negativos de la API: intentar crear un lote con un producto inexistente devuelve error, igual que registrar un usuario con un correo ya ocupado o completar una venta vacía. En todos los casos el motor de base de datos aplicó la restricción correspondiente y la API tradujo ese rechazo en un código de respuesta apropiado.
+
+Un caso de diseño particular que se verificó fue el de los lotes sin número de código asignado. El inventario acepta lotes sin código (ocurre cuando el fabricante no imprime uno), pero si el código está presente no puede repetirse para el mismo producto. Para implementar esto sin bloquear los lotes sin código se utilizó un índice parcial: la restricción de unicidad aplica únicamente cuando el campo tiene un valor, ignorando los registros en que está vacío. La Fig.~\ref{fig:cap4-lote-index} ilustra el comportamiento verificado con cinco intentos de registro sobre un mismo producto: los dos primeros lotes, con códigos distintos, son aceptados; el tercero es rechazado por repetir un código ya registrado; y los dos últimos, ambos sin código, son aceptados sin conflicto porque los registros vacíos no compiten entre sí.
 
 \begin{figure}[H]
 \centering
@@ -70,13 +72,13 @@ Un caso de diseño particular que se verificó fue el de los lotes sin número d
 
 \end{tikzpicture}%
 }
-\caption{Comportamiento del índice parcial sobre el código de lote: los códigos duplicados son rechazados, pero múltiples lotes sin código del mismo producto son permitidos}
+\caption{Comportamiento del índice parcial sobre el código de lote}
 \label{fig:cap4-lote-index}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Ajustes al esquema durante el desarrollo}
+\subsection{Evolución del esquema durante el desarrollo}
 
 El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. Estos cambios se aplicaron mediante migraciones sucesivas que modifican la estructura de la base de datos de forma controlada, preservando los datos existentes. La tabla siguiente resume los ajustes más relevantes:
 
@@ -113,7 +115,7 @@ Se añadió una columna de fecha de baja a las tablas de usuarios, roles, sucurs
 \hline
 
 Índice parcial sobre código de lote &
-Para permitir que un lote no tenga código asignado —situación habitual con algunos proveedores— sin perder la garantía de que los códigos presentes no se dupliquen, se reemplazó la restricción de unicidad simple por un índice que aplica únicamente cuando el campo tiene valor. \\
+Para aceptar lotes sin código asignado (situación habitual con algunos proveedores) sin perder la garantía de que los códigos presentes no se dupliquen, se reemplazó la restricción de unicidad simple por un índice que aplica únicamente cuando el campo tiene valor. \\
 \hline
 
 Tipos enumerados nativos de PostgreSQL &
@@ -121,7 +123,7 @@ Los estados de ventas, pagos, género y tipo de documento se definieron inicialm
 \hline
 
 Índices sobre claves foráneas &
-Se identificó durante las pruebas que las consultas con combinaciones de tablas —como obtener un lote con su producto asociado— resultaban lentas sin índices en las columnas de referencia. Se añadieron índices en las claves foráneas de las tablas de mayor uso. \\
+Se identificó durante las pruebas que las consultas que combinan tablas, por ejemplo obtener un lote junto con su producto, resultaban lentas sin índices en las columnas de referencia. Se añadieron índices en las claves foráneas de las tablas de mayor uso. \\
 \hline
 
 Restricciones únicas en proveedor &
@@ -145,7 +147,7 @@ Las restricciones de unicidad sobre el RFC y correo electrónico del proveedor i
 
 \subsection{Resultados}
 
-El esquema final de la base de datos opera de forma estable en el entorno de producción de Railway. Todas las restricciones verificadas —integridad referencial, unicidad condicional, borrado lógico y precisión monetaria— funcionan de forma correcta bajo la carga de las pruebas automatizadas. Los seis ajustes documentados en la tabla anterior resolvieron los comportamientos incorrectos identificados durante el desarrollo y no requirieron modificaciones adicionales tras su aplicación.
+El esquema final de la base de datos opera establemente en el entorno de producción de Railway. Todas las restricciones verificadas (integridad referencial, unicidad condicional, borrado lógico y precisión monetaria) funcionan correctamente bajo la carga de las pruebas automatizadas. Los seis ajustes documentados en la tabla anterior resolvieron los comportamientos incorrectos que aparecieron durante el desarrollo, y ninguno requirió modificaciones posteriores.
 
 % =============================================
 % SECCIÓN 4.2: API REST
@@ -154,13 +156,13 @@ El esquema final de la base de datos opera de forma estable en el entorno de pro
 \clearpage
 \section{Pruebas de la API REST}
 
-Para verificar el funcionamiento de la API se probó cada uno de sus módulos contra la base de datos real del sistema, en lugar de datos simulados. Este enfoque garantiza que el comportamiento verificado sea idéntico al que se ejecuta en producción: una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias. Se cubrieron escenarios positivos —operaciones que deben completarse con éxito— y negativos —operaciones que el sistema debe rechazar—, en los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
+Para verificar el funcionamiento de la API se probó cada uno de sus módulos contra la base de datos real del sistema, en lugar de datos simulados. La razón es simple: una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias, de modo que lo verificado es idéntico a lo que se ejecuta en producción. Se cubrieron escenarios positivos (operaciones que deben completarse con éxito) y negativos (operaciones que el sistema debe rechazar) en los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
 
 \subsection{Módulo de autenticación}
 
 Con la implementación inicial del módulo de autenticación se obtuvo un sistema que emitía un token de acceso al iniciar sesión y lo verificaba en cada operación posterior. Durante las pruebas se identificó que el tiempo de vigencia del token resultaba insuficiente para sesiones de trabajo prolongadas: el sistema cerraba la sesión del usuario mientras este se encontraba operando la aplicación, lo que interrumpía el flujo de trabajo.
 
-Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares; cuando está próximo a expirar, el sistema lo renueva de forma transparente sin que el usuario tenga que iniciar sesión nuevamente. Se añadió además la opción de sesión prolongada —equivalente a la función \textit{recordarme} en aplicaciones web— que extiende la duración del token de refresco a 30 días para los usuarios que así lo seleccionen al iniciar sesión.
+Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares; cuando está próximo a expirar, el sistema lo renueva sin que el usuario tenga que iniciar sesión otra vez. Se añadió además la opción de sesión prolongada, equivalente a la función \textit{recordarme} de otras aplicaciones web, que extiende la duración del token de refresco a 30 días para quien la seleccione al iniciar sesión. La Fig.~\ref{fig:cap4-token-timeline} compara ambas versiones sobre una línea de tiempo. En la fila superior (\textit{Antes}) el único token expira a los 30 minutos y la sesión se cierra. En la fila inferior (\textit{Después}), cada vez que el token está por expirar se genera uno nuevo en silencio, encadenando periodos de 30 minutos hasta por 30 días sin que el usuario perciba la renovación.
 
 % TODO: insertar captura de pantalla de la pantalla de inicio de sesión mostrando la opción "Recordarme"
 % Guardar en: 0_imagenes/Cap4/LoginRecordarme.png
@@ -225,7 +227,7 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 
 \end{tikzpicture}%
 }
-\caption{Evolución del sistema de sesión: la versión inicial cerraba la sesión al expirar el token de acceso; la versión final lo renueva de forma automática y transparente para el usuario}
+\caption{Evolución del sistema de sesión}
 \label{fig:cap4-token-timeline}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -235,9 +237,11 @@ Durante las pruebas también se identificó que el módulo de cambio de contrase
 
 \subsection{Módulo de ventas y control de inventario por lotes}
 
-La lógica de completar una venta —que descuenta las unidades vendidas del inventario y registra de qué lote provienen— fue el componente de mayor complejidad de la API. Con la propuesta inicial del registro de ventas se contaba únicamente con el encabezado de la transacción y el detalle de los productos; el descuento efectivo del inventario por lote no estaba implementado en esa versión.
+La lógica de completar una venta, que descuenta las unidades vendidas del inventario y registra de qué lote provienen, fue el componente más complejo de la API. Con la propuesta inicial del registro de ventas se contaba únicamente con el encabezado de la transacción y el detalle de los productos; el descuento efectivo del inventario por lote no estaba implementado en esa versión.
 
 Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}: primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto vendido, los ordena por fecha de caducidad y descuenta las unidades del lote que vence primero. Si las existencias de un lote no son suficientes para cubrir la cantidad vendida, el sistema distribuye automáticamente el descuento entre los lotes siguientes en orden de caducidad. Este comportamiento se verificó con pruebas que cubren los casos: descuento completo desde un único lote, distribución entre múltiples lotes, e intento de venta con existencias insuficientes —en este último caso el sistema rechaza la operación y el inventario no se ve afectado.
+
+La Fig.~\ref{fig:cap4-fefo} ilustra el segundo caso con un escenario verificado en las pruebas: una venta de 150 unidades con tres lotes disponibles. El sistema consume primero el lote A por ser el de caducidad más próxima y lo agota con sus 80 unidades; las 70 restantes se descuentan del lote B, que es el siguiente en vencer; el lote C, con la caducidad más lejana, no se toca. El total descontado coincide exactamente con la cantidad vendida.
 
 \begin{figure}[H]
 \centering
@@ -311,7 +315,7 @@ Para cubrir este comportamiento fue necesario desarrollar un módulo adicional q
 
 \end{tikzpicture}%
 }
-\caption{Ejemplo de la política FEFO aplicada en el módulo de ventas: el sistema consume primero el lote con la caducidad más próxima; si sus existencias no alcanzan, continúa con el siguiente lote en orden}
+\caption{Ejemplo de la política FEFO aplicada en el módulo de ventas}
 \label{fig:cap4-fefo}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -406,7 +410,7 @@ La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de 
 
 La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo.
 
-La figura siguiente muestra el flujo general de navegación: desde el inicio de sesión hasta el registro de una venta, con los módulos adicionales accesibles desde el menú lateral de la aplicación.
+La Fig.~\ref{fig:cap4-wireflow} muestra el flujo general de navegación verificado en las pruebas. La fila superior es el recorrido principal de la operación diaria: del inicio de sesión al Dashboard y de ahí al registro y confirmación de una venta. Los módulos de la parte inferior, conectados con flechas punteadas, son accesibles en cualquier momento desde el menú lateral de la aplicación.
 
 % ─────────────────────────────────────────────────────────────────────────
 % WIREFLOW DE NAVEGACIÓN
@@ -531,7 +535,7 @@ La figura siguiente muestra el flujo general de navegación: desde el inicio de 
 \end{tikzpicture}%
 }%
 }
-\caption{Flujo de navegación del usuario en la aplicación web: la fila superior muestra el recorrido principal de registro de venta; los módulos inferiores son accesibles desde el menú lateral en cualquier momento}
+\caption{Flujo de navegación del usuario en la aplicación web}
 \label{fig:cap4-wireflow}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -554,31 +558,31 @@ Se identificó además que una actualización de la configuración interna de la
 
 \subsection{Módulo de productos e inventario}
 
-El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. Con la propuesta inicial se lograba mostrar el listado de productos; fue necesario añadir en iteraciones sucesivas la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados, y la vista de detalle con la información del lote asociado a cada producto.
+El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. Con la propuesta inicial se lograba mostrar el listado de productos; fue necesario añadir en iteraciones sucesivas la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados, y la vista de detalle con la información del lote asociado a cada producto. La Fig.~\ref{fig:cap4-inventario} muestra el resultado final del módulo, con el listado de lotes desplegado y la búsqueda y los filtros en uso.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/ModuloInventario.png}}
-    \caption{Módulo de inventario mostrando el listado de lotes con búsqueda y filtros activos}
+    \caption{Módulo de inventario de la interfaz web}
     \label{fig:cap4-inventario}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Un problema recurrente durante esta fase fue la desincronización entre los valores que la API enviaba y los que el frontend esperaba: cuando se modificaba un conjunto de opciones válidas en la API —por ejemplo, los estados posibles de un lote o los tipos de movimiento— la interfaz seguía usando los valores anteriores, generando errores en los formularios. Esto se corrigió estableciendo un proceso de revisión explícita de estos valores cada vez que se actualizaba la API.
+Un problema recurrente durante esta fase fue la desincronización entre los valores que la API enviaba y los que el frontend esperaba: cuando se modificaba un conjunto de opciones válidas en la API (por ejemplo, los estados posibles de un lote o los tipos de movimiento), la interfaz seguía usando los valores anteriores y los formularios fallaban. Esto se corrigió estableciendo un proceso de revisión explícita de estos valores cada vez que se actualizaba la API.
 
 \subsection{Módulo de ventas y lector de código de barras}
 
 El módulo de ventas fue el de mayor complejidad en el frontend: el formulario de registro de venta pasó por once versiones a lo largo del desarrollo. Con la versión inicial se podía seleccionar productos y registrar el encabezado de la venta; en iteraciones posteriores se incorporó el seguimiento por lote, la sección de pagos con soporte para múltiples métodos, la creación de lotes directamente desde el formulario, y finalmente el modo lector de código de barras.
 
-El modo lector —que se activa con la tecla \textbf{F2} y redirige el foco al campo de escaneo— funcionó correctamente desde las primeras pruebas con productos reales de la farmacia. Los ajustes que requirió fueron de carácter visual: se añadió un banner animado en la parte superior del formulario para indicar que el modo está activo, y un indicador flotante que confirma visualmente si el código escaneado fue reconocido o no.
+El modo lector, que se activa con la tecla \textbf{F2} y redirige el foco al campo de escaneo, funcionó correctamente desde las primeras pruebas con productos reales de la farmacia. Los ajustes que requirió fueron de carácter visual: se añadió un banner animado en la parte superior del formulario para indicar que el modo está activo, y un indicador flotante que confirma visualmente si el código escaneado fue reconocido o no. La Fig.~\ref{fig:cap4-modo-lector} muestra el formulario con el modo lector activo y ambos indicadores visibles.
 
 Durante las pruebas del formulario de pago se identificó que al escribir el monto en el campo correspondiente, el número se concatenaba con el cero inicial del campo en lugar de reemplazarlo, generando valores incorrectos. El comportamiento se corrigió haciendo que el campo seleccione todo su contenido automáticamente al recibir el foco, de modo que el primer dígito tecleado sustituya el valor anterior.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.8\textwidth]{0_imagenes/Cap4/ModoLector.png}}
-    \caption{Formulario de registro de venta con el modo lector de código de barras activo}
+    \caption{Formulario de registro de venta en modo lector}
     \label{fig:cap4-modo-lector}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -588,12 +592,12 @@ Durante las pruebas del formulario de pago se identificó que al escribir el mon
 
 El tablero principal se construyó inicialmente con datos simulados para validar la disposición visual de los indicadores. Una vez que los módulos de ventas, inventario y sensor estuvieron operativos en la API, se realizó la conexión con datos reales: el tablero pasó a mostrar el total de ventas del día, el nivel de existencias, las alertas de lotes próximos a vencer y las lecturas actuales de temperatura y humedad del nodo sensor.
 
-Durante esta conexión se identificó que el tablero realizaba tres llamadas independientes a la API al cargar —una por cada grupo de indicadores— lo que generaba una demora visible al abrir la vista. Para resolver esto se consolidó la información en un único punto de la API que devuelve todos los indicadores en una sola respuesta, reduciendo el tiempo de carga del tablero de forma notoria.
+Durante esta conexión se identificó que el tablero realizaba tres llamadas independientes a la API al cargar (una por cada grupo de indicadores), lo que generaba una demora visible al abrir la vista. Para resolver esto se consolidó la información en un único punto de la API que devuelve todos los indicadores en una sola respuesta, reduciendo el tiempo de carga del tablero de forma notoria. La Fig.~\ref{fig:cap4-sensor-monitor} muestra el módulo de monitoreo ambiental en operación, con las lecturas de temperatura y humedad recibidas del nodo sensor.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.4\textwidth]{0_imagenes/Cap4/MonitorSensor.png}}
-    \caption{Módulo de monitoreo ambiental mostrando lecturas de temperatura y humedad del nodo sensor}
+    \caption{Módulo de monitoreo ambiental de la interfaz web}
     \label{fig:cap4-sensor-monitor}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -690,7 +694,7 @@ La causa del problema fue una barra inclinada adicional al final de la direcció
 
 Durante las pruebas de ensamble se intentó apagar el LED RGB integrado en la placa del ESP32-C5 para que no emitiera luz durante la operación normal del nodo. Al implementar el control del LED por software se comenzaron a registrar lecturas erráticas del sensor AHT10: valores de temperatura y humedad inconsistentes que el firmware descartaba por estar fuera del rango de validación.
 
-La investigación del problema reveló que el pin del microcontrolador asignado al LED RGB coincidía con el mismo pin utilizado como línea de datos del bus de comunicación con el sensor AHT10. Al intentar controlar el LED, el firmware generaba señales que interferían con la comunicación del sensor, corrompiendo las lecturas. La figura siguiente ilustra el conflicto:
+La investigación del problema reveló que el pin del microcontrolador asignado al LED RGB coincidía con el mismo pin utilizado como línea de datos del bus de comunicación con el sensor AHT10. Al intentar controlar el LED, el firmware generaba señales que interferían con la comunicación del sensor, corrompiendo las lecturas. La Fig.~\ref{fig:cap4-pin-conflicto} ilustra el conflicto: del pin GPIO~8 del microcontrolador se desprenden dos destinos simultáneos, la línea de datos del sensor y el control del LED integrado en la placa. Toda señal dirigida al LED viajaba también por la línea del sensor, y esa interferencia era lo que corrompía las lecturas.
 
 \begin{figure}[H]
 \centering
@@ -744,7 +748,7 @@ La investigación del problema reveló que el pin del microcontrolador asignado 
 
 \end{tikzpicture}%
 }
-\caption{Conflicto de pines detectado durante las pruebas: GPIO 8 estaba asignado simultáneamente a la línea de datos del sensor AHT10 y al control del LED RGB, causando interferencia en las lecturas}
+\caption{Conflicto de pines detectado durante las pruebas}
 \label{fig:cap4-pin-conflicto}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -765,9 +769,11 @@ Dado que la documentación técnica de esa revisión de la placa no especificaba
 
 \subsection{Validación de lecturas fuera de rango}
 
-El firmware descarta automáticamente cualquier lectura que caiga fuera de los rangos físicamente plausibles definidos para el sensor: entre $-10\,^\circ\text{C}$ y $85\,^\circ\text{C}$ para temperatura, y entre $0\,\%$ y $100\,\%$ para humedad relativa. Estos límites son deliberadamente amplios respecto a las condiciones normales de una farmacia —donde los rangos de operación son mucho más estrechos— con el objetivo de filtrar únicamente lecturas claramente erróneas sin descartar valores extremos que pudieran ser reales en una situación de emergencia.
+El firmware descarta automáticamente cualquier lectura que caiga fuera de los rangos físicamente plausibles definidos para el sensor: entre $-10\,^\circ\text{C}$ y $85\,^\circ\text{C}$ para temperatura, y entre $0\,\%$ y $100\,\%$ para humedad relativa. Estos límites son deliberadamente amplios respecto a las condiciones normales de una farmacia, donde los rangos de operación son mucho más estrechos. La intención es filtrar únicamente lecturas claramente erróneas, sin descartar valores extremos que pudieran ser reales en una situación de emergencia.
 
 Se verificó este comportamiento forzando manualmente valores fuera de rango en el entorno de pruebas: el firmware los identificó correctamente y los descartó sin enviarlos al servidor, registrando el descarte en la salida de diagnóstico.
+
+La Fig.~\ref{fig:cap4-rangos} compara sobre una misma escala los dos niveles de control que resultan de este diseño. La franja clara es el rango de validación del firmware, es decir, lo que el nodo acepta como lectura físicamente posible; la franja oscura es el rango que la NOM-073-SSA1-2015 recomienda para almacenar medicamentos. Una lectura fuera de la franja clara se descarta por ser un error del sensor; una lectura dentro de la franja clara pero fuera de la oscura sí se registra y genera una alerta en la aplicación, porque describe una condición real que requiere atención.
 
 \begin{figure}[H]
 \centering
@@ -833,7 +839,7 @@ Se verificó este comportamiento forzando manualmente valores fuera de rango en 
 
 \end{tikzpicture}%
 }
-\caption{Rangos de validación del firmware en comparación con los rangos recomendados por la NOM-073-SSA1-2015: el firmware descarta lecturas fuera de los límites del hardware; las alertas se generan al superar los umbrales de la norma}
+\caption{Rangos de validación del firmware frente a los rangos de la NOM-073-SSA1-2015}
 \label{fig:cap4-rangos}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -841,7 +847,7 @@ Se verificó este comportamiento forzando manualmente valores fuera de rango en 
 
 \subsection{Resultados}
 
-Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó de forma estable durante las sesiones de prueba: las lecturas se transmitieron correctamente cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua en la farmacia quedan pendientes hasta que se concluya el rediseño del gabinete físico descrito en la sección siguiente.
+Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó sin fallas durante las sesiones de prueba: las lecturas se transmitieron correctamente cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua en la farmacia quedan pendientes hasta que se concluya el rediseño del gabinete físico descrito en la sección siguiente.
 
 % =============================================
 % SECCIÓN 4.5: GABINETE E INTEGRACIÓN
@@ -852,12 +858,12 @@ Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo o
 
 Con el primer diseño del gabinete se utilizaron las dimensiones nominales de cada componente tal como las especifican los fabricantes: el largo, ancho y alto de la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
 
-Al intentar montar los componentes dentro del gabinete se identificó que no era posible alojarlos correctamente: los conectores Dupont —los terminales de los cables que unen el microcontrolador con el sensor— sobresalen varios milímetros por encima de la superficie de la placa, una dimensión que las especificaciones del fabricante no incluyen. Este sobredimensionamiento vertical impidió cerrar el gabinete sin ejercer presión sobre los cables, lo que representaba un riesgo para las conexiones.
+Al intentar montar los componentes dentro del gabinete se identificó que no era posible alojarlos correctamente: los conectores Dupont (los terminales de los cables que unen el microcontrolador con el sensor) sobresalen varios milímetros por encima de la superficie de la placa, una dimensión que las especificaciones del fabricante no incluyen. Este sobredimensionamiento vertical impidió cerrar el gabinete sin ejercer presión sobre los cables, lo que representaba un riesgo para las conexiones. La Fig.~\ref{fig:cap4-gabinete-v1} muestra el primer gabinete fabricado con los conectores impidiendo el cierre, y la Fig.~\ref{fig:cap4-gabinete-problema} esquematiza el problema en vista lateral: la altura real del conector montado sobre la placa supera el espacio interior que el diseño original dejaba entre la placa y la tapa.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[angle=90, width=0.70\textwidth]{0_imagenes/Cap4/GabineteV1.jpeg}}
-    \caption{Primer diseño del gabinete: los conectores sobresalen e impiden el cierre correcto}
+    \caption{Primer diseño del gabinete impreso en 3D}
     \label{fig:cap4-gabinete-v1}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -905,20 +911,20 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 
 \end{tikzpicture}%
 }
-\caption{Vista lateral esquemática del gabinete original: la altura del conector Dupont supera el espacio interior disponible, impidiendo cerrar la tapa sin comprimir los cables}
+\caption{Vista lateral esquemática del problema del gabinete original}
 \label{fig:cap4-gabinete-problema}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Para resolver esto fue necesario relevar manualmente las dimensiones reales del conjunto ensamblado —incluyendo los conectores y el radio de curvatura de los cables— y rediseñar el gabinete con esas medidas. La nueva versión incorpora una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
+Para resolver esto fue necesario medir manualmente el conjunto ya ensamblado, incluyendo los conectores y el radio de curvatura de los cables, y rediseñar el gabinete con esas dimensiones reales. La nueva versión incorpora una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
 
 Con el segundo diseño fabricado se montaron todos los componentes y se incorporaron al firmware las tres pantallas OLED. Como los tres modelos de pantalla son idénticos y utilizan la misma dirección de comunicación, no es posible conectarlas al mismo canal sin que colisionen entre sí: el microcontrolador no podría distinguir a cuál le está enviando instrucciones. La solución fue asignar a cada pantalla su propio par de pines, de modo que opera en un canal de comunicación completamente independiente. La pantalla de temperatura muestra el valor actual en caracteres grandes; la de humedad hace lo mismo con la lectura de humedad relativa; la tercera indica el estado de la conexión WiFi y de la comunicación con la API. Al encender el nodo, las tres pantallas muestran el nombre del sistema de forma simultánea hasta que la primera lectura esté disponible.
 
 \begin{figure}[H]
     \centering
     \fbox{\includegraphics[width=0.75\textwidth]{0_imagenes/Cap4/GabineteFinal.jpeg}}
-    \caption{Nodo sensor ensamblado en el gabinete final: ESP32-C5, sensor AHT10 y las tres pantallas OLED en operación}
+    \caption{Nodo sensor ensamblado en el gabinete final}
     \label{fig:cap4-gabinete-final}
     \vspace{0.2cm}
     \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -938,7 +944,7 @@ El lector de código de barras se conectó al equipo de cómputo de la farmacia 
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-La integración del lector con el flujo de registro de ventas en la interfaz web —incluyendo la activación del modo de escaneo, la búsqueda en el catálogo local y la confirmación visual del resultado— se describió en la sección 4.3 de este capítulo.
+La integración del lector con el flujo de registro de ventas en la interfaz web, incluyendo la activación del modo de escaneo, la búsqueda en el catálogo local y la confirmación visual del resultado, se describió en la sección 4.3 de este capítulo.
 
 % =============================================
 % SECCIÓN 4.7: INTEGRACIÓN DEL SISTEMA
@@ -947,7 +953,7 @@ La integración del lector con el flujo de registro de ventas en la interfaz web
 \clearpage
 \section{Prueba de integración del sistema}
 
-Una vez verificados los componentes de forma individual, se realizó una prueba de integración del sistema completo para confirmar que los cinco objetivos específicos operan de forma conjunta. El escenario de prueba cubrió el flujo de extremo a extremo más representativo del sistema: desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario, pasando por todas las capas del sistema.
+Una vez verificado cada componente por separado, se realizó una prueba de integración del sistema completo para confirmar que los cinco objetivos específicos operan de forma conjunta. El escenario de prueba cubrió el flujo de extremo a extremo más representativo del sistema: desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario, pasando por todas las capas del sistema. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado: el nodo sensor envía sus lecturas a la API, que las almacena en la base de datos; la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
 
 \begin{figure}[H]
 \centering
@@ -990,7 +996,7 @@ Una vez verificados los componentes de forma individual, se realizó una prueba 
 
 \end{tikzpicture}%
 }
-\caption{Flujo de integración del sistema completo: el nodo sensor envía lecturas a la API, que las almacena en la base de datos; la interfaz web consulta la API para mostrar los datos al usuario}
+\caption{Flujo de integración del sistema completo}
 \label{fig:cap4-integracion}
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
@@ -1010,5 +1016,6 @@ La prueba confirmó que el flujo opera correctamente de extremo a extremo: el no
 %    \vspace{0.2cm}
 %    \footnotesize \textbf{Fuente:} Elaboración propia.
 %\end{figure}
+
 
 El único elemento pendiente al momento de la redacción de este capítulo son las pruebas de operación continua del sistema en las instalaciones de la farmacia, previstas para realizarse una vez que el gabinete físico sea entregado e instalado en el local.

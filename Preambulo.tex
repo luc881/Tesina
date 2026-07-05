@@ -229,8 +229,7 @@
     group-minimum-digits = 4,    % Agrupa a partir de 4 dígitos
     output-decimal-marker = {.}, % Marcador decimal
     round-mode = places,         % Redondea a un número fijo de decimales
-    round-precision = 2,         % Usar 2 decimales
-    round-integer-to-decimal = true, % Añade .00 a enteros (e.g., 80 -> 80.00)
+    round-precision = 2,         % Usar 2 decimales (ya añade .00 a enteros por defecto)
 }
 
 \NewDocumentCommand{\fila}{m m m o}{%
@@ -269,4 +268,31 @@
     \vspace{4pt}
     \noindent\rule{\textwidth}{0.4pt}
     \vspace{4pt}
+}
+
+% ======================================================================================================================
+%   FRAGMENTOS DE CÓDIGO FUENTE
+% ======================================================================================================================
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=true,
+    frame=single,
+    framerule=0.5pt,
+    backgroundcolor=\color{gray!6},
+    keywordstyle=\bfseries,
+    commentstyle=\color{gray!80},
+    stringstyle=\color{black!75},
+    showstringspaces=false,
+    tabsize=2,
+    columns=fullflexible,
+    keepspaces=true,
+    xleftmargin=6pt,
+    xrightmargin=6pt,
+    aboveskip=10pt,
+    belowskip=10pt,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+             {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+             {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1 {°}{{$^\circ$}}1
 }
