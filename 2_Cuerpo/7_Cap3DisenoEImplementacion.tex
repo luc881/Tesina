@@ -1204,13 +1204,13 @@ Antes de imprimir, el diseño se verificó sobre el modelo tridimensional. La Fi
 \clearpage
 \section{Integración del lector de código de barras}
 
-El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un lector USB que el sistema operativo reconoce como un teclado estándar: el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
+El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un escáner inalámbrico (el NETUM CS7501, descrito en el Capítulo 2) cuyo receptor USB es reconocido por el sistema operativo como un teclado estándar: el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
 
 El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse (Fig.~\ref{fig:cap3-modo-lector}).
 
 \begin{figure}[H]
    \centering
-   \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap3/ModoLector.png}}
+   \fbox{\includegraphics[width=0.7\textwidth]{0_imagenes/Cap3/ModoLector.png}}
    \caption{Modo lector activo en el formulario de venta}
    \label{fig:cap3-modo-lector}
    \vspace{0.2cm}
