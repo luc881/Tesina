@@ -1206,9 +1206,35 @@ Antes de imprimir, el diseño se verificó sobre el modelo tridimensional. La Fi
 
 El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un lector USB que el sistema operativo reconoce como un teclado estándar: desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
 
-El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
+El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse (la pantalla de este modo puede verse en la Fig.~\ref{fig:cap3-wireflow-ventas} del flujo de pantallas).
 
-La búsqueda del código se diseñó para resolverse localmente: el catálogo de productos se carga en memoria al abrir el formulario y cada código escaneado se compara contra él, sin generar una petición al servidor por artículo. Esto evita la latencia de red en un flujo donde varios artículos se escanean en secuencia rápida. Si hay coincidencia, el producto se agrega a la venta; si no la hay, el campo muestra una señal de error. El modo se desactiva automáticamente al hacer clic fuera del área de escaneo.
+La búsqueda del código se diseñó para resolverse localmente: el catálogo de productos se carga en memoria al abrir el formulario y cada código escaneado se compara contra él, sin generar una petición al servidor por artículo. Esto evita la latencia de red en un flujo donde varios artículos se escanean en secuencia rápida. Si hay coincidencia, el producto se agrega a la venta; si no la hay, el campo muestra una señal de error. El modo se desactiva automáticamente al hacer clic fuera del área de escaneo. La Fig.~\ref{fig:cap3-barcode-cadena} resume el recorrido completo de un código.
+
+\begin{figure}[H]
+\centering
+\fbox{%
+\scalebox{0.92}{%
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=3pt, fill=gray!10, minimum height=1.05cm,
+    align=center, font=\small, inner sep=6pt},
+  arr/.style={-{Stealth}, thick},
+  lbl/.style={font=\scriptsize, align=center}
+]
+\node[box] (prod)   at (0,0)    {Producto con\\código de barras};
+\node[box] (lector) at (4.2,0)  {Lector USB};
+\node[box, fill=gray!20] (campo) at (8.6,0) {Campo de escaneo\\(modo lector, F2)};
+\node[box] (venta)  at (13.0,0) {Artículo agregado\\a la venta};
+\draw[arr] (prod)   -- node[lbl, above]{escaneo} (lector);
+\draw[arr] (lector) -- node[lbl, above]{llega como\\texto tecleado} (campo);
+\draw[arr] (campo)  -- node[lbl, above]{coincidencia en\\catálogo local} (venta);
+\end{tikzpicture}%
+}%
+}
+\caption{Recorrido de un código de barras desde el producto hasta la venta}
+\label{fig:cap3-barcode-cadena}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 
 
