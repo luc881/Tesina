@@ -1204,10 +1204,19 @@ Antes de imprimir, el diseño se verificó sobre el modelo tridimensional. La Fi
 \clearpage
 \section{Integración del lector de código de barras}
 
-El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un lector USB que el sistema operativo reconoce como un teclado estándar: desde la perspectiva del navegador, el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
+El sexto objetivo específico consistió en incorporar un lector de código de barras al flujo de registro de ventas de la aplicación web. Se eligió un lector USB que el sistema operativo reconoce como un teclado estándar: el código escaneado se ingresa como si hubiera sido tecleado manualmente, lo que evitó desarrollar cualquier controlador o integración especial.
 
-El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse.
+El flujo estándar de creación de venta no estaba diseñado para el ritmo de escaneo continuo: el operador habría tenido que hacer clic en el campo correcto y esperar el resultado por cada artículo. Para que la herramienta resultara práctica en un punto de venta, se diseñó un \textbf{modo lector} en el módulo de ventas, activable desde cualquier parte del formulario con la tecla \textbf{F2}, que redirige el foco al campo de lectura sin que el usuario tenga que desplazarse (Fig.~\ref{fig:cap3-modo-lector}).
 
-La búsqueda del código se diseñó para resolverse localmente: el catálogo de productos se carga en memoria al abrir el formulario y cada código escaneado se compara contra él, sin generar una petición al servidor por artículo. Esto evita la latencia de red en un flujo donde varios artículos se escanean en secuencia rápida. Si hay coincidencia, el producto se agrega a la venta; si no la hay, el campo muestra una señal de error. El modo se desactiva automáticamente al hacer clic fuera del área de escaneo.
+\begin{figure}[H]
+   \centering
+   \fbox{\includegraphics[width=0.85\textwidth]{0_imagenes/Cap3/ModoLector.png}}
+   \caption{Modo lector activo en el formulario de venta}
+   \label{fig:cap3-modo-lector}
+   \vspace{0.2cm}
+   \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+El catálogo se carga en memoria al abrir el formulario, de modo que cada código escaneado se compara al instante, sin una petición al servidor por artículo. Si hay coincidencia, el producto se agrega a la venta; si no, el campo muestra una señal de error. El modo se desactiva al hacer clic fuera del área de escaneo.
 
 Con esto quedan descritos el diseño y la construcción de los seis componentes planteados en los objetivos: la base de datos, la API, la interfaz web, el nodo sensor, su gabinete y la integración del lector. El Capítulo 4 documenta las pruebas a las que se sometió cada componente y los ajustes que resultaron de ellas.
