@@ -1134,8 +1134,6 @@ El ciclo operativo (Fig.~\ref{fig:cap3-firmware-loop}) realiza una lectura cada 
 \end{figure}
 
 
-
-
 % =============================================
 % OE 5: GABINETE FÍSICO
 % =============================================
@@ -1147,7 +1145,47 @@ El quinto objetivo específico consistió en diseñar y fabricar el gabinete que
 
 El gabinete se compone de dos piezas: una base que aloja la tarjeta del microcontrolador y el cableado interno, y una tapa frontal con tres ventanas rectangulares para exponer las pantallas OLED. Una abertura lateral permite la salida del cable de alimentación USB. Las dos piezas ensamblan a presión, sin tornillos.
 
-Cada decisión de diseño respondió a una restricción práctica. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso, mientras que el encaje a presión tolera abrir y cerrar el gabinete sin deteriorarse. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una ranura en la base, suficientemente pequeña para evitar la entrada de polvo pero que permite la circulación del aire del área de almacenamiento.
+Cada decisión de diseño respondió a una restricción práctica. El ensamble a presión se eligió porque los componentes internos pueden requerir ajuste durante la vida útil del dispositivo: con tornillos, el acceso repetido desgasta las roscas en plástico impreso, mientras que el encaje a presión tolera abrir y cerrar el gabinete sin deteriorarse. El ancho mínimo lo determinaron los tres módulos OLED dispuestos en fila horizontal con sus conectores orientados hacia la base. La ventilación del sensor AHT10 se resolvió con una rejilla de perforaciones en la cara superior, suficientemente pequeñas para evitar la entrada de polvo pero que permiten que el aire del área de almacenamiento alcance al sensor.
+
+Las figuras~\ref{fig:cap3-gabinete-plano-base} y~\ref{fig:cap3-gabinete-plano-tapa} presentan los planos acotados de ambas piezas, con las cotas en milímetros. La base mide $150 \times 70 \times 66$~mm, dimensiones que corresponden al gabinete de $15 \times 7 \times 7$~cm planteado en los objetivos; en su interior, dos rieles sujetan la tarjeta del microcontrolador sin tornillos. En la tapa se aprecian las tres ventanas para las pantallas OLED con sus perforaciones de montaje y, en la cara superior, la rejilla de ventilación del sensor.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.95\textwidth]{0_imagenes/Cap3/GabinetePlanoBase.jpeg}}
+    \caption{Plano acotado de la base del gabinete (cotas en mm)}
+    \label{fig:cap3-gabinete-plano-base}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.95\textwidth]{0_imagenes/Cap3/GabinetePlanoTapa.jpeg}}
+    \caption{Plano acotado de la tapa del gabinete (cotas en mm)}
+    \label{fig:cap3-gabinete-plano-tapa}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+Antes de imprimir, el diseño se verificó sobre el modelo tridimensional. La Fig.~\ref{fig:cap3-gabinete-render-base} muestra la base con los rieles interiores y la abertura lateral para el cable de alimentación, y la Fig.~\ref{fig:cap3-gabinete-render-ensamble} el gabinete ensamblado, con las ventanas de las pantallas al frente y la rejilla del sensor en la parte superior.
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.72\textwidth]{0_imagenes/Cap3/GabineteRenderBase.jpeg}}
+    \caption{Modelo 3D de la base del gabinete}
+    \label{fig:cap3-gabinete-render-base}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.72\textwidth]{0_imagenes/Cap3/GabineteRenderEnsamble.jpeg}}
+    \caption{Modelo 3D del gabinete ensamblado}
+    \label{fig:cap3-gabinete-render-ensamble}
+    \vspace{0.2cm}
+    \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 % TODO: subir 0_imagenes/Cap3/GabineteFoto.png a Overleaf para descomentar
 %\begin{figure}[H]
