@@ -7,7 +7,7 @@
 \refstepcounter{chapter}
 \addcontentsline{toc}{chapter}{Cap. 4 Pruebas y Resultados}
 
-En este capítulo se documentan las pruebas realizadas sobre cada componente del sistema construido en el capítulo anterior y los resultados obtenidos. Las pruebas se presentan siguiendo el mismo orden de los objetivos específicos: base de datos, API REST, interfaz web y nodo sensor. Para cada componente se describen los escenarios verificados, los ajustes que fue necesario realizar a partir de los resultados obtenidos, y las mejoras identificadas durante el proceso de validación.
+En este capítulo se documentan las pruebas realizadas sobre cada componente construido en el capítulo anterior y los resultados obtenidos. Las secciones siguen el mismo orden de los objetivos específicos, desde la base de datos hasta el lector de código de barras, y cierran con una prueba de integración del sistema completo. Para cada componente se describen los escenarios verificados y los ajustes que resultaron de ellos.
 
 % =============================================
 % SECCIÓN 4.1: BASE DE DATOS
@@ -15,15 +15,15 @@ En este capítulo se documentan las pruebas realizadas sobre cada componente del
 
 \section{Pruebas de la base de datos}
 
-La base de datos no se probó de forma aislada sino a través de la suite de pruebas automatizadas de la API: dado que cada prueba opera sobre una instancia real de PostgreSQL, cualquier restricción, índice o relación que no funcione correctamente provoca un fallo detectable en la prueba correspondiente. Este enfoque permitió validar el comportamiento de la base de datos en las mismas condiciones que en producción, sin necesidad de escribir pruebas separadas a nivel de base de datos.
+La base de datos no se probó de forma aislada, sino a través de las pruebas automatizadas de la API. Cada prueba opera sobre una instancia real de PostgreSQL, de modo que cualquier restricción, índice o relación que no funcione provoca un fallo detectable en la prueba correspondiente. Así, la base de datos quedó validada en las mismas condiciones en que opera en producción.
 
 \subsection{Restricciones e integridad relacional}
 
-La \textbf{integridad relacional} es la propiedad que garantiza que los datos almacenados en las distintas tablas de la base de datos sean coherentes entre sí: que una venta siempre apunte a un producto que existe, que no haya dos usuarios con el mismo correo, y que los campos obligatorios nunca queden vacíos. Esta coherencia no depende de que el programador la vigile manualmente; se implementa mediante \textbf{restricciones}, reglas declaradas en el propio esquema que el motor de base de datos aplica de forma automática y rechaza cualquier operación que las incumpla. Las pruebas de esta sección verifican precisamente que esas reglas actúan como se espera.
+La \textbf{integridad relacional} es la propiedad que garantiza que los datos de las distintas tablas sean coherentes entre sí. Una venta siempre apunta a un producto que existe, no hay dos usuarios con el mismo correo y los campos obligatorios nunca quedan vacíos. Esta coherencia no depende de que el programador la vigile manualmente. Se implementa mediante \textbf{restricciones}, reglas declaradas en el propio esquema que el motor de base de datos aplica de forma automática, rechazando cualquier operación que las incumpla. Las pruebas de esta sección verifican que esas reglas actúan como se espera.
 
-Las restricciones definidas en el esquema (claves foráneas, unicidad y valores no nulos) se verificaron a través de los casos de prueba negativos de la API: intentar crear un lote con un producto inexistente devuelve error, igual que registrar un usuario con un correo ya ocupado o completar una venta vacía. En todos los casos el motor de base de datos aplicó la restricción correspondiente y la API tradujo ese rechazo en un código de respuesta apropiado.
+Las restricciones definidas en el esquema (claves foráneas, unicidad y valores no nulos) se verificaron con los casos de prueba negativos de la API. Intentar crear un lote con un producto inexistente devuelve error, igual que registrar un usuario con un correo ya ocupado o completar una venta vacía. En todos los casos el motor aplicó la restricción correspondiente y la API tradujo el rechazo en un código de respuesta apropiado.
 
-Un caso de diseño particular que se verificó fue el de los lotes sin número de código asignado. El inventario acepta lotes sin código (ocurre cuando el fabricante no imprime uno), pero si el código está presente no puede repetirse para el mismo producto. Para implementar esto sin bloquear los lotes sin código se utilizó un índice parcial: la restricción de unicidad aplica únicamente cuando el campo tiene un valor, ignorando los registros en que está vacío. La Fig.~\ref{fig:cap4-lote-index} ilustra el comportamiento verificado con cinco intentos de registro sobre un mismo producto: los dos primeros lotes, con códigos distintos, son aceptados; el tercero es rechazado por repetir un código ya registrado; y los dos últimos, ambos sin código, son aceptados sin conflicto porque los registros vacíos no compiten entre sí.
+Un caso de diseño particular fue el de los lotes sin código asignado, que ocurren cuando el fabricante no imprime uno. El inventario los acepta, pero cuando el código sí existe no puede repetirse para el mismo producto. Esto se implementó con un índice parcial, una restricción de unicidad que solo aplica cuando el campo tiene valor. La Fig.~\ref{fig:cap4-lote-index} ilustra el comportamiento verificado con cinco intentos de registro sobre un mismo producto. Los dos primeros lotes, con códigos distintos, son aceptados. El tercero se rechaza por repetir un código ya registrado. Los dos últimos, ambos sin código, se aceptan sin conflicto porque los registros vacíos no compiten entre sí.
 
 \begin{figure}[H]
 \centering
@@ -80,7 +80,7 @@ Un caso de diseño particular que se verificó fue el de los lotes sin número d
 
 \subsection{Evolución del esquema durante el desarrollo}
 
-El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. Estos cambios se aplicaron mediante migraciones sucesivas que modifican la estructura de la base de datos de forma controlada, preservando los datos existentes. La tabla siguiente resume los ajustes más relevantes:
+El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. Estos cambios se aplicaron mediante migraciones sucesivas que modifican la estructura de la base de datos de forma controlada, preservando los datos existentes. La tabla siguiente resume los más relevantes.
 
 \begin{longtable}{|p{4.0cm}|p{10.5cm}|}
 
@@ -115,7 +115,7 @@ Se añadió una columna de fecha de baja a las tablas de usuarios, roles, sucurs
 \hline
 
 Índice parcial sobre código de lote &
-Para aceptar lotes sin código asignado (situación habitual con algunos proveedores) sin perder la garantía de que los códigos presentes no se dupliquen, se reemplazó la restricción de unicidad simple por un índice que aplica únicamente cuando el campo tiene valor. \\
+Se reemplazó la restricción de unicidad simple por el índice descrito en la sección anterior, que aplica únicamente cuando el código de lote tiene valor. \\
 \hline
 
 Tipos enumerados nativos de PostgreSQL &
@@ -156,13 +156,13 @@ El esquema final de la base de datos opera establemente en el entorno de producc
 \clearpage
 \section{Pruebas de la API REST}
 
-Para verificar el funcionamiento de la API se probó cada uno de sus módulos contra la base de datos real del sistema, en lugar de datos simulados. La razón es simple: una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta ese tipo de diferencias, de modo que lo verificado es idéntico a lo que se ejecuta en producción. Se cubrieron escenarios positivos (operaciones que deben completarse con éxito) y negativos (operaciones que el sistema debe rechazar) en los módulos de autenticación, usuarios, roles, productos, inventario, ventas, compras, proveedores y sensor.
+Para verificar el funcionamiento de la API se probó cada módulo contra la base de datos real del sistema, en lugar de datos simulados. Una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta esas diferencias. Se cubrieron tanto operaciones que deben completarse con éxito como operaciones que el sistema debe rechazar, en todos los módulos de la API.
 
 \subsection{Módulo de autenticación}
 
-Con la implementación inicial del módulo de autenticación se obtuvo un sistema que emitía un token de acceso al iniciar sesión y lo verificaba en cada operación posterior. Durante las pruebas se identificó que el tiempo de vigencia del token resultaba insuficiente para sesiones de trabajo prolongadas: el sistema cerraba la sesión del usuario mientras este se encontraba operando la aplicación, lo que interrumpía el flujo de trabajo.
+Con la implementación inicial del módulo de autenticación se obtuvo un sistema que emitía un token de acceso al iniciar sesión y lo verificaba en cada operación posterior. Durante las pruebas se identificó que el tiempo de vigencia del token resultaba insuficiente para sesiones de trabajo prolongadas. El sistema cerraba la sesión del usuario mientras este operaba la aplicación y el flujo de trabajo se interrumpía.
 
-Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares; cuando está próximo a expirar, el sistema lo renueva sin que el usuario tenga que iniciar sesión otra vez. Se añadió además la opción de sesión prolongada, equivalente a la función \textit{recordarme} de otras aplicaciones web, que extiende la duración del token de refresco a 30 días para quien la seleccione al iniciar sesión. La Fig.~\ref{fig:cap4-token-timeline} compara ambas versiones sobre una línea de tiempo. En la fila superior (\textit{Antes}) el único token expira a los 30 minutos y la sesión se cierra. En la fila inferior (\textit{Después}), cada vez que el token está por expirar se genera uno nuevo en silencio, encadenando periodos de 30 minutos hasta por 30 días sin que el usuario perciba la renovación.
+Para resolver este comportamiento fue necesario incorporar un segundo token de mayor duración, denominado token de refresco. El token de acceso mantiene su vigencia de 30 minutos para las operaciones regulares. Cuando está próximo a expirar, el sistema lo renueva sin que el usuario tenga que iniciar sesión otra vez. Se añadió además la opción de sesión prolongada, equivalente a la función \textit{recordarme} de otras aplicaciones web, que extiende la duración del token de refresco a 30 días para quien la seleccione al iniciar sesión. La Fig.~\ref{fig:cap4-token-timeline} compara ambas versiones sobre una línea de tiempo. En la fila superior (\textit{Antes}) el único token expira a los 30 minutos y la sesión se cierra. En la fila inferior (\textit{Después}), cada vez que el token está por expirar se genera uno nuevo en silencio, encadenando periodos de 30 minutos hasta por 30 días sin que el usuario perciba la renovación.
 
 % TODO: insertar captura de pantalla de la pantalla de inicio de sesión mostrando la opción "Recordarme"
 % Guardar en: 0_imagenes/Cap4/LoginRecordarme.png
@@ -233,15 +233,15 @@ Para resolver este comportamiento fue necesario incorporar un segundo token de m
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Durante las pruebas también se identificó que el módulo de cambio de contraseña no verificaba que el usuario con sesión activa fuera el mismo que intentaba realizar el cambio, lo que representaba una vulnerabilidad: un usuario podría haber modificado la contraseña de otro. Esta situación se corrigió añadiendo una verificación de identidad antes de procesar la solicitud.
+Durante las pruebas también se identificó que el módulo de cambio de contraseña no verificaba que el usuario con sesión activa fuera el mismo que intentaba realizar el cambio. Cualquier usuario podría haber modificado la contraseña de otro, así que se añadió una verificación de identidad antes de procesar la solicitud.
 
 \subsection{Módulo de ventas y control de inventario por lotes}
 
-La lógica de completar una venta, que descuenta las unidades vendidas del inventario y registra de qué lote provienen, fue el componente más complejo de la API. Con la propuesta inicial del registro de ventas se contaba únicamente con el encabezado de la transacción y el detalle de los productos; el descuento efectivo del inventario por lote no estaba implementado en esa versión.
+La lógica de completar una venta, que descuenta las unidades vendidas del inventario y registra de qué lote provienen, fue el componente más complejo de la API. La propuesta inicial contaba únicamente con el encabezado de la transacción y el detalle de los productos, sin el descuento efectivo del inventario por lote.
 
-Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}: primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto vendido, los ordena por fecha de caducidad y descuenta las unidades del lote que vence primero. Si las existencias de un lote no son suficientes para cubrir la cantidad vendida, el sistema distribuye automáticamente el descuento entre los lotes siguientes en orden de caducidad. Este comportamiento se verificó con pruebas que cubren los casos: descuento completo desde un único lote, distribución entre múltiples lotes, e intento de venta con existencias insuficientes —en este último caso el sistema rechaza la operación y el inventario no se ve afectado.
+Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}, primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto, los ordena por fecha de caducidad y descuenta las unidades del que vence primero. Si un lote no alcanza a cubrir la cantidad vendida, el descuento se distribuye entre los siguientes en orden de caducidad. Las pruebas cubrieron el descuento completo desde un único lote, la distribución entre varios lotes y el intento de venta con existencias insuficientes, caso en el que el sistema rechaza la operación y el inventario no se ve afectado.
 
-La Fig.~\ref{fig:cap4-fefo} ilustra el segundo caso con un escenario verificado en las pruebas: una venta de 150 unidades con tres lotes disponibles. El sistema consume primero el lote A por ser el de caducidad más próxima y lo agota con sus 80 unidades; las 70 restantes se descuentan del lote B, que es el siguiente en vencer; el lote C, con la caducidad más lejana, no se toca. El total descontado coincide exactamente con la cantidad vendida.
+La Fig.~\ref{fig:cap4-fefo} ilustra el segundo caso con un escenario verificado en las pruebas, una venta de 150 unidades con tres lotes disponibles. El sistema consume primero el lote A por ser el de caducidad más próxima y lo agota con sus 80 unidades. Las 70 restantes se descuentan del lote B, el siguiente en vencer. El lote C, con la caducidad más lejana, no se toca, y el total descontado coincide exactamente con la cantidad vendida.
 
 \begin{figure}[H]
 \centering
@@ -325,7 +325,7 @@ Junto con la lógica de ventas se implementó y verificó el módulo de devoluci
 
 \subsection{Ajustes realizados a la API}
 
-A lo largo del proceso de verificación se identificaron y corrigieron problemas en distintos módulos de la API. La tabla siguiente resume los más representativos:
+A lo largo del proceso de verificación se identificaron y corrigieron problemas en distintos módulos de la API. La tabla siguiente resume los más representativos.
 
 \begin{longtable}{|p{3.0cm}|p{4.2cm}|p{7.3cm}|}
 
@@ -350,11 +350,6 @@ A lo largo del proceso de verificación se identificaron y corrigieron problemas
 
 \hline
 \endlastfoot
-
-Cálculos monetarios &
-Los totales de ventas acumulaban errores de redondeo al operar con precios decimales &
-Se cambió el tipo de dato de las columnas de monto a precisión decimal exacta, eliminando los errores de redondeo \\
-\hline
 
 Registros dados de baja &
 Los registros eliminados seguían apareciendo en los listados de búsqueda y consulta &
@@ -408,9 +403,9 @@ La figura~\ref{fig:cap4-railway} muestra el panel de Railway con el servicio de 
 \clearpage
 \section{Pruebas de la interfaz web}
 
-La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo: cada módulo se probó manualmente en el navegador al momento de construirse, conectándolo contra la API desplegada en Railway para verificar que los datos fluyeran correctamente de extremo a extremo.
+La verificación de la interfaz web se realizó de forma iterativa a lo largo del desarrollo. Cada módulo se probó manualmente en el navegador al momento de construirse, conectado a la API desplegada en Railway para verificar que los datos fluyeran de extremo a extremo.
 
-La Fig.~\ref{fig:cap4-wireflow} muestra el flujo general de navegación verificado en las pruebas. La fila superior es el recorrido principal de la operación diaria: del inicio de sesión al Dashboard y de ahí al registro y confirmación de una venta. Los módulos de la parte inferior, conectados con flechas punteadas, son accesibles en cualquier momento desde el menú lateral de la aplicación.
+La Fig.~\ref{fig:cap4-wireflow} muestra el flujo general de navegación verificado en las pruebas. La fila superior es el recorrido principal de la operación diaria, del inicio de sesión al Dashboard y de ahí al registro y confirmación de una venta. Los módulos de la parte inferior, conectados con flechas punteadas, son accesibles en cualquier momento desde el menú lateral de la aplicación.
 
 % ─────────────────────────────────────────────────────────────────────────
 % WIREFLOW DE NAVEGACIÓN
@@ -552,13 +547,13 @@ La Fig.~\ref{fig:cap4-wireflow} muestra el flujo general de navegación verifica
 
 \subsection{Módulo de autenticación y control de acceso}
 
-La integración del inicio de sesión con la API se completó en las primeras etapas del desarrollo del frontend. Durante las pruebas se identificó un comportamiento incorrecto en la visibilidad de los módulos de navegación: los elementos del menú que debían mostrarse exclusivamente al administrador aparecían para todos los usuarios, y los elementos generales quedaban ocultos. La causa era que la condición de verificación de permisos evaluaba el resultado de forma invertida —ocultaba cuando debía mostrar, y mostraba cuando debía ocultar. Una vez corregida la lógica, todos los roles visualizaron únicamente los módulos que les correspondían.
+La integración del inicio de sesión con la API se completó en las primeras etapas del desarrollo de la interfaz. Durante las pruebas se detectó un comportamiento incorrecto en la visibilidad de los módulos del menú. Los elementos exclusivos del administrador aparecían para todos los usuarios y los generales quedaban ocultos, porque la condición que verifica los permisos evaluaba el resultado al revés. Una vez corregida la lógica, cada rol visualizó únicamente los módulos que le corresponden.
 
-Se identificó además que una actualización de la configuración interna de la aplicación dejaba en algunos navegadores una versión desactualizada de esa configuración en memoria, lo que generaba una pantalla en blanco al recargar. El problema se resolvió versionando la configuración: al detectar una versión anterior, la aplicación la reemplaza automáticamente por la nueva.
+También se encontró que una actualización de la configuración interna dejaba en algunos navegadores una copia desactualizada en memoria y la aplicación quedaba en blanco al recargar. Se resolvió numerando las versiones de la configuración, de modo que al detectar una anterior la aplicación la reemplaza automáticamente por la nueva.
 
 \subsection{Módulo de productos e inventario}
 
-El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. Con la propuesta inicial se lograba mostrar el listado de productos; fue necesario añadir en iteraciones sucesivas la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados, y la vista de detalle con la información del lote asociado a cada producto. La Fig.~\ref{fig:cap4-inventario} muestra el resultado final del módulo, con el listado de lotes desplegado y la búsqueda y los filtros en uso.
+El módulo de productos y el de lotes de inventario fueron los que más iteraciones requirieron durante el desarrollo. La propuesta inicial mostraba el listado de productos. En iteraciones sucesivas se añadieron la búsqueda por nombre, los filtros por categoría y marca, la paginación de resultados y la vista de detalle con la información del lote asociado a cada producto. La Fig.~\ref{fig:cap4-inventario} muestra el resultado final del módulo, con el listado de lotes desplegado y la búsqueda y los filtros en uso.
 
 \begin{figure}[H]
     \centering
@@ -569,15 +564,15 @@ El módulo de productos y el de lotes de inventario fueron los que más iteracio
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Un problema recurrente durante esta fase fue la desincronización entre los valores que la API enviaba y los que el frontend esperaba: cuando se modificaba un conjunto de opciones válidas en la API (por ejemplo, los estados posibles de un lote o los tipos de movimiento), la interfaz seguía usando los valores anteriores y los formularios fallaban. Esto se corrigió estableciendo un proceso de revisión explícita de estos valores cada vez que se actualizaba la API.
+Un problema recurrente fue la desincronización entre los valores que la API enviaba y los que la interfaz esperaba. Cuando la API modificaba un conjunto de opciones válidas, por ejemplo los estados posibles de un lote, los formularios seguían usando los valores anteriores y fallaban. Se corrigió estableciendo una revisión de estos valores en cada actualización de la API.
 
 \subsection{Módulo de ventas y lector de código de barras}
 
-El módulo de ventas fue el de mayor complejidad en el frontend: el formulario de registro de venta pasó por once versiones a lo largo del desarrollo. Con la versión inicial se podía seleccionar productos y registrar el encabezado de la venta; en iteraciones posteriores se incorporó el seguimiento por lote, la sección de pagos con soporte para múltiples métodos, la creación de lotes directamente desde el formulario, y finalmente el modo lector de código de barras.
+El módulo de ventas fue el de mayor complejidad en la interfaz. El formulario de registro pasó por once versiones a lo largo del desarrollo. La versión inicial permitía seleccionar productos y registrar el encabezado de la venta, y en iteraciones posteriores se incorporaron el seguimiento por lote, la sección de pagos con varios métodos, la creación de lotes desde el propio formulario y el modo lector de código de barras.
 
-El modo lector, que se activa con la tecla \textbf{F2} y redirige el foco al campo de escaneo, funcionó correctamente desde las primeras pruebas con productos reales de la farmacia. Los ajustes que requirió fueron de carácter visual: se añadió un banner animado en la parte superior del formulario para indicar que el modo está activo, y un indicador flotante que confirma visualmente si el código escaneado fue reconocido o no. La Fig.~\ref{fig:cap4-modo-lector} muestra el formulario con el modo lector activo y ambos indicadores visibles.
+El modo lector, que se activa con la tecla \textbf{F2} y redirige el foco al campo de escaneo, funcionó correctamente desde las primeras pruebas con productos reales de la farmacia. Los ajustes que requirió fueron de carácter visual. Se añadió un aviso animado en la parte superior del formulario para indicar que el modo está activo y un indicador flotante que confirma si el código escaneado fue reconocido. La Fig.~\ref{fig:cap4-modo-lector} muestra el formulario con el modo lector activo y ambos indicadores visibles.
 
-Durante las pruebas del formulario de pago se identificó que al escribir el monto en el campo correspondiente, el número se concatenaba con el cero inicial del campo en lugar de reemplazarlo, generando valores incorrectos. El comportamiento se corrigió haciendo que el campo seleccione todo su contenido automáticamente al recibir el foco, de modo que el primer dígito tecleado sustituya el valor anterior.
+En el formulario de pago se detectó que el monto tecleado se concatenaba con el cero inicial del campo en lugar de reemplazarlo. Se corrigió haciendo que el campo seleccione todo su contenido al recibir el foco, de modo que el primer dígito sustituya el valor anterior.
 
 \begin{figure}[H]
     \centering
@@ -590,9 +585,9 @@ Durante las pruebas del formulario de pago se identificó que al escribir el mon
 
 \subsection{Tablero de indicadores y monitoreo del sensor}
 
-El tablero principal se construyó inicialmente con datos simulados para validar la disposición visual de los indicadores. Una vez que los módulos de ventas, inventario y sensor estuvieron operativos en la API, se realizó la conexión con datos reales: el tablero pasó a mostrar el total de ventas del día, el nivel de existencias, las alertas de lotes próximos a vencer y las lecturas actuales de temperatura y humedad del nodo sensor.
+El tablero principal se construyó inicialmente con datos simulados para validar la disposición visual de los indicadores. Una vez que los módulos de ventas, inventario y sensor estuvieron operativos en la API, el tablero pasó a mostrar el total de ventas del día, el nivel de existencias, las alertas de lotes próximos a vencer y las lecturas actuales del nodo sensor.
 
-Durante esta conexión se identificó que el tablero realizaba tres llamadas independientes a la API al cargar (una por cada grupo de indicadores), lo que generaba una demora visible al abrir la vista. Para resolver esto se consolidó la información en un único punto de la API que devuelve todos los indicadores en una sola respuesta, reduciendo el tiempo de carga del tablero de forma notoria. La Fig.~\ref{fig:cap4-sensor-monitor} muestra el módulo de monitoreo ambiental en operación, con las lecturas de temperatura y humedad recibidas del nodo sensor.
+Durante esta conexión se identificó que el tablero hacía tres llamadas a la API al cargar, una por cada grupo de indicadores, y la demora era visible al abrir la vista. Se consolidó la información en un único punto de la API que devuelve todo en una sola respuesta y la carga del tablero se volvió notablemente más rápida. La Fig.~\ref{fig:cap4-sensor-monitor} muestra el módulo de monitoreo ambiental en operación, con las lecturas de temperatura y humedad recibidas del nodo sensor.
 
 \begin{figure}[H]
     \centering
@@ -603,64 +598,9 @@ Durante esta conexión se identificó que el tablero realizaba tres llamadas ind
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Ajustes realizados a la interfaz web}
+\subsection{Ajustes adicionales}
 
-\begin{longtable}{|p{3.2cm}|p{4.0cm}|p{7.3cm}|}
-
-\caption{Correcciones realizadas a la interfaz web durante las pruebas} \label{tab:cap4-front-correcciones} \\
-
-\hline
-\rowcolor{gray!20}
-\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
-\hline
-\endfirsthead
-
-\hline
-\rowcolor{gray!20}
-\textbf{Módulo} & \textbf{Problema identificado} & \textbf{Corrección aplicada} \\
-\hline
-\endhead
-
-\hline
-\multicolumn{3}{|r|}{\small Continúa en la siguiente página} \\
-\hline
-\endfoot
-
-\hline
-\endlastfoot
-
-Visibilidad de módulos &
-La lógica de verificación de permisos estaba invertida: ocultaba lo que debía mostrarse y mostraba lo que debía ocultarse &
-Se corrigió la condición de verificación; cada rol visualiza únicamente los módulos que le corresponden \\
-\hline
-
-Pantalla en blanco &
-Una actualización de la configuración interna dejaba versiones desactualizadas en el navegador, causando pantalla en blanco al recargar &
-Se versionó la configuración para forzar su actualización automática al detectar una versión anterior \\
-\hline
-
-Enrutamiento en Vercel &
-Al acceder directamente a una ruta o recargar la página, Vercel devolvía un error 404 porque no encontraba el archivo correspondiente &
-Se añadió una regla de redirección que redirige cualquier URL al punto de entrada de la aplicación \\
-\hline
-
-Tipos de datos entre sistemas &
-Cuando la API modificaba sus conjuntos de valores válidos, la interfaz seguía usando los valores anteriores, generando errores en los formularios &
-Se estableció una revisión de estos valores en cada actualización de la API \\
-\hline
-
-Límite de solicitudes &
-El servidor rechazaba solicitudes frecuentes con un error de límite de tasa, y la interfaz no lo manejaba, dejando al usuario sin respuesta &
-Se añadió un reintento automático que respeta el tiempo de espera indicado por el servidor antes de reintentar \\
-\hline
-
-Formulario de pago &
-Al escribir el monto en el campo de pago, el número se concatenaba con el valor inicial del campo en lugar de reemplazarlo &
-Se configuró el campo para seleccionar su contenido al recibir el foco, de modo que el primer dígito sustituya el valor anterior \\
-
-\end{longtable}
-\vspace{0.1cm}
-{\footnotesize \textbf{Fuente:} Elaboración propia.}
+Dos ajustes más surgieron de las pruebas y no pertenecen a un módulo en particular. El primero apareció al entrar directamente a una ruta de la aplicación o al recargar la página. Vercel devolvía un error de página no encontrada porque buscaba un archivo con ese nombre, y se resolvió con una regla que redirige cualquier dirección al punto de entrada de la aplicación. El segundo se presentó cuando el servidor rechazaba solicitudes muy frecuentes por su límite de seguridad y la interfaz no reaccionaba, dejando al usuario sin respuesta. Se añadió un reintento automático que espera el tiempo indicado por el servidor antes de volver a intentar.
 
 \subsection{Despliegue en Vercel}
 
@@ -682,7 +622,7 @@ Con los ajustes realizados, la interfaz web quedó desplegada de forma permanent
 \clearpage
 \section{Pruebas del nodo sensor}
 
-Las pruebas del nodo sensor cubrieron tres aspectos: la correcta transmisión de las lecturas al servidor, el comportamiento del firmware ante valores fuera de rango, y la estabilidad de la conexión WiFi. Las pruebas se realizaron en el entorno de desarrollo mientras se finaliza el diseño del gabinete físico para la instalación en la farmacia.
+Las pruebas del nodo sensor cubrieron la transmisión de las lecturas al servidor, el comportamiento del firmware ante valores fuera de rango y la estabilidad de la conexión WiFi. Se realizaron en el entorno de desarrollo mientras se concluye la instalación del gabinete en la farmacia.
 
 \subsection{Transmisión de datos al servidor}
 
@@ -690,11 +630,11 @@ Con la versión inicial del firmware el nodo realizaba lecturas del sensor AHT10
 
 La causa del problema fue una barra inclinada adicional al final de la dirección del servidor configurada en el firmware. Al recibir una solicitud con esa barra, el servidor respondía con un error de ruta no encontrada en lugar de procesar el dato. Una vez eliminada la barra de la dirección, las lecturas comenzaron a registrarse correctamente en la base de datos y a aparecer en el tablero en tiempo real.
 
-\subsection{Incidente de hardware: conflicto de pines}
+\subsection{Incidente de hardware por conflicto de pines}
 
-Durante las pruebas de ensamble se intentó apagar el LED RGB integrado en la placa del ESP32-C5 para que no emitiera luz durante la operación normal del nodo. Al implementar el control del LED por software se comenzaron a registrar lecturas erráticas del sensor AHT10: valores de temperatura y humedad inconsistentes que el firmware descartaba por estar fuera del rango de validación.
+Durante las pruebas de ensamble se intentó apagar el LED RGB integrado en la placa del ESP32-C5 para que no emitiera luz durante la operación normal del nodo. Al implementar el control del LED por software se comenzaron a registrar lecturas erráticas del sensor AHT10, valores de temperatura y humedad inconsistentes que el firmware descartaba por estar fuera del rango de validación.
 
-La investigación del problema reveló que el pin del microcontrolador asignado al LED RGB coincidía con el mismo pin utilizado como línea de datos del bus de comunicación con el sensor AHT10. Al intentar controlar el LED, el firmware generaba señales que interferían con la comunicación del sensor, corrompiendo las lecturas. La Fig.~\ref{fig:cap4-pin-conflicto} ilustra el conflicto: del pin GPIO~8 del microcontrolador se desprenden dos destinos simultáneos, la línea de datos del sensor y el control del LED integrado en la placa. Toda señal dirigida al LED viajaba también por la línea del sensor, y esa interferencia era lo que corrompía las lecturas.
+La investigación del problema reveló que el pin del microcontrolador asignado al LED RGB coincidía con el mismo pin utilizado como línea de datos del bus de comunicación con el sensor AHT10. Al intentar controlar el LED, el firmware generaba señales que interferían con la comunicación del sensor, corrompiendo las lecturas. La Fig.~\ref{fig:cap4-pin-conflicto} ilustra el conflicto. Del pin GPIO~8 del microcontrolador se desprenden dos destinos simultáneos, la línea de datos del sensor y el control del LED integrado en la placa. Toda señal dirigida al LED viajaba también por la línea del sensor y esa interferencia corrompía las lecturas.
 
 \begin{figure}[H]
 \centering
@@ -769,11 +709,11 @@ Dado que la documentación técnica de esa revisión de la placa no especificaba
 
 \subsection{Validación de lecturas fuera de rango}
 
-El firmware descarta automáticamente cualquier lectura que caiga fuera de los rangos físicamente plausibles definidos para el sensor: entre $-10\,^\circ\text{C}$ y $85\,^\circ\text{C}$ para temperatura, y entre $0\,\%$ y $100\,\%$ para humedad relativa. Estos límites son deliberadamente amplios respecto a las condiciones normales de una farmacia, donde los rangos de operación son mucho más estrechos. La intención es filtrar únicamente lecturas claramente erróneas, sin descartar valores extremos que pudieran ser reales en una situación de emergencia.
+El firmware descarta automáticamente cualquier lectura fuera de los rangos físicamente posibles del sensor, de $-10\,^\circ\text{C}$ a $85\,^\circ\text{C}$ en temperatura y de $0\,\%$ a $100\,\%$ en humedad relativa. Estos límites son deliberadamente amplios frente a las condiciones normales de una farmacia. La intención es filtrar solo lecturas claramente erróneas, sin descartar valores extremos que pudieran ser reales en una emergencia.
 
-Se verificó este comportamiento forzando manualmente valores fuera de rango en el entorno de pruebas: el firmware los identificó correctamente y los descartó sin enviarlos al servidor, registrando el descarte en la salida de diagnóstico.
+Este comportamiento se verificó forzando manualmente valores fuera de rango en el entorno de pruebas. El firmware los identificó y los descartó sin enviarlos al servidor, registrando el descarte en la salida de diagnóstico.
 
-La Fig.~\ref{fig:cap4-rangos} compara sobre una misma escala los dos niveles de control que resultan de este diseño. La franja clara es el rango de validación del firmware, es decir, lo que el nodo acepta como lectura físicamente posible; la franja oscura es el rango que la NOM-073-SSA1-2015 recomienda para almacenar medicamentos. Una lectura fuera de la franja clara se descarta por ser un error del sensor; una lectura dentro de la franja clara pero fuera de la oscura sí se registra y genera una alerta en la aplicación, porque describe una condición real que requiere atención.
+La Fig.~\ref{fig:cap4-rangos} compara sobre una misma escala los dos niveles de control que resultan de este diseño. La franja clara es el rango de validación del firmware, lo que el nodo acepta como lectura físicamente posible. La franja oscura es el rango que la NOM-073-SSA1-2015 recomienda para almacenar medicamentos. Una lectura fuera de la franja clara se descarta por ser un error del sensor, mientras que una lectura dentro de la clara pero fuera de la oscura sí se registra y genera una alerta en la aplicación, porque describe una condición real que requiere atención.
 
 \begin{figure}[H]
 \centering
@@ -847,7 +787,7 @@ La Fig.~\ref{fig:cap4-rangos} compara sobre una misma escala los dos niveles de 
 
 \subsection{Resultados}
 
-Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó sin fallas durante las sesiones de prueba: las lecturas se transmitieron correctamente cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua en la farmacia quedan pendientes hasta que se concluya el rediseño del gabinete físico descrito en la sección siguiente.
+Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo operó sin fallas durante las sesiones de prueba. Las lecturas se transmitieron cada 30 segundos y aparecieron en el tablero de la aplicación web sin interrupciones. Las pruebas de operación continua quedan pendientes hasta que el gabinete descrito en la sección siguiente se instale en la farmacia.
 
 % =============================================
 % SECCIÓN 4.5: GABINETE E INTEGRACIÓN
@@ -856,9 +796,9 @@ Resuelto el conflicto de pines y corregida la dirección del servidor, el nodo o
 \clearpage
 \section{Pruebas del gabinete impreso en 3D}
 
-Con el primer diseño del gabinete se utilizaron las dimensiones nominales de cada componente tal como las especifican los fabricantes: el largo, ancho y alto de la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
+Con el primer diseño del gabinete se utilizaron las dimensiones nominales que los fabricantes especifican para la placa del ESP32-C5, el módulo del sensor AHT10 y las pantallas OLED. Las piezas se modelaron con esas medidas y se fabricaron mediante impresión 3D.
 
-Al intentar montar los componentes dentro del gabinete se identificó que no era posible alojarlos correctamente: los conectores Dupont (los terminales de los cables que unen el microcontrolador con el sensor) sobresalen varios milímetros por encima de la superficie de la placa, una dimensión que las especificaciones del fabricante no incluyen. Este sobredimensionamiento vertical impidió cerrar el gabinete sin ejercer presión sobre los cables, lo que representaba un riesgo para las conexiones. La Fig.~\ref{fig:cap4-gabinete-v1} muestra el primer gabinete fabricado con los conectores impidiendo el cierre, y la Fig.~\ref{fig:cap4-gabinete-problema} esquematiza el problema en vista lateral: la altura real del conector montado sobre la placa supera el espacio interior que el diseño original dejaba entre la placa y la tapa.
+Al montar los componentes se encontró que no cabían. Los conectores Dupont, los terminales de los cables que unen el microcontrolador con el sensor, sobresalen varios milímetros por encima de la placa, una dimensión que las hojas de los fabricantes no incluyen. Ese exceso de altura impedía cerrar el gabinete sin presionar los cables, con riesgo para las conexiones. La Fig.~\ref{fig:cap4-gabinete-v1} muestra el primer gabinete con los conectores impidiendo el cierre y la Fig.~\ref{fig:cap4-gabinete-problema} esquematiza el problema en vista lateral. La altura real del conector montado supera el espacio que el diseño original dejaba entre la placa y la tapa.
 
 \begin{figure}[H]
     \centering
@@ -919,7 +859,7 @@ Al intentar montar los componentes dentro del gabinete se identificó que no era
 
 Para resolver esto fue necesario medir manualmente el conjunto ya ensamblado, incluyendo los conectores y el radio de curvatura de los cables, y rediseñar el gabinete con esas dimensiones reales. La nueva versión incorpora una altura interior mayor en la base para dar espacio a los conectores y una distribución diferente de los componentes para reducir el recorrido de los cables internos.
 
-Con el segundo diseño fabricado se montaron todos los componentes y se incorporaron al firmware las tres pantallas OLED. Como los tres modelos de pantalla son idénticos y utilizan la misma dirección de comunicación, no es posible conectarlas al mismo canal sin que colisionen entre sí: el microcontrolador no podría distinguir a cuál le está enviando instrucciones. La solución fue asignar a cada pantalla su propio par de pines, de modo que opera en un canal de comunicación completamente independiente. La pantalla de temperatura muestra el valor actual en caracteres grandes; la de humedad hace lo mismo con la lectura de humedad relativa; la tercera indica el estado de la conexión WiFi y de la comunicación con la API. Al encender el nodo, las tres pantallas muestran el nombre del sistema de forma simultánea hasta que la primera lectura esté disponible.
+Con el segundo diseño fabricado se montaron todos los componentes y se incorporaron al firmware las tres pantallas OLED, cada una en su canal de comunicación independiente, como se describió en el Capítulo 3. La pantalla de temperatura muestra el valor actual en caracteres grandes, la de humedad hace lo propio con su lectura y la tercera indica el estado de la conexión WiFi y de la comunicación con la API. Al encender el nodo, las tres muestran el nombre del sistema hasta que la primera lectura está disponible.
 
 \begin{figure}[H]
     \centering
@@ -933,7 +873,7 @@ Con el segundo diseño fabricado se montaron todos los componentes y se incorpor
 \clearpage
 \section{Pruebas del lector de código de barras}
 
-El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante USB y fue reconocido automáticamente por el sistema operativo como un dispositivo de teclado estándar, sin requerir la instalación de controladores adicionales. Se realizaron pruebas de escaneo con productos reales del inventario de la farmacia: todos los códigos de barras presentes en los productos fueron leídos correctamente y el código obtenido coincidió con el registrado en el catálogo del sistema.
+El lector de código de barras se conectó al equipo de cómputo de la farmacia mediante su receptor USB y fue reconocido automáticamente por el sistema operativo como un teclado estándar, sin requerir controladores adicionales. En las pruebas de escaneo con productos reales del inventario, todos los códigos fueron leídos correctamente y coincidieron con los registrados en el catálogo del sistema.
 
 \begin{figure}[H]
     \centering
@@ -953,7 +893,7 @@ La integración del lector con el flujo de registro de ventas en la interfaz web
 \clearpage
 \section{Prueba de integración del sistema}
 
-Una vez verificado cada componente por separado, se realizó una prueba de integración del sistema completo para confirmar que los cinco objetivos específicos operan de forma conjunta. El escenario de prueba cubrió el flujo de extremo a extremo más representativo del sistema: desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario, pasando por todas las capas del sistema. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado: el nodo sensor envía sus lecturas a la API, que las almacena en la base de datos; la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
+Una vez verificado cada componente por separado, se realizó una prueba de integración para confirmar que todos operan en conjunto. El escenario cubrió el flujo más representativo del sistema, desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado. El nodo envía sus lecturas a la API, que las guarda en la base de datos, y la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
 
 \begin{figure}[H]
 \centering
@@ -1002,7 +942,7 @@ Una vez verificado cada componente por separado, se realizó una prueba de integ
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-La prueba confirmó que el flujo opera correctamente de extremo a extremo: el nodo sensor transmite las lecturas ambientales al servidor cada 30 segundos, la API las almacena en la base de datos y la interfaz web las muestra en el módulo de monitoreo sin intervención adicional. De forma simultánea, el registro de ventas con descuento de inventario por lote, la autenticación por roles y la navegación por módulos funcionaron de forma conjunta sin conflictos entre componentes.
+La prueba confirmó el funcionamiento de extremo a extremo. El nodo transmite las lecturas cada 30 segundos, la API las almacena y la interfaz las muestra en el módulo de monitoreo sin intervención adicional. En paralelo, el registro de ventas con descuento por lote, la autenticación por roles y la navegación por módulos funcionaron sin conflictos entre componentes.
 
 % TODO: insertar captura de pantalla del dashboard mostrando lecturas del sensor y datos de ventas
 %       simultáneamente — es la evidencia visual más directa de que el sistema integrado funciona
