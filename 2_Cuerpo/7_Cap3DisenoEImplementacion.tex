@@ -724,18 +724,11 @@ Con esta definición, al iniciar la aplicación se obtiene en PostgreSQL la tabl
 
 \newpage
 
-\subsection{Validación de los datos de entrada}
-
-Para cada operación de la API se definió un contrato: qué información acepta cuando el cliente envía datos, qué campos son obligatorios y qué estructura tiene la respuesta. Si una petición no cumple ese contrato (un precio negativo, un campo requerido ausente) se rechaza antes de llegar a la lógica de la aplicación, sin código de validación manual adicional.
-
-
 \subsection{Autenticación y autorización}
 
-El diseño del control de acceso partió de dos requisitos: que cada petición pudiera verificarse sin consultar la base de datos, para no sumar una consulta adicional a cada operación del sistema, y que los permisos definidos en la base de datos fueran exactamente los que se aplican al momento de operar.
+El control de acceso se diseñó en dos pasos. El primero es la \textbf{autenticación}: al iniciar sesión, la API verifica la contraseña y emite un token de sesión firmado que lleva dentro la identidad y los permisos del usuario, de modo que cada petición posterior se verifica sin consultar la base de datos. Su vigencia es de solo 30 minutos para limitar el daño si llegara a ser interceptado; un segundo token de renovación, válido por 7 días, extiende la sesión en segundo plano sin pedir la contraseña de nuevo.
 
-Para el primer requisito se decidió usar \textbf{tokens firmados}. Al iniciar sesión, la API verifica la contraseña (que se almacena cifrada, nunca en texto legible) y emite un token de sesión con vigencia de 30 minutos que lleva dentro la identidad y los permisos del usuario; como el token va firmado, el servidor confía en su contenido sin volver a consultar la base de datos. La vigencia se fijó corta a propósito, para limitar el daño si un token llegara a ser interceptado. Y para que esa vigencia corta no obligue al usuario a escribir su contraseña cada 30 minutos, se emite también un token de renovación válido por 7 días, con el que la sesión se extiende en segundo plano.
-
-Para el segundo requisito, la \textbf{autorización}, se decidió que cada operación de la API declare el permiso que exige y lo compruebe contra el token antes de ejecutarse. Así, la estructura de roles definida en la base de datos se aplica en cada petición: un cajero puede registrar ventas, pero no modificar usuarios ni configurar sucursales. La Fig.~\ref{fig:cap3-jwt-flujo} resume el flujo resultante.
+El segundo paso es la \textbf{autorización}: cada operación de la API declara el permiso que exige y lo comprueba contra el token antes de ejecutarse. Así, los roles definidos en la base de datos se aplican en cada petición. La Fig.~\ref{fig:cap3-jwt-flujo} resume el flujo.
 
 \begin{figure}[H]
 \centering
@@ -782,7 +775,7 @@ Para el segundo requisito, la \textbf{autorización}, se decidió que cada opera
 \newpage
 \subsection{Endpoints por módulo}
 
-Los 23 grupos de rutas de la API se organizaron en seis áreas funcionales que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
+Los 23 grupos de rutas de la API se organizaron en seis áreas que corresponden a los módulos del sistema. La siguiente tabla resume cada área y sus operaciones principales:
 
 \begin{table}[H]
 \centering
@@ -807,7 +800,7 @@ Monitoreo          & \texttt{sensor\_readings, dashboard, stats, calendar}      
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{table}
 
-Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente (usuarios, roles, sucursales) aplican borrado lógico, como se describió en la sección de la base de datos.
+Las operaciones siguen las convenciones REST: consulta, creación, actualización y eliminación. Los recursos que no deben borrarse permanentemente, se aplica borrado lógico, como se describió en la sección de la base de datos.
 
 Para ilustrar cómo se construye una de estas operaciones, el siguiente fragmento corresponde al endpoint que recibe las lecturas del nodo sensor:
 
@@ -860,9 +853,11 @@ Se eligió \textbf{React} porque su modelo de componentes reutilizables se ajust
 
 \subsection{Estructura e interfaz de la aplicación}
 
-La aplicación se organizó en tres niveles: \textbf{páginas} (punto de entrada de cada ruta), \textbf{secciones} (lógica y disposición de cada módulo de negocio) y \textbf{componentes} (bloques visuales reutilizables). Para el enrutamiento entre vistas se utilizó React Router, que mapea cada URL a su vista sin recargar el servidor. Para el diseño visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de componentes prediseñados (tablas paginadas, formularios, diálogos, selectores de fecha) que da consistencia visual a toda la aplicación y evita desarrollar esos elementos desde cero.
+La aplicación se organizó en tres niveles: \textbf{páginas} (la puerta de entrada de cada dirección), \textbf{secciones} (la lógica de cada módulo) y \textbf{componentes} (bloques visuales que se reutilizan en toda la aplicación). Para el aspecto visual se utilizó \textbf{Material-UI} (MUI), una biblioteca de elementos prediseñados (tablas, formularios, diálogos) que da una apariencia uniforme sin construir cada pieza desde cero.
 
-La Fig.~\ref{fig:cap3-screenshot} muestra la disposición general de la interfaz con el módulo de inventario como ejemplo. A la izquierda, una barra lateral siempre visible agrupa los dieciséis módulos en las mismas cuatro áreas del diagrama de navegación (General, Punto de venta, Operaciones y Sistema), con el módulo activo resaltado. El área de contenido, a la derecha, repite en todos los módulos la misma estructura de arriba hacia abajo: una barra de acciones con el nombre del módulo y el botón de alta, un buscador con filtros, la tabla de datos con los registros y el control de paginación al pie. Esta estructura corresponde a los componentes reutilizables descritos en la sección anterior: la vista de inventario de la figura es visualmente idéntica a la de ventas, usuarios o proveedores.
+La Fig.~\ref{fig:cap3-screenshot} muestra el resultado con el módulo de inventario como ejemplo. A la izquierda, la barra lateral agrupa los dieciséis módulos en las cuatro áreas del diagrama de navegación, con el módulo activo resaltado; a la derecha, el contenido repite en todos los módulos la misma estructura: título con botón de alta, buscador con filtros, tabla de registros y paginación. Gracias a los componentes reutilizables, la vista de inventario de la figura es idéntica a la de ventas, usuarios o proveedores.
+
+Sobre esta estructura se definieron dos comportamientos comunes a todos los módulos, los datos consultados se conservan en una memoria temporal del navegador que se refresca sola tras cada operación y los formularios validan cada campo antes de enviar.
 
 \begin{figure}[H]
     \centering
@@ -873,17 +868,11 @@ La Fig.~\ref{fig:cap3-screenshot} muestra la disposición general de la interfaz
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Gestión de datos y formularios}
-
-Al diseñar el manejo de la información dentro de la aplicación se separaron dos responsabilidades. El \textbf{estado de sesión} (usuario, rol y permisos) se colocó en un contexto global, de modo que cualquier módulo pueda consultarlo para decidir qué mostrar y qué operaciones habilitar. Para los \textbf{datos del servidor} se optó por una biblioteca de caché del lado del cliente: los datos consultados se conservan en memoria y se actualizan automáticamente tras cada operación, lo que evita recargar la página y reduce las peticiones repetidas a la API.
-
-Los formularios se diseñaron para validar cada campo antes de enviar la petición: si un dato no cumple las reglas, se señala visualmente sin llegar a generar tráfico al servidor.
-
 \subsection{Autenticación en el cliente}
 
-La API exige un token en cada petición y ese token caduca a los 30 minutos, de modo que al diseñar la interfaz hubo que resolver tres problemas: dónde guardar el token, cómo incluirlo en todas las peticiones sin repetir código en dieciséis módulos, y cómo renovarlo sin interrumpir al usuario.
+La API exige un token en cada petición y ese token caduca a los 30 minutos, así que al diseñar la interfaz hubo que resolver tres cosas: dónde guardarlo, cómo incluirlo en todas las peticiones sin repetir código en dieciséis módulos y cómo renovarlo sin interrumpir al usuario.
 
-La decisión fue concentrar toda la gestión de la sesión en una sola función, en lugar de repartirla por la aplicación. Esa función guarda el token en el almacenamiento del navegador, lo registra como encabezado por defecto de todas las peticiones y programa su renovación automática leyendo la fecha de caducidad que el propio token trae dentro. El siguiente fragmento del código de la interfaz muestra esa función; se ejecuta al iniciar sesión con el token recibido, y al cerrar sesión sin token:
+La solución fue concentrar todo en una sola función: guarda el token en el navegador, lo adjunta automáticamente a todas las peticiones y programa su renovación leyendo la fecha de caducidad que el propio token trae dentro. El siguiente fragmento muestra esa función; se ejecuta con el token al iniciar sesión y sin token al cerrarla, los revierte:
 
 \begin{lstlisting}
 export async function setSession(accessToken) {
@@ -901,14 +890,11 @@ export async function setSession(accessToken) {
 }
 \end{lstlisting}
 
-Cuando recibe un token, la función ejecuta los tres pasos del diseño (guardar, registrar como encabezado, programar la renovación); cuando se llama sin token, los revierte y la sesión queda cerrada.
-
-Con esto, ningún otro componente tiene que ocuparse de la autenticación: los dieciséis módulos hacen sus peticiones sin mencionar el token y la renovación ocurre en segundo plano, sin que el usuario vuelva a escribir su contraseña. Sobre esta misma base se protegieron las rutas de la aplicación: si no hay sesión activa, cualquier intento de abrir una pantalla redirige al inicio de sesión, y las operaciones que exigen permisos específicos comprueban que el token los incluya, en línea con la estructura de roles del sistema.
+Con esto, ningún otro componente se ocupa de la autenticación: los módulos hacen sus peticiones sin mencionar el token y la renovación ocurre en segundo plano, sin que el usuario vuelva a escribir su contraseña. Los datos de la sesión (usuario, rol y permisos) quedan además disponibles en un punto central que cualquier módulo consulta para decidir qué mostrar y qué habilitar: sin sesión activa, cualquier pantalla redirige al inicio de sesión, y las operaciones que exigen permisos específicos comprueban que el token los incluya.
 
 \subsection{Despliegue en Vercel}
 
-La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en aplicaciones JavaScript modernas. Se eligió sobre alternativas como AWS por la misma razón de escala que Railway: ofrece red de distribución de contenido, integración con el repositorio y despliegue automático en cada actualización, sin la complejidad de una infraestructura mayor. Se configuró además una regla de enrutamiento que redirige cualquier URL al punto de entrada de la aplicación, necesaria para que React Router pueda gestionar la navegación correctamente cuando el usuario accede directamente a una ruta o recarga la página.
-
+La interfaz se publicó en \textbf{Vercel}, una plataforma especializada en aplicaciones web modernas, elegida sobre alternativas como AWS por la misma razón de escala que Railway: ofrece lo esencial (publicación automática con cada actualización y entrega rápida del contenido en cualquier ubicación) sin la complejidad de una infraestructura mayor. Solo se requirió una regla adicional: redirigir cualquier dirección al punto de entrada de la aplicación, para que las pantallas abran correctamente cuando el usuario entra por un enlace directo o recarga la página.
 
 % =============================================
 % OE 4: NODO SENSOR ESP32
@@ -917,17 +903,17 @@ La interfaz se desplegó en \textbf{Vercel}, una plataforma especializada en apl
 \clearpage
 \section{Desarrollo del nodo sensor con ESP32}
 
-Para cumplir con el cuarto objetivo específico se diseñó e implementó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía esas lecturas a la API del sistema. El nodo está integrado por un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED SSD1306}, programado en C++ con el entorno Arduino.
+Para cumplir con el cuarto objetivo específico se construyó un nodo electrónico que mide temperatura y humedad relativa en el área de almacenamiento y envía las lecturas a la API. Lo integran un microcontrolador \textbf{ESP32-C5}, un sensor \textbf{AHT10} y tres pantallas \textbf{OLED}, y su programa se escribió en C++ con el entorno Arduino.
 
 \subsection{Selección del hardware}
 
-Se eligió el \textbf{ESP32-C5} como microcontrolador por tres razones: integra conectividad WiFi de forma nativa sin necesitar un módulo adicional, soporta el protocolo I\textsuperscript{2}C necesario para comunicarse con el sensor y las pantallas, y es compatible con el entorno Arduino, que provee bibliotecas maduras para red y manejo de datos. Se descartó el Arduino Uno por carecer de WiFi integrado. Una Raspberry Pi, por su parte, habría resultado sobredimensionada para leer y enviar dos valores numéricos periódicamente: cuesta y consume más sin aportar un beneficio funcional que lo justifique.
+Se eligió el \textbf{ESP32-C5} porque integra WiFi sin módulos adicionales, se comunica por I\textsuperscript{2}C con el sensor y las pantallas, y es compatible con el entorno Arduino. Un Arduino Uno carece de WiFi, y una Raspberry Pi habría sido excesiva (cuesta y consume más) para leer y enviar dos números cada 30 segundos.
 
-Para la medición ambiental se eligió el sensor \textbf{AHT10} sobre alternativas como el DHT11 o el DHT22 por dos razones. La primera es que se comunica por I\textsuperscript{2}C, la misma interfaz que usan las pantallas, con solo dos conductores por conexión. La segunda es su precisión de ±0.3\,°C en temperatura y ±2\% en humedad, suficiente para vigilar los límites de 30\,°C y 65\% de humedad relativa que la normativa sanitaria marca como máximos para el almacenamiento de medicamentos.
+El sensor \textbf{AHT10} se eligió sobre el DHT11 y el DHT22 por usar esa misma interfaz I\textsuperscript{2}C y por su precisión (±0.3\,°C y ±2\% de humedad), suficiente para vigilar los máximos de 30\,°C y 65\% que marca la normativa sanitaria.
 
 \subsection{Arquitectura del nodo}
 
-El sensor AHT10 y las tres pantallas OLED se conectaron al ESP32-C5 mediante I\textsuperscript{2}C, una interfaz que requiere solo dos conductores por conexión. Las pantallas utilizadas tienen una dirección de fábrica que no puede cambiarse, por lo que no pueden convivir en una misma línea de comunicación; se aprovechó que el ESP32-C5 permite habilitar varios buses I\textsuperscript{2}C simultáneos y cada pantalla se conectó a un bus propio, al igual que el sensor. La alimentación proviene de una fuente USB de 5\,V y la conexión con la API se realiza de forma inalámbrica a través de la red WiFi del establecimiento.
+Las tres pantallas muestran cada una un dato (temperatura, humedad y estado de la conexión) para que el personal verifique el nodo de un vistazo, sin abrir la aplicación web. Como vienen de fábrica con una dirección I\textsuperscript{2}C fija, no pueden compartir una sola línea de comunicación: se aprovechó que el ESP32-C5 permite varios buses I\textsuperscript{2}C simultáneos y cada pantalla, igual que el sensor, se conectó a un bus propio (Fig.~\ref{fig:cap3-sensor-hw}). La alimentación proviene de una fuente USB de 5\,V y la conexión con la API es inalámbrica, por la red WiFi del establecimiento.
 
 \begin{figure}[H]
 \centering
@@ -998,41 +984,9 @@ El sensor AHT10 y las tres pantallas OLED se conectaron al ESP32-C5 mediante I\t
 
 \subsection{Funcionamiento del firmware}
 
-El firmware se estructuró según el modelo de Arduino: una función de configuración que se ejecuta una sola vez al encender el dispositivo (inicializa los buses I\textsuperscript{2}C, detecta el sensor y establece la conexión WiFi) y un ciclo continuo que realiza las lecturas cada 30 segundos y las envía a la API. Para la espera entre lecturas se decidió no pausar el programa, sino comparar continuamente el tiempo transcurrido: así el ciclo puede vigilar la conexión WiFi y el botón de reinicio en cada vuelta, en lugar de quedarse congelado 30 segundos.
+El firmware tiene dos partes: una \textbf{secuencia de arranque} que se ejecuta una sola vez al encender el nodo y un \textbf{ciclo operativo} que se repite mientras esté encendido. Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan ambas etapas en diagrama de flujo.
 
-Para la conexión WiFi se utilizó la biblioteca \textbf{WiFiManager}. En el primer arranque, el ESP32 crea una red temporal de nombre \texttt{Sensor-Farmacia}; el técnico se conecta desde un teléfono o computadora, selecciona la red del establecimiento e ingresa la contraseña. El dispositivo guarda esas credenciales y las usa automáticamente en arranques posteriores. Si se necesita cambiar la red (por ejemplo, al reubicar el dispositivo), mantener presionado el botón de reinicio durante tres segundos borra las credenciales y reinicia el proceso de configuración.
-
-El corazón del firmware es la función que se ejecuta en cada ciclo de lectura. El siguiente fragmento es su código tal como opera en el nodo:
-
-\begin{lstlisting}[language=C++]
-void leerYEnviar() {
-  Wire.end(); Wire.begin(SDA_AHT, SCL_AHT);
-  sensors_event_t humEv, tempEv;
-  aht.getEvent(&humEv, &tempEv);
-
-  float t = tempEv.temperature;
-  float h = humEv.relative_humidity;
-
-  if (t < -10 || t > 85 || h < 0 || h > 100) {
-    Serial.printf("Fuera de rango: %.1fC %.1f%%\n", t, h);
-    return;
-  }
-
-  mostrarTemperatura(t);
-  mostrarHumedad(h);
-  if (wifiOk) enviarLectura(t, h);
-}
-\end{lstlisting}
-
-La función realiza cuatro pasos. Primero activa el canal de comunicación del sensor y le solicita las dos mediciones. Después valida que los valores estén dentro del rango físicamente posible del sensor (de $-10$ a $85\,^\circ$C y de 0 a 100\,\% de humedad); si una lectura cae fuera, se descarta y la función termina sin enviar nada, para que un fallo momentáneo del sensor no registre datos falsos. En seguida actualiza las pantallas OLED con los valores medidos. Por último, solo si hay conexión WiFi, envía la lectura a la API.
-
-Lo que se obtiene en cada ciclo es un mensaje en formato JSON, por ejemplo \texttt{\{"temperature": 23.4, "humidity": 41.2, "device\_id": "esp32-farmacia-01"\}}, que la API almacena en la base de datos como se mostró en la sección de la API, y que aparece segundos después en el tablero de la aplicación web.
-
-El envío se realiza mediante una petición cifrada (HTTPS). El intervalo de 30 segundos entre lecturas balancea el detalle del historial con la carga sobre la red: lecturas más frecuentes no aportarían información adicional relevante para el monitoreo ambiental de un almacén.
-
-Las figuras~\ref{fig:cap3-firmware-setup} y~\ref{fig:cap3-firmware-loop} presentan en diagrama de flujo el comportamiento completo del firmware, separado en sus dos etapas. La Fig.~\ref{fig:cap3-firmware-setup} corresponde a la \textbf{secuencia de arranque}, que se ejecuta una sola vez al encender el nodo: se inicializan los buses de comunicación y las pantallas, se detecta el sensor, se establece la conexión WiFi mediante el portal de configuración (con tres minutos como tiempo límite) y, si el sensor respondió, se realiza una primera lectura antes de entrar al ciclo. Los rombos del diagrama son puntos de decisión: cuando el sensor o el WiFi no están disponibles, el arranque no se detiene, sino que registra la falla y continúa, de modo que el nodo siga mostrando en pantalla lo que sí puede medir.
-
-La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, que se repite de forma continua mientras el nodo está encendido. Cada iteración verifica primero si el botón de reinicio lleva más de tres segundos presionado, en cuyo caso borra las credenciales WiFi y reinicia el equipo; después comprueba si ya transcurrieron los 30 segundos del intervalo de lectura. Cuando el intervalo se cumple, lee el sensor, valida que los valores estén dentro del rango físico admisible, actualiza las pantallas y, si hay conexión, envía la lectura a la API. Las salidas marcadas con \textit{No} en los rombos regresan por el carril izquierdo al inicio del ciclo: una lectura inválida o la falta de red no detienen el programa, solo omiten el envío de esa iteración.
+La secuencia de arranque (Fig.~\ref{fig:cap3-firmware-setup}) prepara el hardware: inicializa los buses y las pantallas, detecta el sensor y conecta el WiFi. Para la conexión se utilizó la biblioteca \textbf{WiFiManager}: en el primer arranque, el nodo crea una red temporal (\texttt{Sensor-Farmacia}) a la que el técnico se conecta desde un teléfono o computadora para indicarle la red de la farmacia y su contraseña; el nodo las guarda y las reutiliza en cada encendido. El criterio de diseño fue que ninguna falla detuviera el arranque: si el sensor o el WiFi no responden (los rombos del diagrama), se registra la falla y se continúa, de modo que el nodo muestre en pantalla lo que sí pueda medir.
 
 \begin{figure}[H]
 \centering
@@ -1070,7 +1024,7 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 \node[side] (wifiSi)   at ( 4.6, -13.2) {Marcar WiFi\\conectado};
 \node[proc] (showConn) at (0, -15.0){Actualizar pantalla de estado de conexión};
 \node[dec]  (decFirst) at (0, -16.7){¿AHT10\\disponible?};
-\node[proc] (firstR)   at (4.6, -16.7){Primera lectura\\(leerYEnviar)};
+\node[proc] (firstR)   at (4.6, -16.7){Primera lectura\\y envío};
 \node[proc] (markTime) at (0, -18.5){Registrar la hora de la última lectura};
 \node[term] (toCiclo)  at (0, -19.9){$\downarrow$\, CICLO PRINCIPAL};
 
@@ -1109,6 +1063,9 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+
+El ciclo operativo (Fig.~\ref{fig:cap3-firmware-loop}) realiza una lectura cada 30 segundos, intervalo que balancea el detalle del historial con la carga sobre la red. La espera no pausa el programa: el ciclo compara el tiempo transcurrido en cada vuelta, y así vigila también el botón de reinicio (mantenerlo presionado tres segundos borra las credenciales WiFi, para configurar una red nueva al reubicar el dispositivo). Cada lectura se descarta si cae fuera del rango físicamente posible del sensor ($-10$ a $85\,^\circ$C, 0 a 100\,\%), para que un fallo momentáneo no registre datos falsos; si es válida, se muestra en las pantallas y, solo cuando hay conexión, se envía cifrada a la API, donde segundos después aparece en el tablero de la aplicación web.
 
 \begin{figure}[H]
 \centering
@@ -1176,9 +1133,7 @@ La Fig.~\ref{fig:cap3-firmware-loop} corresponde al \textbf{ciclo operativo}, qu
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-\subsection{Pantallas OLED}
 
-Se incorporaron tres pantallas \textbf{OLED SSD1306} de 128×64 píxeles para que el personal pueda verificar el estado del nodo (temperatura, humedad y conexión WiFi) sin necesidad de abrir la aplicación web; cada pantalla muestra un único dato para que sea legible de un vistazo. Como los módulos vienen de fábrica con una dirección I\textsuperscript{2}C fija que no puede modificarse, las tres pantallas no pueden compartir una sola línea de comunicación: cada una opera en un bus I\textsuperscript{2}C independiente del ESP32-C5, separado también del bus que usa el sensor. La actualización ocurre tras cada ciclo de lectura, reutilizando el mismo dato que se envía a la API sin operaciones adicionales.
 
 
 % =============================================
