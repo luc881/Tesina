@@ -103,6 +103,14 @@
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
 \renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
 
+% tocloft 3.0c llama al socket struct/end, que no existe en núcleos de LaTeX
+% anteriores; sin este parche \cftpagenumbersoff rompe el índice.
+\makeatletter
+\renewcommand{\@cftpnumoff}[1]{%
+  \@namedef{cft#1fillnum}##1{%
+    \cftparfillskip\@nameuse{cft#1afterpnum}\@nameuse{cft#1pnumfinal}\par}}
+\makeatother
+
 
 \addto\captionsspanish{ %Cambia el titulo del indice de cuadros
     \renewcommand{\listtablename}{Índice de tablas}
