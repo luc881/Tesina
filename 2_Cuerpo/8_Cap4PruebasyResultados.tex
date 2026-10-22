@@ -21,8 +21,6 @@ La base de datos no se probó de forma aislada, sino a través de las pruebas au
 
 La \textbf{integridad relacional} es la propiedad que garantiza que los datos de las distintas tablas sean coherentes entre sí. Una venta siempre apunta a un producto que existe, no hay dos usuarios con el mismo correo y los campos obligatorios nunca quedan vacíos. Esta coherencia no depende de que el programador la vigile manualmente. Se implementa mediante \textbf{restricciones}, reglas declaradas en el propio esquema que el motor de base de datos aplica de forma automática, rechazando cualquier operación que las incumpla. Las pruebas de esta sección verifican que esas reglas actúan como se espera.
 
-Las restricciones definidas en el esquema (claves foráneas, unicidad y valores no nulos) se verificaron con los casos de prueba negativos de la API. Intentar crear un lote con un producto inexistente devuelve error, igual que registrar un usuario con un correo ya ocupado o completar una venta vacía. En todos los casos el motor aplicó la restricción correspondiente y la API tradujo el rechazo en un código de respuesta apropiado.
-
 Un caso de diseño particular fue el de los lotes sin código asignado, que ocurren cuando el fabricante no imprime uno. El inventario los acepta, pero cuando el código sí existe no puede repetirse para el mismo producto. Esto se implementó con un índice parcial, una restricción de unicidad que solo aplica cuando el campo tiene valor. La Fig.~\ref{fig:cap4-lote-index} ilustra el comportamiento verificado con cinco intentos de registro sobre un mismo producto. Los dos primeros lotes, con códigos distintos, son aceptados. El tercero se rechaza por repetir un código ya registrado. Los dos últimos, ambos sin código, se aceptan sin conflicto porque los registros vacíos no compiten entre sí.
 
 \begin{figure}[H]
@@ -80,7 +78,7 @@ Un caso de diseño particular fue el de los lotes sin código asignado, que ocur
 
 \subsection{Evolución del esquema durante el desarrollo}
 
-El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. Estos cambios se aplicaron mediante migraciones sucesivas que modifican la estructura de la base de datos de forma controlada, preservando los datos existentes. La tabla siguiente resume los más relevantes.
+El diseño inicial de la base de datos descrito en el capítulo anterior continuó evolucionando durante la implementación. A medida que se desarrollaban los módulos de la API y se ejecutaban las pruebas, se identificaron aspectos del esquema que requerían ajuste. La tabla siguiente resume los más relevantes.
 
 \begin{longtable}{|p{4.0cm}|p{10.5cm}|}
 
@@ -130,20 +128,19 @@ Restricciones únicas en proveedor &
 Las restricciones de unicidad sobre el RFC y correo electrónico del proveedor impedían reutilizar esos datos al dar de baja y reactivar un proveedor. La validación se trasladó al código de la API, eliminando la restricción del esquema. \\
 
 \end{longtable}
-\vspace{0.1cm}
-{\footnotesize \textbf{Fuente:} Elaboración propia.}
+
 
 % TODO: insertar captura de pantalla del diagrama de la base de datos en DataGrip o similar
 % (el diagrama general del esquema con las 22 tablas y sus relaciones)
 % Guardar en: 0_imagenes/Cap4/EsquemaBD.png
-%\begin{figure}[H]
-%    \centering
-%    \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/EsquemaBD.png}}
-%    \caption{Esquema final de la base de datos con las 22 tablas y sus relaciones}
-%    \label{fig:cap4-esquema-bd}
-%    \vspace{0.2cm}
-%    \footnotesize \textbf{Fuente:} Elaboración propia.
-%\end{figure}
+\begin{figure}[H]
+   \centering
+   \fbox{\includegraphics[width=\textwidth]{0_imagenes/Cap4/dbDataGrip.png}}
+   \caption{Esquema final de la base de datos con las 22 tablas y sus relaciones}
+   \label{fig:cap4-esquema-bd}
+   \vspace{0.2cm}
+   \footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
 
 \subsection{Resultados}
 
@@ -154,7 +151,7 @@ El esquema final de la base de datos opera establemente en el entorno de producc
 % =============================================
 
 \clearpage
-\section{Pruebas de la API REST}
+\section{Pruebas de la API}
 
 Para verificar el funcionamiento de la API se probó cada módulo contra la base de datos real del sistema, en lugar de datos simulados. Una verificación sobre datos simulados puede dar resultados correctos aunque el sistema real falle, mientras que una prueba sobre la base de datos real detecta esas diferencias. Se cubrieron tanto operaciones que deben completarse con éxito como operaciones que el sistema debe rechazar, en todos los módulos de la API.
 
@@ -239,7 +236,7 @@ Durante las pruebas también se identificó que el módulo de cambio de contrase
 
 La lógica de completar una venta, que descuenta las unidades vendidas del inventario y registra de qué lote provienen, fue el componente más complejo de la API. La propuesta inicial contaba únicamente con el encabezado de la transacción y el detalle de los productos, sin el descuento efectivo del inventario por lote.
 
-Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}, primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto, los ordena por fecha de caducidad y descuenta las unidades del que vence primero. Si un lote no alcanza a cubrir la cantidad vendida, el descuento se distribuye entre los siguientes en orden de caducidad. Las pruebas cubrieron el descuento completo desde un único lote, la distribución entre varios lotes y el intento de venta con existencias insuficientes, caso en el que el sistema rechaza la operación y el inventario no se ve afectado.
+Para cubrir este comportamiento fue necesario desarrollar un módulo adicional que implementa la política FEFO (\textit{First Expired, First Out}, primero en vencer, primero en salir). Al confirmar una venta, el sistema identifica los lotes disponibles del producto, los ordena por fecha de caducidad y descuenta las unidades del que vence primero. Las pruebas cubrieron el descuento completo desde un único lote, la distribución entre varios lotes y el intento de venta con existencias insuficientes, caso en el que el sistema rechaza la operación y el inventario no se ve afectado.
 
 La Fig.~\ref{fig:cap4-fefo} ilustra el segundo caso con un escenario verificado en las pruebas, una venta de 150 unidades con tres lotes disponibles. El sistema consume primero el lote A por ser el de caducidad más próxima y lo agota con sus 80 unidades. Las 70 restantes se descuentan del lote B, el siguiente en vencer. El lote C, con la caducidad más lejana, no se toca, y el total descontado coincide exactamente con la cantidad vendida.
 
@@ -321,7 +318,6 @@ La Fig.~\ref{fig:cap4-fefo} ilustra el segundo caso con un escenario verificado 
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Junto con la lógica de ventas se implementó y verificó el módulo de devoluciones. Una devolución revierte el descuento de inventario aplicado al completar la venta, reintegrando las unidades a los mismos lotes de los que fueron descontadas. El estado de la venta se actualiza automáticamente a \textit{parcialmente devuelta} o \textit{devuelta} según la cantidad retornada, sin intervención manual.
 
 \subsection{Ajustes realizados a la API}
 
@@ -376,8 +372,6 @@ El servicio externo de envío de correo cambió su interfaz entre versiones, int
 Se actualizó la integración con la nueva versión del servicio \\
 
 \end{longtable}
-\vspace{0.1cm}
-{\footnotesize \textbf{Fuente:} Elaboración propia.}
 
 \subsection{Despliegue en Railway}
 
@@ -564,7 +558,7 @@ El módulo de productos y el de lotes de inventario fueron los que más iteracio
     \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
 
-Un problema recurrente fue la desincronización entre los valores que la API enviaba y los que la interfaz esperaba. Cuando la API modificaba un conjunto de opciones válidas, por ejemplo los estados posibles de un lote, los formularios seguían usando los valores anteriores y fallaban. Se corrigió estableciendo una revisión de estos valores en cada actualización de la API.
+Un problema recurrente fue la desincronización entre los valores que la API enviaba y los que la interfaz esperaba. Cuando la API modificaba un conjunto de opciones válidas, por ejemplo los estados posibles de un lote, los formularios seguían usando los valores anteriores y fallaban. Se corrigió estableciendo una revisión de estos valores en cada actualización de la API.\newpage   
 
 \subsection{Módulo de ventas y lector de código de barras}
 
