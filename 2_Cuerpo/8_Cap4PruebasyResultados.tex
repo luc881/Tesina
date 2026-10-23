@@ -887,7 +887,7 @@ La integración del lector con el flujo de registro de ventas en la interfaz web
 \clearpage
 \section{Prueba de integración del sistema}
 
-Una vez verificado cada componente por separado, se realizó una prueba de integración para confirmar que todos operan en conjunto. El escenario cubrió el flujo más representativo del sistema, desde la medición ambiental del nodo sensor hasta el registro de una venta con descuento de inventario. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado. El nodo envía sus lecturas a la API, que las guarda en la base de datos, y la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
+Una vez verificado cada componente por separado, se realizó una prueba de integración para confirmar que todos operan en conjunto. La Fig.~\ref{fig:cap4-integracion} resume el recorrido verificado. El nodo envía sus lecturas a la API, que las guarda en la base de datos, y la interfaz web consulta esa misma API tanto para mostrar las lecturas en el tablero como para registrar las ventas, de modo que todos los componentes convergen en un único punto de intercambio de información.
 
 \begin{figure}[H]
 \centering
@@ -952,4 +952,6 @@ La prueba confirmó el funcionamiento de extremo a extremo. El nodo transmite la
 %\end{figure}
 
 
-El único elemento pendiente al momento de la redacción de este capítulo son las pruebas de operación continua del sistema en las instalaciones de la farmacia, previstas para realizarse una vez que el gabinete físico sea entregado e instalado en el local.
+Ante un corte de energía eléctrica o de internet, la información registrada no se pierde, porque la base de datos se encuentra en la nube y no en el local. Mientras dure la falla no es posible registrar ventas ni consultar el inventario, ya que la interfaz es una aplicación web. El nodo sensor, mientras tenga energía, continúa midiendo y mostrando los valores en sus pantallas, pero las lecturas tomadas sin conexión no se envían. Al restablecerse el servicio, el nodo vuelve a conectarse a la red de forma automática y el sistema retoma su operación sin intervención del personal.
+
+

@@ -132,9 +132,31 @@ El desarrollo del servidor se realizó utilizando el lenguaje de programación P
 
 \subsection{Python}
 
-Python es el lenguaje de programación utilizado para desarrollar el servidor del sistema. Fue elegido por su sintaxis clara y legible, lo que facilita la comprensión del código, la detección de errores y el mantenimiento del sistema, especialmente en proyectos colaborativos. Además, cuenta con un ecosistema amplio y maduro de librerías y frameworks que permiten desarrollar aplicaciones web robustas y escalables de manera eficiente.
+Python es el lenguaje de programación con el que se desarrolló el servidor. Además de su facilidad de uso, se eligió por dos razones. La primera es que maneja el dinero sin errores de redondeo: las computadoras suelen guardar los decimales de forma aproximada, y en un punto de venta esas pequeñas diferencias se acumulan hasta descuadrar el corte de caja. Python incluye un tipo de número decimal exacto, que el servidor usa en todos los precios y montos. La segunda es que FastAPI, la herramienta con la que se construyó el servidor, solo existe para Python y revisa automáticamente que la información recibida sea correcta.
 
-En este sistema, Python actúa como la base sobre la cual se implementa la lógica de negocio, gestionando las operaciones de inventario, autenticación de usuarios, registro de datos de sensores y comunicación con la base de datos PostgreSQL, asegurando que el servidor funcione de manera eficiente, confiable y segura.
+La Tabla~\ref{tab:cap2-comparativa-lenguajes} compara Python con otros lenguajes que se consideraron.
+
+\begin{table}[H]
+\centering
+\caption{Comparación de lenguajes para el desarrollo del servidor}
+\label{tab:cap2-comparativa-lenguajes}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}X c c c c@{}}
+\toprule
+\textbf{Criterio} & \textbf{Python} & \textbf{JavaScript} & \textbf{PHP} & \textbf{Java} \\
+\midrule
+Decimales exactos para dinero & Sí & No & Parcial & Sí \\
+Revisión automática de datos & Sí & No & Sí & Sí \\
+Consumo de recursos del servidor & Bajo & Bajo & Medio & Alto \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
+\end{table}
+
+Python es el único que cumple los tres criterios. Java también maneja decimales exactos, pero consume más recursos, lo que en Railway eleva el costo mensual.
 
 \subsection{FastAPI: Comunicación entre el Sistema y los Usuarios}
 

@@ -20,8 +20,6 @@ El desarrollo de la plataforma para Farmacia Selene partió de un diagnóstico c
 
 Los seis componentes operan en conjunto: el nodo sensor envía las lecturas ambientales al servidor, que las almacena y las pone a disposición de la interfaz web, mientras el registro de ventas con descuento automático por FEFO, la gestión de compras y el control de acceso por roles funcionan sin conflictos entre sí. El sistema queda listo para instalarse definitivamente en la farmacia y validarse con los usuarios finales en condiciones reales de operación.
 
-\thispagestyle{empty}
-
 
 \chapterstar{Recomendaciones}
 
@@ -29,7 +27,7 @@ Las siguientes recomendaciones están dirigidas al personal administrativo y ope
 
 \begin{itemize}
 
-    \item Mantener una conexión a internet estable y de uso preferentemente dedicado para las operaciones del negocio. La comunicación entre el nodo sensor, el servidor y la interfaz web depende de la red: una interrupción prolongada implica que las lecturas ambientales dejan de registrarse y que el personal no puede consultar ni actualizar el inventario desde la interfaz.
+    \item Mantener una conexión a internet estable y de uso preferentemente dedicado para las operaciones del negocio. La comunicación entre el nodo sensor, el servidor y la interfaz web depende de la red: una interrupción prolongada implica que las lecturas ambientales dejan de registrarse y que el personal no puede consultar ni actualizar el inventario desde la interfaz. Ante un corte de energía, la operación puede continuar desde un celular o una computadora portátil con batería, conectados a internet mediante datos móviles o un módem LTE, y el nodo sensor puede alimentarse con una batería portátil (\textit{power bank}) conectada a su entrada USB.
 
     \item Revisar el tablero de indicadores al inicio de cada jornada laboral. El tablero reúne el estado actual del inventario, las ventas del día y las condiciones ambientales del local; una revisión diaria permite detectar a tiempo lotes próximos a vencer o condiciones de temperatura y humedad fuera del rango recomendado por la normatividad.
 
@@ -45,8 +43,6 @@ Las siguientes recomendaciones están dirigidas al personal administrativo y ope
 
 \end{itemize}
 
-\thispagestyle{empty}
-
 
 \chapterstar{Mejoras}
 
@@ -60,7 +56,9 @@ A partir de los resultados obtenidos y de los aspectos del sistema que pueden fo
 
     \item Implementar un módulo de notificaciones externas que envíe alertas automáticas al administrador por correo electrónico o mensaje de texto cuando las lecturas de temperatura o humedad superen los umbrales de la normatividad. Actualmente las alertas solo son visibles desde la interfaz web; con notificaciones externas el administrador se enteraría aunque no esté consultando el sistema en ese momento.
 
-    \item Agregar almacenamiento local en el nodo sensor para que las lecturas ambientales se guarden en la memoria del microcontrolador cuando la conexión a internet no esté disponible, y se sincronicen automáticamente con el servidor al recuperarla. Esto eliminaría los huecos en el historial ambiental provocados por interrupciones momentáneas de la red.
+    \item Agregar almacenamiento local en el nodo sensor para que las lecturas ambientales se guarden en la memoria del microcontrolador cuando la conexión a internet no esté disponible, y se sincronicen automáticamente con el servidor al recuperarla. Esto eliminaría los huecos en el historial ambiental provocados por interrupciones momentáneas de la red. \newpage
+
+    \item Desarrollar un modo sin conexión dentro de la misma aplicación web, mediante la técnica conocida como aplicación web progresiva, que permita registrar ventas durante una falla de internet y las sincronice con el servidor al recuperarla. Se propone sobre la aplicación existente y no como un programa de escritorio aparte, para que funcione tanto en computadora como en celular. El reto principal es resolver los conflictos de inventario, por ejemplo cuando dos dispositivos venden la última unidad de un producto mientras están desconectados.
 
     \item Habilitar la actualización del firmware a distancia (OTA, por sus siglas en inglés) en el nodo sensor. Actualmente, cargar una nueva versión del programa requiere desmontar el nodo y conectarlo por cable a una computadora; con actualizaciones por la red, las mejoras futuras podrían instalarse sin interrumpir el monitoreo ni manipular el gabinete.
 
@@ -69,5 +67,3 @@ A partir de los resultados obtenidos y de los aspectos del sistema que pueden fo
     \item Ampliar la arquitectura del sistema para soportar múltiples sucursales desde un único panel de administración. Esta extensión permitiría gestionar el traslado de lotes entre farmacias, consolidar reportes de ventas e inventario entre sucursales y mantener un catálogo de productos compartido entre todos los puntos de venta.
 
 \end{itemize}
-
-\thispagestyle{empty}
