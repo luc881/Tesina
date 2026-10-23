@@ -559,6 +559,19 @@ Este módulo gestiona la información de los medicamentos en seis tablas: el cat
 
 La decisión principal fue separar el medicamento genérico de sus presentaciones comerciales: \textit{Paracetamol} existe una sola vez como genérico y cada presentación (tabletas de 500~mg, suspensión) es un registro que apunta a él, lo que permite agrupar reportes por nombre genérico. Las categorías forman una jerarquía sin límite de profundidad (\textit{Medicamentos} → \textit{Analgésicos} → \textit{Antiinflamatorios}) almacenada en una sola tabla, y la relación entre producto e ingrediente guarda la cantidad y su unidad, lo que hace posible buscar medicamentos por principio activo desde la aplicación.
 
+Para evitar que un mismo producto se registre dos veces, cada producto tiene un código SKU, que corresponde a su código de barras y no puede repetirse. Al crear o editar un producto, el servidor verifica que el código no esté registrado, como muestra el siguiente fragmento de la API:
+
+\begin{lstlisting}[language=Python]
+# Validar SKU unico
+if db.query(Product).filter(Product.sku == product.sku).first():
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Product with this SKU already exists."
+    )
+\end{lstlisting}
+
+La segunda línea busca en la tabla de productos uno con el mismo SKU; si lo encuentra, la operación se rechaza con un mensaje de error y el producto no se guarda. Como respaldo, la propia base de datos impide que existan dos productos con el mismo nombre y SKU: ambos se combinan en un identificador declarado como único (\texttt{unique=True}) en la definición de la tabla. Estas reglas son también las que permiten que el lector de código de barras identifique cada producto sin confusiones.
+
 % -------------------------------------------------------
 % DIAGRAMA 2 — Módulo de Catálogo de Productos
 % Guardar como: 0_imagenes/Cap3/DiagramaCatalogo.png
@@ -970,6 +983,128 @@ Las tres pantallas muestran cada una un dato (temperatura, humedad y estado de l
 \vspace{0.2cm}
 \footnotesize \textbf{Fuente:} Elaboración propia.
 \end{figure}
+
+La Fig.~\ref{fig:cap3-sensor-electrico} muestra el diagrama eléctrico del nodo. Los cuatro módulos se alimentan del pin de 3.3\,V de la placa y comparten la misma tierra (GND); las conexiones marcadas con la misma etiqueta están unidas entre sí. Cada módulo usa dos líneas de comunicación, datos (SDA) y reloj (SCL), conectadas a un par de pines propio del ESP32-C5. La placa recibe 5\,V por su puerto USB y su regulador interno los convierte a los 3.3\,V que usan el microcontrolador y los módulos.
+
+\begin{figure}[H]
+\centering
+\fbox{%
+\scalebox{0.92}{%
+\begin{tikzpicture}[font=\scriptsize,
+    gnd/.pic={\draw (0,0) -- (0,-0.15);
+              \draw (-0.2,-0.15) -- (0.2,-0.15);
+              \draw (-0.12,-0.22) -- (0.12,-0.22);
+              \draw (-0.05,-0.29) -- (0.05,-0.29);},
+    mod/.style={draw, fill=gray!8, rounded corners=3pt},
+    pinL/.style={anchor=east, inner sep=1.5pt},
+    pinR/.style={anchor=west, inner sep=1.5pt},
+    wire/.style={thick}
+]
+
+% ── ESP32-C5 ─────────────────────────────────────────────
+\draw[draw, fill=gray!20, rounded corners=4pt] (-2.2,2.4) rectangle (2.2,-3.0);
+\node[font=\small\bfseries, align=center] at (0,1.5) {ESP32-C5\\[-1pt]{\scriptsize DevKitC-1}};
+\node[pinR] at (-2.2, 0.4) {GPIO 8};
+\node[pinR] at (-2.2,-0.2) {GPIO 9};
+\node[pinR] at (-2.2,-1.6) {GPIO 25};
+\node[pinR] at (-2.2,-2.2) {GPIO 26};
+\node[pinL] at ( 2.2, 0.4) {GPIO 2};
+\node[pinL] at ( 2.2,-0.2) {GPIO 3};
+\node[pinL] at ( 2.2,-1.6) {GPIO 4};
+\node[pinL] at ( 2.2,-2.2) {GPIO 5};
+\node[align=center, font=\tiny, text=gray!70!black] at (0,-0.9) {botón BOOT\\integrado (GPIO 28)};
+\node[anchor=south, inner sep=1.5pt] at (-0.8,-3.0) {USB};
+\node[anchor=south, inner sep=1.5pt] at ( 1.0,-3.0) {GND};
+
+% Alimentación de la placa
+\draw[wire] (-0.8,2.4) -- (-0.8,2.9) node[above, font=\scriptsize\bfseries] {3V3};
+\draw[wire] (1.0,-3.0) -- (1.0,-3.4); \pic at (1.0,-3.4) {gnd};
+\node[mod, minimum width=2.4cm, minimum height=0.6cm] (usb) at (-0.8,-4.3) {Fuente USB 5\,V};
+\draw[wire, -{Stealth}] (usb.north) -- (-0.8,-3.0);
+
+% ── Sensor AHT10 (izquierda arriba) ──────────────────────
+\draw[mod] (-7.6,2.0) rectangle (-5.0,-0.6);
+\node[align=center] at (-6.6,0.7) {\textbf{Sensor}\\\textbf{AHT10}};
+\node[pinL] at (-5.0, 1.6) {VCC};
+\node[pinL] at (-5.0, 1.0) {GND};
+\node[pinL] at (-5.0, 0.4) {SDA};
+\node[pinL] at (-5.0,-0.2) {SCL};
+\draw[wire] (-5.0,1.6) -- (-4.4,1.6) node[right, font=\scriptsize\bfseries] {3V3};
+\draw[wire] (-5.0,1.0) -- (-4.4,1.0); \pic at (-4.4,1.0) {gnd};
+\draw[wire] (-5.0, 0.4) -- (-2.2, 0.4);
+\draw[wire] (-5.0,-0.2) -- (-2.2,-0.2);
+
+% ── OLED temperatura (izquierda abajo) ───────────────────
+\draw[mod] (-7.6,-1.2) rectangle (-5.0,-3.8);
+\node[align=center] at (-6.6,-2.5) {\textbf{OLED}\\Temperatura};
+\node[pinL] at (-5.0,-1.6) {SDA};
+\node[pinL] at (-5.0,-2.2) {SCL};
+\node[pinL] at (-5.0,-2.8) {VCC};
+\node[pinL] at (-5.0,-3.4) {GND};
+\draw[wire] (-5.0,-1.6) -- (-2.2,-1.6);
+\draw[wire] (-5.0,-2.2) -- (-2.2,-2.2);
+\draw[wire] (-5.0,-2.8) -- (-4.4,-2.8) node[right, font=\scriptsize\bfseries] {3V3};
+\draw[wire] (-5.0,-3.4) -- (-4.4,-3.4); \pic at (-4.4,-3.4) {gnd};
+
+% ── OLED humedad (derecha arriba) ────────────────────────
+\draw[mod] (5.0,2.0) rectangle (7.6,-0.6);
+\node[align=center] at (6.6,0.7) {\textbf{OLED}\\Humedad};
+\node[pinR] at (5.0, 1.6) {VCC};
+\node[pinR] at (5.0, 1.0) {GND};
+\node[pinR] at (5.0, 0.4) {SDA};
+\node[pinR] at (5.0,-0.2) {SCL};
+\draw[wire] (5.0,1.6) -- (4.4,1.6) node[left, font=\scriptsize\bfseries] {3V3};
+\draw[wire] (5.0,1.0) -- (4.4,1.0); \pic at (4.4,1.0) {gnd};
+\draw[wire] (5.0, 0.4) -- (2.2, 0.4);
+\draw[wire] (5.0,-0.2) -- (2.2,-0.2);
+
+% ── OLED conexión (derecha abajo) ────────────────────────
+\draw[mod] (5.0,-1.2) rectangle (7.6,-3.8);
+\node[align=center] at (6.6,-2.5) {\textbf{OLED}\\Conexión};
+\node[pinR] at (5.0,-1.6) {SDA};
+\node[pinR] at (5.0,-2.2) {SCL};
+\node[pinR] at (5.0,-2.8) {VCC};
+\node[pinR] at (5.0,-3.4) {GND};
+\draw[wire] (5.0,-1.6) -- (2.2,-1.6);
+\draw[wire] (5.0,-2.2) -- (2.2,-2.2);
+\draw[wire] (5.0,-2.8) -- (4.4,-2.8) node[left, font=\scriptsize\bfseries] {3V3};
+\draw[wire] (5.0,-3.4) -- (4.4,-3.4); \pic at (4.4,-3.4) {gnd};
+
+\end{tikzpicture}%
+}%
+}
+\caption{Diagrama eléctrico del nodo sensor}
+\label{fig:cap3-sensor-electrico}
+\vspace{0.2cm}
+\footnotesize \textbf{Fuente:} Elaboración propia.
+\end{figure}
+
+El consumo eléctrico del nodo se estimó con los valores de las hojas técnicas de cada componente (Tabla~\ref{tab:cap3-consumo}). La columna \textit{normal} corresponde al nodo conectado a la red en espera entre lecturas, y la \textit{máxima}, al momento en que transmite por WiFi, que dura una fracción de segundo cada 30 segundos. Se tomaron los valores de la banda de 5\,GHz, la de mayor consumo, por lo que el consumo real es menor.
+
+\begin{table}[H]
+\centering
+\caption{Consumo eléctrico estimado del nodo sensor}
+\label{tab:cap3-consumo}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{0.8\textwidth}{@{}>{\raggedright}X c c@{}}
+\toprule
+\textbf{Componente} & \textbf{Normal (mA)} & \textbf{Máxima (mA)} \\
+\midrule
+ESP32-C5 con WiFi activo & 121 & 397 \\
+3 pantallas OLED (20 a 23\,mA c/u) & 60 & 69 \\
+Sensor AHT10 & 0.02 & 0.02 \\
+\midrule
+\textbf{Corriente total} & \textbf{181} & \textbf{466} \\
+\textbf{Potencia a 3.3\,V} & \textbf{0.60\,W} & \textbf{1.54\,W} \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia con datos de \cite{esp32c5-wroom-ds}, \cite{dfrobot-oled} y \cite{aht10-datasheet}.}
+\end{table}
+
+Con 0.6\,W en operación normal, el nodo consume cerca de 0.43\,kWh al mes, menos de un peso en el recibo de luz. El fabricante indica que la fuente debe entregar al menos 0.6\,A \cite{esp32c5-wroom-ds}, por lo que un cargador USB común de 5\,V y 1\,A cubre el requisito con margen. El lector de código de barras no se incluye en el cálculo porque funciona con su propia batería recargable.
 
 % TODO: agregar fotografía del nodo ensamblado
 % Guardar en 0_imagenes/Cap3/FotoNodo.png y descomentar:
