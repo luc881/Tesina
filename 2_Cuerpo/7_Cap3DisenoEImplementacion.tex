@@ -1386,5 +1386,40 @@ Farmacias & Cada farmacia utiliza su propia copia del sistema. \\
 
 El sistema puede replicarse para otra farmacia sin modificar el código: basta con crear una nueva instalación del servidor, la base de datos y la interfaz, configurar sus direcciones y cargar en el nodo sensor la dirección del nuevo servidor. Este modelo, en el que cada negocio tiene su propia copia del sistema, se conoce como \textit{single-tenant} y mantiene separados los datos de cada farmacia. Su límite es que cada copia tiene su propio costo mensual de alojamiento (Tabla~\ref{tab:rec_financieros}) y las actualizaciones deben aplicarse en cada una, por lo que para un número grande de farmacias convendría un modelo compartido (\textit{multi-tenant}), propuesto en el apartado de Mejoras.
 
+% =============================================
+% PUESTA EN MARCHA
+% =============================================
+
+\section{Recursos e instalación del sistema}
+
+Para que la farmacia comience a usar el sistema no es necesario instalar programas ni adquirir un servidor propio. La Tabla~\ref{tab:cap3-puesta-marcha} resume lo que se requiere y su costo, tomado de la Tabla~\ref{tab:rec_financieros}.
+
+\begin{table}[H]
+\centering
+\caption{Recursos necesarios para la operación del sistema}
+\label{tab:cap3-puesta-marcha}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}p{3.6cm} X >{\raggedleft\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{Recurso} & \textbf{Uso} & \textbf{Costo (MXN)} \\
+\midrule
+Conexión a internet & Comunica el nodo sensor y los equipos del personal con el servidor. & Servicio existente \\[4pt]
+Computadora o celular con navegador & Acceso a la aplicación web, sin instalar programas. & Equipo existente \\[4pt]
+Lector de código de barras & Registro de productos durante la venta. & 500 inicial \\[4pt]
+Nodo sensor con gabinete y fuente USB & Monitoreo de temperatura y humedad. & 950 inicial \\[4pt]
+Contacto eléctrico & Alimentación del nodo sensor. & --- \\[4pt]
+Alojamiento en Railway y Vercel & Mantiene disponibles el servidor, la base de datos y la interfaz. & 720 al mes \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
+\end{table}
+
+El nodo sensor se instala en el área de bodega, donde se almacenan los productos, cerca de un contacto eléctrico y dentro del alcance de la red WiFi. No se coloca dentro de un refrigerador, porque mediría condiciones distintas a las del resto del inventario, que se conserva a temperatura ambiente (Anexo~2), y sus paredes metálicas debilitarían la señal WiFi. Tampoco se coloca dentro de un anaquel, porque los productos que lo rodean bloquearían el paso del aire hacia el sensor y las pantallas quedarían fuera de la vista del personal.
+
+En total, la puesta en marcha requiere una inversión inicial de \$1,450 y un costo fijo de \$720 al mes.
+
 
 

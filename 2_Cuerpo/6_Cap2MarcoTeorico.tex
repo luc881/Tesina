@@ -316,6 +316,32 @@ Para el monitoreo ambiental se utiliza el \textbf{sensor digital de temperatura 
 
 El AHT10 se comunica con el microcontrolador mediante la interfaz \textbf{I²C}, lo que facilita su integración con el ESP32-C5 y permite la conexión de múltiples sensores en un mismo bus de comunicación. Esta característica resulta especialmente útil en entornos donde se requiere monitorear varias áreas de almacenamiento de manera simultánea.
 
+La Tabla~\ref{tab:cap2-comparativa-sensores} compara el AHT10 con otros sensores de temperatura y humedad que se consideraron.
+
+\begin{table}[H]
+\centering
+\caption{Comparación de sensores de temperatura y humedad}
+\label{tab:cap2-comparativa-sensores}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}X c c c c@{}}
+\toprule
+\textbf{Criterio} & \textbf{AHT10} & \textbf{DHT11} & \textbf{DHT22} & \textbf{SHT31} \\
+\midrule
+Precisión en temperatura & ±0.3\,°C & ±2\,°C & ±0.5\,°C & ±0.2\,°C \\
+Precisión en humedad & ±2\% & ±5\% & ±2 a 5\% & ±2\% \\
+Tipo de conexión & I²C & Un cable & Un cable & I²C \\
+Consumo al medir & 0.023\,mA & 2.5\,mA & 2.5\,mA & 0.6\,mA \\
+Precio aproximado (MXN) & 150 & 50 a 80 & 80 a 200 & 200 a 380 \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia con datos de \cite{aht10-datasheet}, \cite{adafruit-dht} y \cite{sensirion-sht3x}, y precios de tiendas en línea en México.}
+\end{table}
+
+El DHT11 es el más barato, pero su margen de ±2\,°C es demasiado amplio: una lectura de 28\,°C podría ser en realidad 30\,°C, el límite que marca la normativa. El DHT22 es más preciso, pero, igual que el DHT11, usa su propio tipo de conexión y consume cien veces más que el AHT10. El SHT31 es ligeramente más preciso, pero cuesta más y esa diferencia no es necesaria para vigilar los límites de 30\,°C y 65\%. Por ello se eligió el AHT10: tiene la precisión suficiente, el menor consumo y usa la misma conexión I²C que las pantallas del nodo.
+
 Dentro del sistema, el sensor AHT10 cumple las siguientes funciones:
 
 \begin{itemize}
