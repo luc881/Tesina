@@ -1219,5 +1219,37 @@ El flujo estándar de creación de venta no estaba diseñado para el ritmo de es
 
 El catálogo se carga en memoria al abrir el formulario, de modo que cada código escaneado se compara al instante, sin una petición al servidor por artículo. Si hay coincidencia, el producto se agrega a la venta; si no, el campo muestra una señal de error. El modo se desactiva al hacer clic fuera del área de escaneo.
 
-Con esto quedan descritos el diseño y la construcción de los seis componentes planteados en los objetivos: la base de datos, la API, la interfaz web, el nodo sensor, su gabinete y la integración del lector. El Capítulo 4 documenta las pruebas a las que se sometió cada componente y los ajustes que resultaron de ellas.
+% =============================================
+% ESCALABILIDAD
+% =============================================
+
+
+\section{Escalabilidad del sistema}
+
+La escalabilidad es la capacidad del sistema para seguir funcionando correctamente cuando aumenta su uso. La Tabla~\ref{tab:cap3-escalabilidad} resume cómo responde el sistema a cada tipo de crecimiento.
+
+\begin{table}[H]
+\centering
+\caption{Capacidad del sistema ante distintos tipos de crecimiento}
+\label{tab:cap3-escalabilidad}
+\begin{spacing}{1.0}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright}p{3.2cm} X@{}}
+\toprule
+\textbf{Si aumentan\ldots} & \textbf{Cómo lo soporta el sistema} \\
+\midrule
+Usuarios y datos & Railway y Vercel permiten aumentar los recursos del servidor desde su panel de control, sin modificar el código. \\[4pt]
+Sensores & Cada nodo envía su propio identificador, por lo que pueden agregarse más nodos sin cambiar la base de datos. \\[4pt]
+Sucursales & Parcialmente: los usuarios y las ventas ya se asocian a una sucursal, pero el inventario es único para todas. \\[4pt]
+Farmacias & Cada farmacia utiliza su propia copia del sistema. \\
+\bottomrule
+\end{tabularx}
+\end{spacing}
+\vspace{0.2cm}
+{\footnotesize \textbf{Fuente:} Elaboración propia.}
+\end{table}
+
+El sistema puede replicarse para otra farmacia sin modificar el código: basta con crear una nueva instalación del servidor, la base de datos y la interfaz, configurar sus direcciones y cargar en el nodo sensor la dirección del nuevo servidor. Este modelo, en el que cada negocio tiene su propia copia del sistema, se conoce como \textit{single-tenant} y mantiene separados los datos de cada farmacia. Su límite es que cada copia tiene su propio costo mensual de alojamiento (Tabla~\ref{tab:rec_financieros}) y las actualizaciones deben aplicarse en cada una, por lo que para un número grande de farmacias convendría un modelo compartido (\textit{multi-tenant}), propuesto en el apartado de Mejoras.
+
+
 
